@@ -106,6 +106,21 @@ canvas#cv{width:100%;border:1px solid var(--bd);border-radius:8px;touch-action:n
   .qrp .qrbox{display:inline-block;margin:20px 0}
   @page{size:A4;margin:16mm}
 }
+
+/* ===== Pro UI upgrade ===== */
+:root{--shadow:0 10px 30px rgba(29,36,51,.08);--soft:#f8faff;--pri2:#6b8cff}
+body{background:radial-gradient(circle at 15% 0%,#eaf0ff 0,#f3f5fa 36%,#f7f8fb 100%)}
+.wrap{max-width:1120px;margin:0 auto;padding:18px}.narrow{max-width:760px}.card{border:1px solid rgba(214,220,236,.9);border-radius:18px;box-shadow:var(--shadow);background:rgba(255,255,255,.96)}
+.top{position:sticky;top:0;z-index:5;background:rgba(243,245,250,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--bd);padding:12px 0;margin-bottom:14px}
+h1,h2,h3{letter-spacing:-.03em}button{transition:.15s ease}button.pri{box-shadow:0 8px 18px rgba(47,91,214,.22)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tabs button{border-radius:999px;background:#fff}.tabs button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.pill{border-radius:999px;padding:3px 9px;font-size:.85em;background:#eef2fc;color:var(--pri-d)}.pill.ok{background:#e9f8f1;color:var(--ok)}
+.srow{display:flex;justify-content:space-between;gap:14px;align-items:center;border:1px solid var(--bd);border-radius:16px;background:#fff;padding:14px;margin:10px 0}.row.wrap{display:flex;gap:8px;flex-wrap:wrap}
+input,select,textarea{border:1px solid var(--bd);border-radius:12px;padding:11px 12px;background:#fff;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(47,91,214,.12)}
+.home-hero{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:stretch}.hero-card{background:linear-gradient(135deg,#ffffff,#f5f7ff);border-radius:22px;padding:22px}.hero-title{font-size:34px;margin:0 0 6px}.qr-stage{text-align:center}.qr-stage>div{display:inline-block;background:#fff;padding:16px;border-radius:22px;box-shadow:var(--shadow)}.code-big{font-size:24px;font-weight:800;color:var(--pri-d);letter-spacing:.04em}.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.mini{padding:12px;border:1px solid var(--bd);border-radius:14px;background:var(--soft)}
+#present{position:fixed;inset:0;background:#0f172a;color:#f8fafc;z-index:50}.pbar{display:flex;gap:8px;align-items:center;padding:12px;background:#111827;border-bottom:1px solid #334155}.pbar button{background:#1f2937;color:#f8fafc;border-color:#475569}.pbody{padding:28px;max-width:1100px;margin:0 auto;font-size:var(--ps,30px);line-height:1.55}.pbody .card{color:var(--tx)}
+@media(max-width:760px){.home-hero{grid-template-columns:1fr}.hero-title{font-size:28px}.srow{display:block}.top{position:static}.wrap{padding:12px}}
+
 </style>
 </head>
 <body>
@@ -233,26 +248,29 @@ async function start() {
   const w = new URLSearchParams(location.search).get('w');
   if (w) { await openMember(norm(w)); return; }
   try { const a = JSON.parse(sessionStorage.getItem('wsAdmin') || 'null'); if (a && await adminEnter(a.code, a.pin, '', true)) return; } catch (e) { }
-  renderHome();
+  new URLSearchParams(location.search).get('admin') === '1' ? renderAdminLogin() : renderHome();
 }
 
 function renderHome(msg) {
   S.view = 'home';
-  app.innerHTML = modeBanner() + `<div class="wrap narrow"><h1 style="margin-top:28px">분임 토론방</h1>
-  <p class="mu">워크숍 분임별 의견 나눔 · 공유 · 발표</p>
-  <div class="card"><h3>참여자 입장</h3>
-    <label>워크숍 코드</label><input id="code" placeholder="안내받은 코드" value="${esc(norm(localStorage.getItem('wsLastCode') || ''))}" autocapitalize="off">
-    <p style="margin:12px 0 0"><button class="pri" id="goM" style="width:100%">입장하기</button></p>
-    <p class="mu" style="margin-bottom:0">※ QR을 찍고 들어오면 코드가 자동으로 입력돼요.</p></div>
-  <div class="card"><h3>관리자</h3>
-    <label>워크숍 코드 (새로 만들거나 기존 코드)</label><input id="acode" placeholder="예) ws2026" autocapitalize="off">
-    <label>제목 <span class="mu">(새로 만들 때만)</span></label><input id="atitle" placeholder="예) 2026 체육 업무 워크숍">
-    <label>관리자 PIN</label><input id="apin" type="password" placeholder="숫자/문자 4자 이상" autocomplete="off">
-    <p style="margin:12px 0 0"><button id="goA" style="width:100%">관리자로 들어가기</button></p></div></div>`;
+  const last = norm(localStorage.getItem('wsLastCode') || S.code || 'ws2026');
+  const url = `${location.origin}${location.pathname}?w=${encodeURIComponent(last)}`;
+  app.innerHTML = modeBanner() + `<div class="wrap narrow">
+    <div class="home-hero">
+      <div class="card hero-card"><h1 class="hero-title">분임 토론방</h1><p class="mu">QR만 띄워두면 참여자는 바로 입장하고, 모둠별 작업·공유·발표까지 한 번에 진행됩니다.</p>
+        <div class="quick-grid"><div class="mini"><b>① 입장</b><br><span class="mu">QR 또는 코드</span></div><div class="mini"><b>② 모둠 작업</b><br><span class="mu">의견 작성·정리</span></div><div class="mini"><b>③ 발표</b><br><span class="mu">전체 화면 발표</span></div></div>
+        <div class="card" style="margin-top:14px"><h3>참여자 입장</h3><label>워크숍 코드</label><input id="code" placeholder="안내받은 코드" value="${esc(last)}" autocapitalize="off"><p style="margin:12px 0 0"><button class="pri" id="goM" style="width:100%">입장하기</button></p><p class="mu" style="margin-bottom:0">QR로 접속하면 코드가 자동으로 적용돼요.</p></div>
+      </div>
+      <div class="card hero-card"><h3 style="margin-top:0">접속 QR 코드</h3><div class="qr-stage"><div id="homeQr"></div></div><p class="mu" style="text-align:center;margin:12px 0 4px">접속 코드</p><div class="code-big" style="text-align:center">${esc(last)}</div><p class="home-url">${esc(url)}</p><button id="copyHomeUrl" style="width:100%">주소 복사</button></div>
+    </div>
+    <p class="home-admin-link"><button id="adminOpen" class="link-btn">관리자 화면 열기</button></p>
+  </div>`;
+  makeQR($('#homeQr'), url, 260);
   if (msg) toast(msg);
-  $('#goM').onclick = () => { const c = norm($('#code').value); if (!c) return toast('코드를 입력하세요'); openMember(c); };
+  $('#goM').onclick = () => { const c = norm($('#code').value); if (!c) return toast('코드를 입력하세요'); localStorage.setItem('wsLastCode', c); memberEnter(c); };
   $('#code').onkeydown = e => { if (e.key === 'Enter') $('#goM').click(); };
-  $('#goA').onclick = () => adminEnter(norm($('#acode').value), $('#apin').value, $('#atitle').value.trim());
+  $('#copyHomeUrl').onclick = async () => { try { await navigator.clipboard.writeText(url); toast('주소를 복사했어요'); } catch(e) { toast('주소를 선택해 복사해 주세요'); } };
+  $('#adminOpen').onclick = () => { history.replaceState(null, '', `${location.pathname}?admin=1`); renderAdminLogin(); };
 }
 
 async function openMember(code) {
@@ -517,6 +535,16 @@ async function adminEnter(code, pin, title, silent) {
   sessionStorage.setItem('wsAdmin', JSON.stringify({ code, pin }));
   S.role = 'admin'; S.meta = m || { title, leaderTopic: true }; S.groups = (await DB.get(`ws/${code}/groups`)) || {};
   S.view = 'loading'; connect(code); S.tab = Object.keys(S.groups).length ? 'status' : 'groups'; renderAdmin(); return true;
+}
+
+function renderAdminLogin(msg) {
+  S.view = 'adminLogin';
+  const last = norm(localStorage.getItem('wsLastCode') || 'ws2026');
+  app.innerHTML = modeBanner() + `<div class="wrap narrow"><div class="card hero-card"><h1 class="hero-title">관리자 설정</h1><p class="mu">접속 코드, 분임 구성, QR 안내, 발표와 저장을 관리합니다.</p><label>워크숍 코드</label><input id="acode" value="${esc(last)}" autocapitalize="off"><label>제목 <span class="mu">(새로 만들 때만)</span></label><input id="atitle" placeholder="예) 2026 체육 업무 워크숍"><label>관리자 PIN</label><input id="apin" type="password" placeholder="숫자/문자 4자 이상" autocomplete="off"><p style="margin:14px 0 0"><button class="pri" id="goA" style="width:100%">관리자로 들어가기</button></p></div><p class="home-admin-link"><button id="backHome" class="link-btn">참여자 화면으로 돌아가기</button></p></div>`;
+  if (msg) toast(msg);
+  $('#goA').onclick = () => { const c=norm($('#acode').value), title=$('#atitle').value.trim(), pin=$('#apin').value.trim(); if(!c) return toast('워크숍 코드를 입력하세요'); if(!pin||pin.length<4) return toast('관리자 PIN은 4자 이상 입력하세요'); localStorage.setItem('wsLastCode', c); adminEnter(c, pin, title); };
+  $('#apin').onkeydown = e => { if (e.key === 'Enter') $('#goA').click(); };
+  $('#backHome').onclick = () => { history.replaceState(null, '', location.pathname); renderHome(); };
 }
 function renderAdmin() {
   leaveRoom(); S.view = 'admin';
