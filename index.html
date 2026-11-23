@@ -2,92 +2,245 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#3a5bd9">
 <title>분임 토론방</title>
 <style>
-:root{--pri:#2f5bd6;--pri-d:#2447ad;--bg:#f3f5fa;--bd:#d6dcec;--ok:#16915a;--warn:#c9741c;--tx:#1d2433;--mu:#69728a;--card:#fff}
+
+:root{
+  --bg:#eceff6;--panel:#fff;--panel-2:#f8f9fc;--ink:#101828;--mu:#667085;--bd:#dde1ea;--bd-s:#eceff4;
+  --pri:#3a5bd9;--pri-d:#2c47b4;--pri-s:#eef1fe;--ok:#0e8a5f;--ok-s:#e6f6ee;--warn:#b45309;--warn-s:#fff6e8;--dg:#c0392b;--dg-s:#fdeceb;
+  --r:14px;--rs:10px;--sh:0 1px 2px rgba(16,24,40,.05),0 2px 6px rgba(16,24,40,.06);
+}
 *{box-sizing:border-box}
 html,body{margin:0}
-body{font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif;background:var(--bg);color:var(--tx);font-size:16px;line-height:1.5}
+body{font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%}
 body.noscroll{overflow:hidden}
 button,input,select,textarea{font:inherit;color:inherit}
-button{border:1px solid var(--bd);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;min-height:38px}
-button:hover{background:#eef2fc}
+a{color:var(--pri)}
+h1,h2,h3,h4{margin:0 0 6px;letter-spacing:-.01em}
+h1{font-size:30px}h2{font-size:22px}h3{font-size:17px}
+p{margin:6px 0}
+.mu{color:var(--mu);font-size:.92em}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+/* ---------- 버튼 ---------- */
+button{border:1px solid var(--bd);background:#fff;border-radius:var(--rs);padding:9px 14px;cursor:pointer;min-height:40px;font-weight:600;transition:.14s background,.14s border-color,.14s transform}
+button:hover{background:var(--panel-2);border-color:#cbd2e0}
+button:active{transform:translateY(1px)}
 button.pri{background:var(--pri);border-color:var(--pri);color:#fff}
-button.pri:hover{background:var(--pri-d)}
+button.pri:hover{background:var(--pri-d);border-color:var(--pri-d)}
 button.ok{background:var(--ok);border-color:var(--ok);color:#fff}
-button.warn{background:#fff4e6;border-color:#f0c999;color:#8a4b0c}
-button.danger{color:#b3261e}
-button:disabled{opacity:.45;cursor:not-allowed}
-input,select,textarea{border:1px solid var(--bd);border-radius:8px;padding:8px 10px;background:#fff;width:100%}
-textarea{resize:vertical}
-label{display:block;font-weight:600;margin:12px 0 4px}
-label.chk{display:flex;gap:8px;align-items:center;font-weight:500}
-label.chk input{width:auto}
-h1,h2,h3{margin:0 0 8px}
-.wrap{max-width:980px;margin:0 auto;padding:16px}
-.narrow{max-width:440px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:12px 0}
+button.ok:hover{background:#0b7350}
+button.warn{background:var(--warn-s);border-color:#f0d3a6;color:#8a4b0c}
+button.danger{background:#fff;border-color:#f0c7c2;color:var(--dg)}
+button.danger:hover{background:var(--dg-s)}
+button.ghost{background:transparent;border-color:transparent;color:var(--mu)}
+button.ghost:hover{background:#e6e9f2;color:var(--ink)}
+button.sm{min-height:32px;padding:4px 10px;font-size:.88em;border-radius:8px}
+button.lg{min-height:52px;font-size:1.05em;border-radius:12px}
+button:disabled{opacity:.42;cursor:not-allowed}
+button.block{width:100%}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btnrow .grow{flex:1}
+.link{border:0;background:none;color:var(--pri);padding:2px;min-height:0;font-weight:700}
+.link:hover{background:none;text-decoration:underline}
+
+/* ---------- 폼 ---------- */
+input,select,textarea{border:1px solid var(--bd);border-radius:var(--rs);padding:10px 12px;background:#fff;width:100%;transition:.14s box-shadow,.14s border-color}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--pri);box-shadow:0 0 0 3px rgba(58,91,217,.14)}
+textarea{resize:vertical;line-height:1.6}
+label{display:block;font-weight:700;margin:14px 0 5px;font-size:.93em}
+label .mu{font-weight:500}
+label.chk{display:flex;gap:9px;align-items:flex-start;font-weight:500;background:var(--panel-2);border:1px solid var(--bd-s);border-radius:var(--rs);padding:10px 12px}
+label.chk input{width:auto;margin-top:3px}
 .row{display:flex;gap:8px;align-items:center}
 .row.wrap{flex-wrap:wrap}
-.row>input{flex:1}
-.mu{color:var(--mu);font-size:.92em}
-.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.82em;background:#e8edf9;color:var(--pri-d);font-weight:600}
-.pill.ok{background:#dff5e9;color:var(--ok)}
-.banner{background:#fff4e6;border:1px solid #f0c999;color:#8a4b0c;padding:8px 12px;font-size:.9em;text-align:center}
-.top{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;margin-bottom:8px}
-.tabs{display:flex;gap:6px;border-bottom:2px solid var(--bd);margin:8px 0 12px;overflow-x:auto}
-.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:10px 14px;white-space:nowrap;margin-bottom:-2px}
-.tabs button.on{border-bottom-color:var(--pri);color:var(--pri);font-weight:700}
-.gcard{display:block;width:100%;text-align:left;margin:8px 0;padding:14px 16px;border-radius:12px;background:#fff}
-.gcard b{display:block;font-size:1.1em}
-.gcard span{color:var(--mu);font-size:.92em}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.chip{background:#eef2fc;border:1px solid #cfd8f1;border-radius:99px;padding:3px 12px;font-size:.92em}
-.chip.lead{background:#fff1c9;border-color:#f0d27a;font-weight:700}
-button.chip{min-height:0;cursor:pointer;font-size:1.05em;padding:8px 16px}
-.topic{background:#f0f5ff;border:1px solid #cdd9f7;border-radius:12px;padding:10px 14px;margin:8px 0;display:flex;gap:10px;align-items:center;justify-content:space-between}
-.topic b{color:var(--pri-d)}
-.tb{display:flex;flex-wrap:wrap;gap:4px;align-items:center;background:#fff;border:1px solid var(--bd);border-radius:12px 12px 0 0;padding:6px;position:sticky;top:0;z-index:5}
-.tb button,.tb select{min-height:34px;padding:4px 9px;width:auto}
-.tb .sep{width:1px;height:22px;background:var(--bd);margin:0 4px}
-.tb.off{opacity:.5;pointer-events:none}
-.doc{background:#fff;border:1px solid var(--bd);border-top:0;border-radius:0 0 12px 12px;min-height:360px;padding:16px;outline:none;line-height:1.7;overflow-wrap:anywhere}
-.doc[contenteditable=false]{background:#fafbfd}
-.doc table{border-collapse:collapse;margin:8px 0;max-width:100%}
-.doc td,.doc th{border:1px solid #777;padding:6px 10px;min-width:70px;vertical-align:top}
-.doc th{background:#eef1f8}
-.doc img{max-width:100%}
-.doc h3{margin:12px 0 6px}
-.doc p{margin:4px 0}
-.actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;align-items:center}
-.actions .grow{flex:1}
-.srow{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin:8px 0;background:#fff}
-.srow .info{flex:1;min-width:220px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
-.gbox{border:1px solid var(--bd);background:#fff;border-radius:12px;padding:12px;cursor:pointer}
+.row>input,.row>select{flex:1;min-width:0}
+.num{width:92px;flex:none;text-align:center}
+
+/* ---------- 레이아웃 ---------- */
+.wrap{max-width:1080px;margin:0 auto;padding:18px 16px 56px}
+.wrap.narrow{max-width:520px}
+.card{background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin:14px 0;box-shadow:var(--sh)}
+.card.tight{padding:14px}
+.card.flat{box-shadow:none;background:var(--panel-2)}
+.card-h{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-bottom:4px}
+.card-h h3{margin:0}
+.sect{font-size:.78em;font-weight:800;letter-spacing:.08em;color:var(--mu);text-transform:uppercase;margin:22px 2px 2px}
+.hr{height:1px;background:var(--bd-s);margin:14px 0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:720px){.two{grid-template-columns:1fr}}
+
+/* ---------- 상단 바 ---------- */
+.appbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--bd)}
+.appbar-in{max-width:1080px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:-.02em}
+.brand .dot{width:11px;height:11px;border-radius:3px;background:var(--pri)}
+.appbar .ttl{font-weight:800;line-height:1.2}
+.appbar .sub{color:var(--mu);font-size:.84em}
+.appbar .sp{flex:1}
+.notice{background:var(--warn-s);border-bottom:1px solid #f0d3a6;color:#8a4b0c;padding:7px 12px;font-size:.88em;text-align:center}
+
+/* ---------- 칩 / 배지 ---------- */
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--pri-s);border:1px solid #d3dbfb;color:var(--pri-d);border-radius:999px;padding:3px 11px;font-size:.86em;font-weight:700}
+.chip.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.04em}
+.chip.gray{background:var(--panel-2);border-color:var(--bd);color:var(--mu)}
+.chip.ok{background:var(--ok-s);border-color:#bfe6d3;color:var(--ok)}
+.chip.warn{background:var(--warn-s);border-color:#f0d3a6;color:var(--warn)}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:.84em;font-weight:700;border-radius:999px;padding:3px 10px;background:var(--panel-2);border:1px solid var(--bd);color:var(--mu)}
+.badge.ok{background:var(--ok-s);border-color:#bfe6d3;color:var(--ok)}
+.badge.live{background:var(--pri-s);border-color:#d3dbfb;color:var(--pri-d)}
+.dot-l{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.people{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
+.person{background:var(--panel-2);border:1px solid var(--bd);border-radius:999px;padding:4px 12px;font-size:.9em}
+.person.lead{background:#fff6da;border-color:#f0dca0;font-weight:700}
+button.person{min-height:0;font-size:1em;padding:9px 16px}
+button.person:hover{border-color:var(--pri);background:var(--pri-s)}
+
+/* ---------- 탭 ---------- */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:4px;background:var(--panel-2);border:1px solid var(--bd);border-radius:999px;margin:4px 0 14px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{border:0;background:none;border-radius:999px;padding:8px 15px;white-space:nowrap;color:var(--mu);min-height:36px}
+.tabs button:hover{background:#e6e9f2}
+.tabs button.on{background:var(--pri);color:#fff}
+
+/* ---------- 홈 ---------- */
+.hero{text-align:center;padding:30px 0 6px}
+.hero h1{font-size:clamp(26px,5vw,38px);margin-bottom:6px}
+.hero p{color:var(--mu);margin:0}
+.qrcard{background:var(--panel);border:1px solid var(--bd);border-radius:18px;padding:20px;box-shadow:var(--sh);display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center}
+@media(max-width:640px){.qrcard{grid-template-columns:1fr;text-align:center;justify-items:center}}
+.qrbox{background:#fff;border:1px solid var(--bd-s);border-radius:14px;padding:12px;line-height:0}
+.qrbox img,.qrbox canvas{display:block;border-radius:6px}
+.qrinfo{min-width:0}
+.codebig{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:clamp(24px,4.6vw,34px);font-weight:800;letter-spacing:.06em;color:var(--pri-d);word-break:break-all}
+.url{font-size:.86em;color:var(--mu);background:var(--panel-2);border:1px solid var(--bd-s);border-radius:9px;padding:7px 10px;word-break:break-all;margin:8px 0 10px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}
+@media(max-width:720px){.steps{grid-template-columns:repeat(2,1fr)}}
+.step{background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);padding:13px 14px}
+.step b{display:block;font-size:.95em}
+.step span{color:var(--mu);font-size:.85em}
+.step i{font-style:normal;font-size:.72em;font-weight:800;color:var(--pri);letter-spacing:.08em}
+
+/* ---------- 분임 선택 카드 ---------- */
+.glist{display:grid;gap:10px}
+.gpick{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:15px 16px;border-radius:var(--r);background:#fff;box-shadow:var(--sh)}
+.gpick:hover{border-color:var(--pri);background:var(--pri-s)}
+.gpick .n{width:40px;height:40px;flex:none;border-radius:11px;background:var(--pri-s);color:var(--pri-d);display:flex;align-items:center;justify-content:center;font-weight:800}
+.gpick b{display:block;font-size:1.05em}
+.gpick span{color:var(--mu);font-size:.88em;font-weight:500}
+
+/* ---------- 작업실 ---------- */
+.room{display:grid;grid-template-columns:1fr 316px;gap:16px;align-items:start}
+@media(max-width:980px){.room{grid-template-columns:1fr}.room .side{order:-1}}
+.side{display:grid;gap:12px;position:sticky;top:64px}
+@media(max-width:980px){.side{position:static}}
+.side .card{margin:0}
+.brief{background:linear-gradient(180deg,#f4f7ff,#fff);border:1px solid #d3dbfb}
+.brief ol,.brief ul{margin:6px 0 0;padding-left:20px}
+.brief li{margin:3px 0}
+.topicline{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.topicline b{color:var(--pri-d)}
+.role{display:flex;align-items:center;gap:8px;margin:7px 0}
+.role .lab{width:58px;flex:none;color:var(--mu);font-size:.86em;font-weight:700}
+.role select{flex:1}
+.tb{display:flex;flex-wrap:wrap;gap:4px;align-items:center;background:var(--panel-2);border:1px solid var(--bd);border-radius:var(--r) var(--r) 0 0;padding:7px;position:sticky;top:56px;z-index:9}
+.tb button,.tb select{min-height:34px;padding:4px 9px;width:auto;border-radius:8px;font-weight:600}
+.tb .sep{width:1px;height:20px;background:var(--bd);margin:0 3px}
+.tb .lab{font-size:.82em;color:var(--mu);font-weight:700;padding:0 2px}
+.tb.off{opacity:.45;pointer-events:none}
+.doc{background:#fff;border:1px solid var(--bd);border-top:0;border-radius:0 0 var(--r) var(--r);min-height:420px;padding:22px;outline:none;line-height:1.75;overflow-wrap:anywhere}
+.doc[contenteditable=false]{background:var(--panel-2)}
+.doc:focus{box-shadow:inset 0 0 0 2px rgba(58,91,217,.12)}
+.doc table{border-collapse:collapse;margin:10px 0;max-width:100%}
+.doc td,.doc th{border:1px solid #9aa3b5;padding:7px 11px;min-width:70px;vertical-align:top}
+.doc th{background:var(--pri-s)}
+.doc img{max-width:100%;border-radius:6px}
+.doc h3{margin:14px 0 6px;color:var(--pri-d)}
+.doc p{margin:5px 0}
+.doc ul,.doc ol{margin:6px 0;padding-left:24px}
+.statusbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 0;font-size:.88em;color:var(--mu)}
+.statusbar .grow{flex:1}
+.statusbar .live{color:var(--pri-d);font-weight:700}
+.timer{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-variant-numeric:tabular-nums;background:var(--panel-2);border:1px solid var(--bd);border-radius:999px;padding:5px 13px}
+.timer.run{background:var(--pri-s);border-color:#d3dbfb;color:var(--pri-d)}
+.timer.end{background:var(--dg-s);border-color:#f0c7c2;color:var(--dg)}
+
+/* ---------- 그리드/행 ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:12px}
+.gbox{border:1px solid var(--bd);background:#fff;border-radius:var(--r);padding:14px;cursor:pointer;box-shadow:var(--sh)}
 .gbox:hover{border-color:var(--pri)}
-.snip{color:var(--mu);font-size:.9em;max-height:4.5em;overflow:hidden}
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1d2433;color:#fff;padding:10px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:99;max-width:90vw}
-#toast.on{opacity:.95}
-.modal{position:fixed;inset:0;background:rgba(15,20,35,.55);z-index:60;display:flex;align-items:center;justify-content:center;padding:12px}
-.mbox{background:#fff;border-radius:14px;padding:14px;width:min(960px,100%);max-height:100%;overflow:auto}
-.mt{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:8px}
-.dtools{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-.dtools .sw{width:34px;height:34px;border-radius:50%;padding:0;border:3px solid #fff;box-shadow:0 0 0 1px var(--bd)}
+.gbox .snip{color:var(--mu);font-size:.88em;max-height:4.6em;overflow:hidden;margin-top:6px}
+.srow{display:flex;gap:14px;justify-content:space-between;align-items:center;flex-wrap:wrap;border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;margin:10px 0;background:#fff;box-shadow:var(--sh)}
+.srow .info{flex:1;min-width:230px}
+.bar{height:7px;border-radius:99px;background:var(--bd-s);overflow:hidden;margin:8px 0 2px}
+.bar i{display:block;height:100%;background:var(--pri);border-radius:99px;transition:width .3s}
+.bar i.ok{background:var(--ok)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:720px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);padding:13px 15px;box-shadow:var(--sh)}
+.kpi .lab{font-size:.8em;color:var(--mu);font-weight:700}
+.kpi .val{font-size:27px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .val small{font-size:.5em;color:var(--mu);font-weight:700}
+.gedit{border:1px solid var(--bd);border-radius:var(--r);background:#fff;padding:14px 16px;margin:10px 0;box-shadow:var(--sh)}
+.gedit .hd{display:flex;gap:8px;align-items:center}
+.gedit .hd .ord{display:flex;gap:4px}
+
+/* ---------- 토스트/모달 ---------- */
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(8px);background:#101828;color:#fff;padding:11px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:.2s;z-index:99;max-width:92vw;font-weight:600;box-shadow:0 8px 24px rgba(16,24,40,.25)}
+#toast.on{opacity:.97;transform:translateX(-50%)}
+.modal{position:fixed;inset:0;background:rgba(16,24,40,.6);z-index:70;display:flex;align-items:center;justify-content:center;padding:14px}
+.mbox{background:#fff;border-radius:16px;padding:16px;width:min(980px,100%);max-height:100%;overflow:auto}
+.mt{display:flex;justify-content:space-between;align-items:center;font-weight:800;margin-bottom:10px}
+.dtools{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.dtools .sw{width:34px;height:34px;border-radius:50%;padding:0;min-height:0;border:3px solid #fff;box-shadow:0 0 0 1px var(--bd)}
 .dtools .sw.on{box-shadow:0 0 0 3px var(--pri)}
-canvas#cv{width:100%;border:1px solid var(--bd);border-radius:8px;touch-action:none;background:#fff;cursor:crosshair}
-.present{position:fixed;inset:0;background:#fff;z-index:50;display:flex;flex-direction:column}
+canvas#cv{width:100%;border:1px solid var(--bd);border-radius:10px;touch-action:none;background:#fff;cursor:crosshair}
+
+/* ---------- QR 전체화면 ---------- */
+.stage{position:fixed;inset:0;z-index:80;background:#0e1322;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center}
+.stage[hidden]{display:none}
+.stage h2{font-size:clamp(22px,3.4vw,38px);margin:0}
+.stage .code{font-family:ui-monospace,Menlo,monospace;font-size:clamp(28px,5vw,52px);font-weight:800;letter-spacing:.08em;color:#9fb4ff}
+.stage .qrbox{padding:18px;border-radius:18px}
+.stage .u{color:#93a0bd;font-size:clamp(12px,1.6vw,18px);word-break:break-all}
+.stage button{position:absolute;top:18px;right:18px;background:#1b2238;border-color:#2b3454;color:#fff}
+
+/* ---------- 발표 화면 ---------- */
+.present{position:fixed;inset:0;background:#0d1220;color:#f2f5fc;z-index:60;display:flex;flex-direction:column}
 .present[hidden]{display:none}
-.pbar{display:flex;gap:6px;align-items:center;padding:8px 12px;background:#1d2433;color:#fff;flex-wrap:wrap}
-.pbar button{background:#2c3550;border-color:#3a4568;color:#fff}
+.pbar{display:flex;gap:7px;align-items:center;padding:9px 14px;background:#141b2e;border-bottom:1px solid #222c47;flex-wrap:wrap}
+.pbar button{background:#1d2740;border-color:#2b3757;color:#e8edf9;min-height:36px;padding:6px 11px;border-radius:9px}
+.pbar button:hover{background:#27334f;border-color:#3a4870}
+.pbar button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.pbar .sep{width:1px;height:20px;background:#2b3757;margin:0 3px}
 .pbar .sp{flex:1}
-.pbody{flex:1;overflow:auto;padding:28px 6vw 60px}
-.pbody h1{font-size:calc(var(--ps) * 1.6);margin:0 0 6px}
-.pbody .pm{color:var(--mu);font-size:calc(var(--ps) * .6);margin-bottom:8px}
-.pbody .pt{font-size:calc(var(--ps) * .9);background:#f0f5ff;border-radius:12px;padding:10px 16px;margin:10px 0 18px;color:var(--pri-d);font-weight:700}
-.pbody .doc{border:0;padding:0;font-size:var(--ps);min-height:0;background:none;line-height:1.65}
-.pbody .doc td,.pbody .doc th{padding:8px 14px}
+.pbar .cnt{font-weight:800;font-variant-numeric:tabular-nums;color:#b9c6e6;padding:0 4px}
+.ptimer{font-variant-numeric:tabular-nums;font-weight:800;background:#1d2740;border:1px solid #2b3757;border-radius:999px;padding:5px 13px;color:#cfe0ff}
+.ptimer.run{background:#13365c;border-color:#1d5491;color:#9fd0ff}
+.ptimer.end{background:#4a1d1d;border-color:#7d2b2b;color:#ffbcb4}
+.pdots{display:flex;gap:4px;padding:7px 14px;background:#101728;border-bottom:1px solid #1d2740;overflow-x:auto}
+.pdots i{flex:1;height:4px;border-radius:9px;background:#273253}
+.pdots i.on{background:var(--pri)}
+.pdots i.done{background:#1f7a58}
+.pbody{flex:1;overflow:auto;padding:34px 6vw 40px}
+.pbody .pname{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.pbody h1{font-size:calc(var(--ps) * 1.7);margin:0;letter-spacing:-.02em}
+.pbody .pm{color:#9aa8c9;font-size:calc(var(--ps) * .58);margin:6px 0 0}
+.pbody .pt{display:inline-block;font-size:calc(var(--ps) * .82);background:#17213a;border:1px solid #27345a;border-radius:12px;padding:9px 18px;margin:16px 0 6px;color:#bdd0ff;font-weight:700}
+.pbody .psum{background:#132a46;border:1px solid #1d4472;border-left:5px solid #3d7fd6;border-radius:12px;padding:16px 20px;margin:16px 0;font-size:calc(var(--ps) * .92);line-height:1.5;white-space:pre-wrap;color:#e3eeff}
+.pbody .doc{background:none;border:0;padding:0;min-height:0;font-size:var(--ps);line-height:1.7;color:#f2f5fc;border-radius:0}
+.pbody .doc h3{color:#a9c2ff}
+.pbody .doc th{background:#1b2440}
+.pbody .doc td,.pbody .doc th{border:1px solid #39456a;padding:9px 15px}
+.pbody .doc img{background:#fff}
+.pbody.sumonly .doc{display:none}
+.pfoot{display:flex;gap:12px;align-items:center;padding:9px 16px;background:#141b2e;border-top:1px solid #222c47;color:#8c9ab9;font-size:.85em;flex-wrap:wrap}
+.pfoot .sp{flex:1}
+.pfoot b{color:#cfdcff}
+
+/* ---------- 인쇄 ---------- */
 #printArea{display:none}
 @media print{
   body.printing>*:not(#printArea){display:none!important}
@@ -95,37 +248,28 @@ canvas#cv{width:100%;border:1px solid var(--bd);border-radius:8px;touch-action:n
   body.printing{background:#fff}
   .pr{page-break-after:always;color:#000}
   .pr:last-child{page-break-after:auto}
-  .pr h2{font-size:20pt;margin:4px 0}
-  .pr-ws{color:#666;font-size:10pt}
-  .pr-mem{font-size:11pt;margin:4px 0}
-  .pr-topic{font-size:13pt;font-weight:700;margin:6px 0}
-  .pr .doc{border:0;padding:0;min-height:0;font-size:12pt;line-height:1.6}
+  .pr .hd{display:flex;justify-content:space-between;border-bottom:2px solid #000;padding-bottom:4px;font-size:9.5pt;color:#444}
+  .pr h2{font-size:21pt;margin:10px 0 2px}
+  .pr-mem{font-size:10.5pt;color:#333;margin:2px 0 8px}
+  .pr-topic{font-size:13pt;font-weight:700;margin:6px 0;padding:7px 10px;border:1px solid #000}
+  .pr-sum{font-size:11pt;margin:8px 0;padding:8px 10px;border-left:4px solid #000;background:#f2f2f2;white-space:pre-wrap}
+  .pr .doc{border:0;padding:0;min-height:0;font-size:11.5pt;line-height:1.6;border-radius:0}
   .pr .doc td,.pr .doc th{border:1px solid #000}
-  .qrp{text-align:center;padding-top:30mm}
-  .qrp h1{font-size:30pt}
-  .qrp .qrbox{display:inline-block;margin:20px 0}
-  @page{size:A4;margin:16mm}
+  .pr .doc h3{color:#000}
+  .qrp{text-align:center;padding-top:22mm}
+  .qrp h1{font-size:28pt;margin-bottom:4pt}
+  .qrp .big{font-size:16pt}
+  .qrp .qrbox{display:inline-block;margin:14pt 0;border:1px solid #000}
+  .qrp .code{font-size:24pt;font-weight:800;letter-spacing:2pt}
+  @page{size:A4;margin:15mm}
 }
-
-/* ===== Pro UI upgrade ===== */
-:root{--shadow:0 10px 30px rgba(29,36,51,.08);--soft:#f8faff;--pri2:#6b8cff}
-body{background:radial-gradient(circle at 15% 0%,#eaf0ff 0,#f3f5fa 36%,#f7f8fb 100%)}
-.wrap{max-width:1120px;margin:0 auto;padding:18px}.narrow{max-width:760px}.card{border:1px solid rgba(214,220,236,.9);border-radius:18px;box-shadow:var(--shadow);background:rgba(255,255,255,.96)}
-.top{position:sticky;top:0;z-index:5;background:rgba(243,245,250,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--bd);padding:12px 0;margin-bottom:14px}
-h1,h2,h3{letter-spacing:-.03em}button{transition:.15s ease}button.pri{box-shadow:0 8px 18px rgba(47,91,214,.22)}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tabs button{border-radius:999px;background:#fff}.tabs button.on{background:var(--pri);border-color:var(--pri);color:#fff}
-.pill{border-radius:999px;padding:3px 9px;font-size:.85em;background:#eef2fc;color:var(--pri-d)}.pill.ok{background:#e9f8f1;color:var(--ok)}
-.srow{display:flex;justify-content:space-between;gap:14px;align-items:center;border:1px solid var(--bd);border-radius:16px;background:#fff;padding:14px;margin:10px 0}.row.wrap{display:flex;gap:8px;flex-wrap:wrap}
-input,select,textarea{border:1px solid var(--bd);border-radius:12px;padding:11px 12px;background:#fff;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(47,91,214,.12)}
-.home-hero{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:stretch}.hero-card{background:linear-gradient(135deg,#ffffff,#f5f7ff);border-radius:22px;padding:22px}.hero-title{font-size:34px;margin:0 0 6px}.qr-stage{text-align:center}.qr-stage>div{display:inline-block;background:#fff;padding:16px;border-radius:22px;box-shadow:var(--shadow)}.code-big{font-size:24px;font-weight:800;color:var(--pri-d);letter-spacing:.04em}.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.mini{padding:12px;border:1px solid var(--bd);border-radius:14px;background:var(--soft)}
-#present{position:fixed;inset:0;background:#0f172a;color:#f8fafc;z-index:50}.pbar{display:flex;gap:8px;align-items:center;padding:12px;background:#111827;border-bottom:1px solid #334155}.pbar button{background:#1f2937;color:#f8fafc;border-color:#475569}.pbody{padding:28px;max-width:1100px;margin:0 auto;font-size:var(--ps,30px);line-height:1.55}.pbody .card{color:var(--tx)}
-@media(max-width:760px){.home-hero{grid-template-columns:1fr}.hero-title{font-size:28px}.srow{display:block}.top{position:static}.wrap{padding:12px}}
 
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div id="present" class="present" hidden></div>
+<div id="stage" class="stage" hidden></div>
 <div id="printArea"></div>
 <div id="toast"></div>
 
@@ -137,19 +281,32 @@ input,select,textarea{border:1px solid var(--bd);border-radius:12px;padding:11px
 <script src="hwpx-template.js"></script>
 <script src="hwpx.js"></script>
 <script>
-/* ===================== 공통 도구 ===================== */
+
+/* ===================================================================
+   분임 토론방 — v2 (전면 개편)
+   화면: 홈(QR 상시) / 참여자 선택 / 모둠 작업실 / 관리자(5탭) / 발표 스테이지
+   데이터 경로(기존 호환): ws/<code>/meta, ws/<code>/groups/<gid>, ws/<code>/docs/<gid>
+   =================================================================== */
+
+/* ---------- 공통 도구 ---------- */
 const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const norm = c => String(c || '').trim().toLowerCase().replace(/[^a-z0-9가-힣_-]/g, '');
+const nl2 = s => esc(s || '').replace(/\n/g, '<br>');
 let toastT;
 function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2600); }
 async function sha(s) {
   try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join(''); }
   catch (e) { return 'x' + btoa(unescape(encodeURIComponent(s))); }
 }
+const fmtT = ms => new Date(ms).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' });
+const fmtAgo = ms => { if (!ms) return '기록 없음'; const d = Date.now() - ms; if (d < 60000) return '방금 전'; if (d < 3600000) return Math.floor(d / 60000) + '분 전'; if (d < 86400000) return Math.floor(d / 3600000) + '시간 전'; return fmtT(ms); };
+const fmtClock = ms => { const s = Math.max(0, Math.round(ms / 1000)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+const toLocalInput = ms => { if (!ms) return ''; const d = new Date(ms - new Date(ms).getTimezoneOffset() * 60000); return d.toISOString().slice(0, 16); };
 
-/* ===================== 데이터 계층 (Firebase 또는 로컬 연습 모드) ===================== */
+/* ---------- 데이터 계층 (Firebase 또는 로컬 연습 모드) ---------- */
 const DB = (() => {
   const cfg = window.FIREBASE_CONFIG;
   if (cfg && cfg.databaseURL && window.firebase) {
@@ -193,31 +350,60 @@ const DB = (() => {
   };
 })();
 
-/* ===================== 상태 ===================== */
-const S = { code: null, meta: null, groups: {}, docs: {}, role: null, gid: null, me: null, view: 'home', tab: 'status', roomTab: 'mine' };
+/* ---------- 상태 ---------- */
+const S = { code: null, meta: null, groups: {}, docs: {}, role: null, gid: null, me: null, view: 'home', tab: 'status', roomTab: 'mine', sel: {} };
 const app = $('#app');
 const ws = p => `ws/${S.code}/${p}`;
 let unsubs = [];
 function connect(code) {
   S.code = code; unsubs.forEach(f => f()); unsubs = [];
-  unsubs.push(DB.watch(`ws/${code}/meta`, v => { S.meta = v; onData(); }));
+  unsubs.push(DB.watch(`ws/${code}/meta`, v => { S.meta = v || S.meta; onData(); }));
   unsubs.push(DB.watch(`ws/${code}/groups`, v => { S.groups = v || {}; onData(); }));
 }
 const glist = () => Object.entries(S.groups).map(([id, g]) => ({ id, ...g })).sort((a, b) => (a.order || 0) - (b.order || 0));
 const mlist = g => Object.entries((g && g.members) || {}).map(([id, m]) => ({ id, ...m })).sort((a, b) => (a.o || 0) - (b.o || 0));
+const isAdmin = () => S.role === 'admin';
 function membersText(g) {
   const ms = mlist(g), lead = ms.find(m => m.id === g.leader), rest = ms.filter(m => m.id !== g.leader).map(m => m.name);
   return [lead ? '분임장 ' + lead.name : '', rest.length ? (lead ? '분임원 ' : '') + rest.join(', ') : ''].filter(Boolean).join(' · ');
 }
-function modeBanner() { return DB.mode === 'local' ? '<div class="banner">⚠ 연습(로컬) 모드 — firebase-config.js 를 채우기 전에는 같은 브라우저의 다른 탭끼리만 연결됩니다.</div>' : ''; }
+function periodState(m) { const n = Date.now(); if (m && m.openFrom && n < m.openFrom) return 'before'; if (m && m.openUntil && n > m.openUntil) return 'after'; return 'open'; }
+function periodInfo(m) {
+  if (!m || (!m.openFrom && !m.openUntil)) return '현재: 제한 없음 (언제나 접속 가능)';
+  const s = periodState(m), r = (m.openFrom ? fmtT(m.openFrom) : '처음') + ' ~ ' + (m.openUntil ? fmtT(m.openUntil) : '제한 없음');
+  return `현재: ${r} · ${s === 'open' ? '접속 가능' : s === 'before' ? '아직 열리기 전' : '기간 종료됨'}`;
+}
+const closedForMe = () => !isAdmin() && periodState(S.meta) !== 'open';
+const isLeader = () => { const g = S.groups[S.gid]; return !!(g && S.me && g.leader === S.me.id); };
+const canTopic = () => isAdmin() || (S.meta && S.meta.leaderTopic && isLeader());
+const joinUrl = (code) => `${location.origin}${location.pathname}?w=${encodeURIComponent(code || S.code)}`;
+const adminUrl = () => `${location.pathname}?admin=1`;
+
 function onData() {
   if (S.view === 'room') updateRoom();
   else if (S.view === 'pick') { const a = document.activeElement; if (!a || a.tagName !== 'INPUT') renderPick(); }
-  else if (S.view === 'admin' && S.tab === 'status') renderAdminBody();
+  else if (S.view === 'who') { /* 유지 */ }
+  else if (S.view === 'admin' && (S.tab === 'status' || S.tab === 'groups')) renderAdminBody();
   if (P.open) paintPresent();
+  renderTimerChip();
 }
 
-/* ===================== 문서 정리(보안) ===================== */
+/* ---------- 공통 타이머(토론 시간) ---------- */
+function timerRemain() {
+  const t = S.meta && S.meta.timer; if (!t || (!t.endsAt && !t.paused)) return null;
+  return t.paused ? Math.max(0, t.remain || 0) : Math.max(0, (t.endsAt || 0) - Date.now());
+}
+function renderTimerChip() {
+  const el = $('#gTimer'); if (!el) return;
+  const r = timerRemain();
+  if (r == null) { el.hidden = true; return; }
+  const t = S.meta.timer; el.hidden = false;
+  el.className = 'timer ' + (r <= 0 ? 'end' : (t.paused ? '' : 'run'));
+  el.textContent = r <= 0 ? '⏱ 시간 종료' : (t.paused ? '⏸ ' : '⏱ ') + fmtClock(r) + ' 남음';
+}
+setInterval(() => { renderTimerChip(); if (P.open) tickPresentTimer(); }, 500);
+
+/* ---------- 문서 정리(보안) ---------- */
 const OK_TAGS = new Set('p div br b strong i em u s strike span font h1 h2 h3 h4 ul ol li table thead tbody tr td th img mark hr blockquote'.split(' '));
 const DROP_TAGS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'link', 'meta', 'svg', 'form', 'input', 'button', 'textarea', 'select', 'video', 'audio']);
 function clean(html) {
@@ -243,36 +429,148 @@ function clean(html) {
 }
 const textOf = html => { const d = document.createElement('div'); d.innerHTML = clean(html); return (d.textContent || '').replace(/\s+/g, ' ').trim(); };
 
-/* ===================== 시작 / 홈 ===================== */
+/* ---------- 양식 템플릿 ---------- */
+const TPL = {
+  basic: { name: '기본형 · 현황 / 문제 / 해결', html: '<h3>1. 현황</h3><p><br></p><h3>2. 문제점</h3><p><br></p><h3>3. 개선 방안</h3><p><br></p><h3>4. 건의 사항</h3><p><br></p>' },
+  table: {
+    name: '표형 · 의견 모으기', html: '<h3>분임 의견 정리</h3><table><tbody>' +
+      '<tr><th>구분</th><th>의견</th><th>이유 / 근거</th></tr>' +
+      '<tr><td>현황</td><td><br></td><td><br></td></tr><tr><td>문제</td><td><br></td><td><br></td></tr>' +
+      '<tr><td>개선안</td><td><br></td><td><br></td></tr></tbody></table><p><br></p>'
+  },
+  swot: {
+    name: 'SWOT 분석', html: '<h3>SWOT 분석</h3><table><tbody>' +
+      '<tr><th>강점(S)</th><th>약점(W)</th></tr><tr><td><br></td><td><br></td></tr>' +
+      '<tr><th>기회(O)</th><th>위협(T)</th></tr><tr><td><br></td><td><br></td></tr></tbody></table><p><br></p>'
+  },
+  top3: { name: '제안 3가지', html: '<h3>우리 분임의 핵심 제안 3가지</h3><ol><li><br></li><li><br></li><li><br></li></ol><h3>실행에 필요한 지원</h3><p><br></p>' }
+};
+
+/* ---------- 화면 틀 ---------- */
+function noticeBar() { return DB.mode === 'local' ? '<div class="notice">연습(로컬) 모드입니다 — firebase-config.js 를 채우기 전에는 같은 브라우저의 다른 탭끼리만 연결됩니다.</div>' : ''; }
+function appbar(o) {
+  o = o || {};
+  return noticeBar() + `<div class="appbar"><div class="appbar-in">
+    <div class="brand"><span class="dot"></span>분임 토론방</div>
+    ${o.title ? `<div style="min-width:0"><div class="ttl">${esc(o.title)}</div>${o.sub ? `<div class="sub">${o.sub}</div>` : ''}</div>` : ''}
+    <span class="sp"></span>
+    <span class="timer" id="gTimer" hidden></span>
+    ${o.right || ''}
+  </div></div>`;
+}
+function makeQR(el, text, size) {
+  if (!el) return; el.innerHTML = '';
+  if (window.QRCode) new QRCode(el, { text, width: size, height: size, correctLevel: QRCode.CorrectLevel.M });
+  else el.innerHTML = '<span class="mu" style="font-size:13px">QR 라이브러리를 불러오지 못했어요 (인터넷 확인)</span>';
+}
+function openStage(code, title) {
+  const el = $('#stage'); el.hidden = false; document.body.classList.add('noscroll');
+  el.innerHTML = `<button id="sx">닫기 ✕</button><h2>${esc(title || '분임 토론방')}</h2>
+    <div class="qrbox" id="sqr"></div>
+    <div><div class="mu" style="color:#93a0bd;font-size:.95em">접속 코드</div><div class="code">${esc(code)}</div></div>
+    <div class="u">${esc(joinUrl(code))}</div>`;
+  const side = Math.max(220, Math.min(window.innerWidth, window.innerHeight) * 0.46);
+  makeQR($('#sqr'), joinUrl(code), Math.round(side));
+  $('#sx').onclick = closeStage;
+}
+function closeStage() { $('#stage').hidden = true; $('#stage').innerHTML = ''; document.body.classList.remove('noscroll'); }
+function printQR(code, title) {
+  $('#printArea').innerHTML = `<div class="qrp"><h1>${esc(title || '분임 토론방')}</h1>
+    <p class="big">휴대폰 카메라로 QR을 찍어 우리 분임방으로 들어오세요</p>
+    <div class="qrbox" id="qrp"></div>
+    <p class="code">${esc(code)}</p>
+    <p class="big">${esc(joinUrl(code))}</p></div>`;
+  makeQR($('#qrp'), joinUrl(code), 420);
+  document.body.classList.add('printing'); setTimeout(() => window.print(), 450);
+}
+
+/* ===================== 시작 / 라우팅 ===================== */
 async function start() {
-  const w = new URLSearchParams(location.search).get('w');
+  const q = new URLSearchParams(location.search);
+  const w = q.get('w');
+  if (q.get('admin') === '1' || q.get('admin') === 'true') {
+    try { const a = JSON.parse(sessionStorage.getItem('wsAdmin') || 'null'); if (a && await adminEnter(a.code, a.pin, '', true)) return; } catch (e) { }
+    renderAdminLogin(); return;
+  }
   if (w) { await openMember(norm(w)); return; }
   try { const a = JSON.parse(sessionStorage.getItem('wsAdmin') || 'null'); if (a && await adminEnter(a.code, a.pin, '', true)) return; } catch (e) { }
-  new URLSearchParams(location.search).get('admin') === '1' ? renderAdminLogin() : renderHome();
+  renderHome();
 }
 
+/* ===================== 홈 (참여자 · QR 상시 노출) ===================== */
+let homeT = null;
 function renderHome(msg) {
   S.view = 'home';
-  const last = norm(localStorage.getItem('wsLastCode') || S.code || 'ws2026');
-  const url = `${location.origin}${location.pathname}?w=${encodeURIComponent(last)}`;
-  app.innerHTML = modeBanner() + `<div class="wrap narrow">
-    <div class="home-hero">
-      <div class="card hero-card"><h1 class="hero-title">분임 토론방</h1><p class="mu">QR만 띄워두면 참여자는 바로 입장하고, 모둠별 작업·공유·발표까지 한 번에 진행됩니다.</p>
-        <div class="quick-grid"><div class="mini"><b>① 입장</b><br><span class="mu">QR 또는 코드</span></div><div class="mini"><b>② 모둠 작업</b><br><span class="mu">의견 작성·정리</span></div><div class="mini"><b>③ 발표</b><br><span class="mu">전체 화면 발표</span></div></div>
-        <div class="card" style="margin-top:14px"><h3>참여자 입장</h3><label>워크숍 코드</label><input id="code" placeholder="안내받은 코드" value="${esc(last)}" autocapitalize="off"><p style="margin:12px 0 0"><button class="pri" id="goM" style="width:100%">입장하기</button></p><p class="mu" style="margin-bottom:0">QR로 접속하면 코드가 자동으로 적용돼요.</p></div>
-      </div>
-      <div class="card hero-card"><h3 style="margin-top:0">접속 QR 코드</h3><div class="qr-stage"><div id="homeQr"></div></div><p class="mu" style="text-align:center;margin:12px 0 4px">접속 코드</p><div class="code-big" style="text-align:center">${esc(last)}</div><p class="home-url">${esc(url)}</p><button id="copyHomeUrl" style="width:100%">주소 복사</button></div>
+  const code = norm(localStorage.getItem('wsLastCode') || '');
+  app.innerHTML = appbar({ right: `<button class="ghost" id="toAdmin">관리자</button>` }) + `
+  <div class="wrap">
+    <div class="hero">
+      <h1>분임 토론방</h1>
+      <p>QR 하나로 입장 · 분임별로 의견 정리 · 바로 발표까지</p>
     </div>
-    <p class="home-admin-link"><button id="adminOpen" class="link-btn">관리자 화면 열기</button></p>
+
+    <div class="qrcard">
+      <div class="qrbox" id="hqr"></div>
+      <div class="qrinfo">
+        <div class="mu" style="font-weight:700">접속 코드</div>
+        <div class="codebig" id="hcode">${esc(code || '- - -')}</div>
+        <div class="url" id="hurl">${esc(code ? joinUrl(code) : '워크숍 코드를 입력하면 QR이 만들어집니다')}</div>
+        <div class="btnrow">
+          <button class="sm" id="hcopy">주소 복사</button>
+          <button class="sm" id="hbig">큰 화면으로 띄우기</button>
+          <button class="sm" id="hprint">QR 안내문 인쇄</button>
+        </div>
+        <div class="mu" id="hinfo" style="margin-top:8px"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>참여자 입장</h3><span class="chip gray" id="hcnt">대기</span></div>
+      <label>워크숍 코드 <span class="mu">(QR로 들어오면 자동 입력됩니다)</span></label>
+      <div class="row"><input id="code" placeholder="안내받은 코드 (예: ws2026)" value="${esc(code)}" autocapitalize="off" autocomplete="off" inputmode="latin"></div>
+      <p style="margin:14px 0 0"><button class="pri lg block" id="goM">입장하기 →</button></p>
+    </div>
+
+    <div class="steps">
+      <div class="step"><i>STEP 1</i><b>입장</b><span>QR을 찍고 분임·이름 선택</span></div>
+      <div class="step"><i>STEP 2</i><b>토론</b><span>분임별 작업실에서 함께 작성</span></div>
+      <div class="step"><i>STEP 3</i><b>공유</b><span>완료하면 다른 분임도 열람</span></div>
+      <div class="step"><i>STEP 4</i><b>발표</b><span>발표 화면 · PDF · HWPX 저장</span></div>
+    </div>
+
+    <p class="mu" style="text-align:center;margin-top:22px">진행자이신가요? <button class="link" id="toAdmin2">관리자 화면 열기</button></p>
   </div>`;
-  makeQR($('#homeQr'), url, 260);
   if (msg) toast(msg);
-  $('#goM').onclick = () => { const c = norm($('#code').value); if (!c) return toast('코드를 입력하세요'); localStorage.setItem('wsLastCode', c); memberEnter(c); };
+  const refresh = () => {
+    const c = norm($('#code').value);
+    $('#hcode').textContent = c || '- - -';
+    $('#hurl').textContent = c ? joinUrl(c) : '워크숍 코드를 입력하면 QR이 만들어집니다';
+    if (c) makeQR($('#hqr'), joinUrl(c), 196); else $('#hqr').innerHTML = '<div style="width:196px;height:196px;display:flex;align-items:center;justify-content:center;color:#98a2b3;font-size:13px;line-height:1.4;text-align:center">코드를 입력하면<br>QR이 표시됩니다</div>';
+    clearTimeout(homeT);
+    homeT = setTimeout(async () => {
+      if (!c) { $('#hinfo').textContent = ''; $('#hcnt').textContent = '대기'; $('#hcnt').className = 'chip gray'; return; }
+      const m = await DB.get(`ws/${c}/meta`);
+      if (S.view !== 'home') return;
+      if (!m) { $('#hinfo').textContent = '이 코드로 열린 워크숍이 없어요. 코드를 확인해 주세요.'; $('#hcnt').textContent = '코드 없음'; $('#hcnt').className = 'chip warn'; return; }
+      const gs = (await DB.get(`ws/${c}/groups`)) || {};
+      const n = Object.keys(gs).length, ppl = Object.values(gs).reduce((a, g) => a + Object.keys(g.members || {}).length, 0);
+      $('#hinfo').innerHTML = `<b>${esc(m.title)}</b> · 분임 ${n}개 · 참여자 ${ppl}명 · ${esc(periodInfo(m).replace('현재: ', ''))}`;
+      const open = periodState(m) === 'open';
+      $('#hcnt').textContent = open ? '입장 가능' : (periodState(m) === 'before' ? '시작 전' : '종료됨');
+      $('#hcnt').className = 'chip ' + (open ? 'ok' : 'warn');
+    }, 420);
+  };
+  refresh();
+  $('#code').oninput = refresh;
   $('#code').onkeydown = e => { if (e.key === 'Enter') $('#goM').click(); };
-  $('#copyHomeUrl').onclick = async () => { try { await navigator.clipboard.writeText(url); toast('주소를 복사했어요'); } catch(e) { toast('주소를 선택해 복사해 주세요'); } };
-  $('#adminOpen').onclick = () => { history.replaceState(null, '', `${location.pathname}?admin=1`); renderAdminLogin(); };
+  $('#goM').onclick = () => { const c = norm($('#code').value); if (!c) return toast('워크숍 코드를 입력하세요'); openMember(c); };
+  $('#hcopy').onclick = () => { const c = norm($('#code').value); if (!c) return toast('코드를 먼저 입력하세요'); navigator.clipboard.writeText(joinUrl(c)).then(() => toast('주소를 복사했어요'), () => toast('복사에 실패했어요')); };
+  $('#hbig').onclick = async () => { const c = norm($('#code').value); if (!c) return toast('코드를 먼저 입력하세요'); const m = await DB.get(`ws/${c}/meta`); openStage(c, m && m.title); };
+  $('#hprint').onclick = async () => { const c = norm($('#code').value); if (!c) return toast('코드를 먼저 입력하세요'); const m = await DB.get(`ws/${c}/meta`); printQR(c, m && m.title); };
+  $('#toAdmin').onclick = $('#toAdmin2').onclick = () => { history.pushState(null, '', adminUrl()); renderAdminLogin(); };
 }
 
+/* ===================== 참여자 입장 ===================== */
 async function openMember(code) {
   const m = await DB.get(`ws/${code}/meta`);
   if (!m) { renderHome(); toast('열려 있는 워크숍을 찾을 수 없어요 (코드 확인)'); return; }
@@ -287,118 +585,243 @@ async function openMember(code) {
   else renderPick();
 }
 
-/* ===================== 참여자: 분임/이름 선택 ===================== */
+function briefCardHtml(compact) {
+  const b = S.meta && S.meta.brief;
+  if (!b || (!b.text && !b.link)) return '';
+  return `<div class="card brief ${compact ? 'tight' : ''}">
+    <div class="card-h"><h3>전체 공통 과제</h3><span class="chip">전체 배부</span></div>
+    ${b.text ? `<div style="margin-top:6px">${nl2(b.text)}</div>` : ''}
+    ${b.link ? `<p class="mu" style="margin-top:8px">참고 자료: <a href="${esc(b.link)}" target="_blank" rel="noopener">${esc(b.link)}</a></p>` : ''}
+    ${b.at ? `<p class="mu" style="margin:6px 0 0">${esc(fmtAgo(b.at))} 배부</p>` : ''}
+  </div>`;
+}
+
 function renderPick() {
   S.view = 'pick';
   const gs = glist();
-  app.innerHTML = modeBanner() + `<div class="wrap narrow"><h2 style="margin-top:20px">${esc(S.meta.title)}</h2><p class="mu">우리 분임을 선택하세요</p>
-  ${gs.length ? gs.map(g => `<button class="gcard" data-g="${g.id}"><b>${esc(g.name)}</b><span>${mlist(g).length}명 · ${esc(g.topic || '주제 미정')}</span></button>`).join('') : '<div class="card mu">아직 분임이 만들어지지 않았어요. 잠시 후 다시 확인해 주세요.</div>'}
-  <p><button id="home">← 처음으로</button></p></div>`;
-  app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => renderWho(b.dataset.g));
+  app.innerHTML = appbar({
+    title: S.meta.title, sub: `코드 ${esc(S.code)}`,
+    right: `<button class="ghost" id="home">처음으로</button>`
+  }) + `<div class="wrap narrow">
+    <h2 style="margin-top:14px">어느 분임이신가요?</h2>
+    <p class="mu">내 분임을 선택하면 이름 고르기로 넘어갑니다.</p>
+    ${briefCardHtml(true)}
+    <div class="glist" style="margin-top:14px">
+      ${gs.length ? gs.map((g, i) => `<button class="gpick" data-g="${g.id}">
+        <span class="n">${i + 1}</span>
+        <span style="min-width:0"><b>${esc(g.name)}</b><span>${mlist(g).length}명 · ${esc(g.topic || '주제 미정')}</span></span>
+        <span class="sp" style="flex:1"></span>
+        <span class="badge ${g.status === 'done' ? 'ok' : ''}">${g.status === 'done' ? '완료' : '토론 중'}</span>
+      </button>`).join('') : '<div class="card mu">아직 분임이 만들어지지 않았어요. 진행자의 안내를 기다려 주세요. (자동으로 갱신됩니다)</div>'}
+    </div>
+  </div>`;
+  renderTimerChip();
+  $$('[data-g]').forEach(b => b.onclick = () => renderWho(b.dataset.g));
   $('#home').onclick = () => { history.replaceState(null, '', location.pathname); renderHome(); };
 }
+
 function renderWho(gid) {
   S.view = 'who';
   const g = S.groups[gid]; if (!g) return renderPick();
-  app.innerHTML = modeBanner() + `<div class="wrap narrow"><h2 style="margin-top:20px">${esc(g.name)}</h2><p class="mu">내 이름을 선택하세요</p>
-  <div class="chips">${mlist(g).map(m => `<button class="chip ${m.id === g.leader ? 'lead' : ''}" data-m="${m.id}">${esc(m.name)}${m.id === g.leader ? ' (분임장)' : ''}</button>`).join('')}</div>
-  <div class="card"><b>내 이름이 없나요?</b><div class="row" style="margin-top:8px"><input id="newName" placeholder="이름 입력"><button id="addName" class="pri">추가</button></div></div>
-  <p><button id="back">← 분임 다시 선택</button></p></div>`;
+  app.innerHTML = appbar({ title: esc(g.name), sub: esc(S.meta.title), right: `<button class="ghost" id="back">분임 다시 선택</button>` }) + `
+  <div class="wrap narrow">
+    <h2 style="margin-top:14px">내 이름을 선택하세요</h2>
+    <p class="mu">선택한 이름으로 작성 기록이 남습니다.</p>
+    <div class="card">
+      <div class="people">${mlist(g).map(m => `<button class="person ${m.id === g.leader ? 'lead' : ''}" data-m="${m.id}">${esc(m.name)}${m.id === g.leader ? ' · 분임장' : ''}</button>`).join('') || '<span class="mu">등록된 이름이 없어요. 아래에서 추가하세요.</span>'}</div>
+    </div>
+    <div class="card">
+      <h3>이름이 없나요?</h3>
+      <div class="row" style="margin-top:8px"><input id="newName" placeholder="이름 입력"><button class="pri" id="addName">추가</button></div>
+      <p class="mu" style="margin-bottom:0">추가한 이름은 진행자 화면에도 바로 보입니다.</p>
+    </div>
+  </div>`;
+  renderTimerChip();
   const enter = (mid, name) => { S.gid = gid; S.me = { id: mid, name }; localStorage.setItem('wsMe', JSON.stringify({ code: S.code, gid, mid })); renderRoom(); };
-  app.querySelectorAll('[data-m]').forEach(b => b.onclick = () => enter(b.dataset.m, g.members[b.dataset.m].name));
+  $$('[data-m]').forEach(b => b.onclick = () => enter(b.dataset.m, g.members[b.dataset.m].name));
   $('#addName').onclick = async () => {
     const n = $('#newName').value.trim(); if (!n) return toast('이름을 입력하세요');
     const ex = mlist(g).find(m => m.name === n); if (ex) return enter(ex.id, ex.name);
     const mid = uid('m'); await DB.update(ws(`groups/${gid}/members`), { [mid]: { name: n, o: Date.now() } }); enter(mid, n);
   };
+  $('#newName').onkeydown = e => { if (e.key === 'Enter') $('#addName').click(); };
   $('#back').onclick = renderPick;
 }
 
-/* ===================== 방(토론) 화면 ===================== */
+/* ===================== 모둠(분임) 작업실 ===================== */
 let R = {};
-const isAdmin = () => S.role === 'admin';
-const fmtT = ms => new Date(ms).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' });
-const toLocalInput = ms => { if (!ms) return ''; const d = new Date(ms - new Date(ms).getTimezoneOffset() * 60000); return d.toISOString().slice(0, 16); };
-function periodState(m) { const n = Date.now(); if (m && m.openFrom && n < m.openFrom) return 'before'; if (m && m.openUntil && n > m.openUntil) return 'after'; return 'open'; }
-function periodInfo(m) {
-  if (!m || (!m.openFrom && !m.openUntil)) return '현재: 제한 없음';
-  const s = periodState(m), r = (m.openFrom ? fmtT(m.openFrom) : '처음') + ' ~ ' + (m.openUntil ? fmtT(m.openUntil) : '제한 없음');
-  return `현재: ${r} · ${s === 'open' ? '접속 가능' : s === 'before' ? '아직 열리기 전' : '기간 종료됨'}`;
-}
-const closedForMe = () => !isAdmin() && periodState(S.meta) !== 'open';
-const isLeader = () => { const g = S.groups[S.gid]; return !!(g && S.me && g.leader === S.me.id); };
-const canTopic = () => isAdmin() || (S.meta && S.meta.leaderTopic && isLeader());
-function leaveRoom() { if (R.unsub) R.unsub(); if (R.timer) clearInterval(R.timer); clearTimeout(R.saveTimer); R = {}; }
+function leaveRoom() { if (R.unsub) R.unsub(); if (R.timer) clearInterval(R.timer); clearTimeout(R.saveTimer); clearTimeout(R.sumTimer); R = {}; }
 
 function renderRoom() {
   leaveRoom(); S.view = 'room'; S.roomTab = 'mine';
-  app.innerHTML = modeBanner() + `<div class="wrap">
-  <div class="top"><div><h2 id="rName" style="margin:0"></h2><span id="rPill" class="pill"></span> <span class="mu" id="rWs"></span></div>
-    <div class="row"><button id="leave">${isAdmin() ? '← 관리자 화면' : '분임 변경'}</button></div></div>
-  <div class="chips" id="rChips"></div>
-  <div class="tabs"><button data-t="mine" class="on">우리 분임</button><button data-t="others" id="tabOthers">다른 분임 의견</button></div>
-  <section id="sMine">
-    <div class="topic"><div>주제 <b id="rTopic"></b></div><button id="topicBtn" hidden>주제 정하기/변경</button></div>
-    <div class="tb" id="tb">
-      <button data-c="bold" title="굵게"><b>B</b></button><button data-c="italic" title="기울임"><i>I</i></button><button data-c="underline" title="밑줄"><u>U</u></button>
-      <button data-c="hiliteColor" data-v="#fff176" title="형광펜" style="background:#fff176">형광</button>
-      <button data-c="foreColor" data-v="#d32f2f" style="color:#d32f2f">빨강</button><button data-c="foreColor" data-v="#1a4fd6" style="color:#1a4fd6">파랑</button><button data-c="foreColor" data-v="#111111">검정</button>
-      <select id="fs" title="글자 크기"><option value="">크기</option><option value="2">작게</option><option value="3">보통</option><option value="5">크게</option><option value="6">아주 크게</option></select>
-      <span class="sep"></span>
-      <button data-c="formatBlock" data-v="h3">제목</button><button data-c="formatBlock" data-v="p">본문</button>
-      <button data-c="insertUnorderedList">• 목록</button><button data-c="insertOrderedList">1. 목록</button>
-      <span class="sep"></span>
-      <span>표</span><select id="tr">${[2, 3, 4, 5, 6, 7, 8].map(n => `<option ${n === 3 ? 'selected' : ''}>${n}</option>`).join('')}</select>×<select id="tc">${[2, 3, 4, 5, 6].map(n => `<option ${n === 3 ? 'selected' : ''}>${n}</option>`).join('')}</select><button id="addTbl">표 넣기</button>
-      <button data-t="ar">행+</button><button data-t="dr">행−</button><button data-t="ac">열+</button><button data-t="dc">열−</button><button data-t="dt">표 삭제</button>
-      <span class="sep"></span>
-      <button id="draw">✏️ 그리기</button>
-      <button data-c="undo">↶</button><button data-c="redo">↷</button>
+  const g = S.groups[S.gid] || {};
+  app.innerHTML = appbar({
+    title: g.name || '분임', sub: `${esc(S.meta.title)} · ${esc((S.me && S.me.name) || '')}`,
+    right: `<button class="ghost" id="leave">${isAdmin() ? '관리자 화면' : '분임 변경'}</button>`
+  }) + `<div class="wrap">
+    <div class="tabs" role="tablist">
+      <button data-t="mine" class="on">우리 분임 작업실</button>
+      <button data-t="others" id="tabOthers">다른 분임 의견</button>
     </div>
-    <div class="doc" id="editor" contenteditable="true" spellcheck="false"></div>
-    <div class="actions"><span class="mu" id="saveState"></span><span class="mu" id="badge"></span><span class="grow"></span>
-      <button id="pdf">PDF 저장·인쇄</button><button id="hwpx">HWPX 저장</button><button id="doneBtn" class="ok">✔ 완료 (다른 분임에 공유)</button></div>
-  </section>
-  <section id="sOthers" hidden><p class="mu">완료를 누른 분임의 내용을 볼 수 있어요. 눌러서 크게 보기.</p><div class="grid" id="othersGrid"></div></section></div>`;
+
+    <section id="sMine">
+      <div class="room">
+        <main>
+          <div class="tb" id="tb">
+            <span class="lab">글자</span>
+            <button data-c="bold" title="굵게 (Ctrl+B)"><b>B</b></button>
+            <button data-c="italic" title="기울임"><i>I</i></button>
+            <button data-c="underline" title="밑줄"><u>U</u></button>
+            <button data-c="hiliteColor" data-v="#fff176" title="형광펜" style="background:#fff176">형광</button>
+            <button data-c="foreColor" data-v="#d32f2f" style="color:#d32f2f">빨강</button>
+            <button data-c="foreColor" data-v="#1a4fd6" style="color:#1a4fd6">파랑</button>
+            <button data-c="foreColor" data-v="#111111">검정</button>
+            <select id="fs" title="글자 크기"><option value="">크기</option><option value="2">작게</option><option value="3">보통</option><option value="5">크게</option><option value="6">아주 크게</option></select>
+            <span class="sep"></span>
+            <span class="lab">단락</span>
+            <button data-c="formatBlock" data-v="h3">소제목</button>
+            <button data-c="formatBlock" data-v="p">본문</button>
+            <button data-c="insertUnorderedList">• 목록</button>
+            <button data-c="insertOrderedList">1. 목록</button>
+            <span class="sep"></span>
+            <span class="lab">표</span>
+            <select id="tr" title="행">${[2, 3, 4, 5, 6, 7, 8].map(n => `<option ${n === 3 ? 'selected' : ''}>${n}</option>`).join('')}</select>×<select id="tc" title="열">${[2, 3, 4, 5, 6].map(n => `<option ${n === 3 ? 'selected' : ''}>${n}</option>`).join('')}</select>
+            <button id="addTbl">넣기</button>
+            <button data-t="ar">행+</button><button data-t="dr">행−</button><button data-t="ac">열+</button><button data-t="dc">열−</button><button data-t="dt">표삭제</button>
+            <span class="sep"></span>
+            <select id="tpl" title="양식 넣기"><option value="">양식 넣기…</option>${Object.entries(TPL).map(([k, v]) => `<option value="${k}">${esc(v.name)}</option>`).join('')}</select>
+            <button id="draw">✏️ 그리기</button>
+            <span class="sep"></span>
+            <button data-c="undo" title="되돌리기">↶</button><button data-c="redo" title="다시">↷</button>
+          </div>
+          <div class="doc" id="editor" contenteditable="true" spellcheck="false"></div>
+          <div class="statusbar">
+            <span id="saveState">불러오는 중…</span>
+            <span id="chars" class="mu"></span>
+            <span id="badge" class="live"></span>
+            <span class="grow"></span>
+            <span class="mu" id="lastEdit"></span>
+          </div>
+          <div class="btnrow" style="margin-top:12px">
+            <button id="pdf">PDF 저장·인쇄</button>
+            <button id="hwpx">HWPX 저장</button>
+            <span class="grow"></span>
+            <button id="doneBtn" class="ok">완료하고 공유하기</button>
+          </div>
+        </main>
+
+        <aside class="side">
+          <div id="briefSlot"></div>
+          <div class="card tight">
+            <div class="card-h"><h3>우리 분임 주제</h3><span class="badge" id="rStatus">토론 중</span></div>
+            <div class="topicline"><div id="rTopic" style="font-weight:700;color:var(--pri-d)">-</div><button class="sm" id="topicBtn" hidden>변경</button></div>
+          </div>
+          <div class="card tight">
+            <h3>발표 요약 <span class="mu">(3줄 이내 권장)</span></h3>
+            <textarea id="sumBox" rows="4" placeholder="발표할 핵심 내용을 짧게 정리하세요. 발표 화면에서 크게 보여집니다."></textarea>
+            <div class="btnrow" style="margin-top:8px"><span class="mu" id="sumState"></span><span class="grow"></span><button class="sm" id="sumSave">요약 저장</button></div>
+          </div>
+          <div class="card tight">
+            <h3>역할</h3>
+            <div class="role"><span class="lab">분임장</span><select id="rLead"></select></div>
+            <div class="role"><span class="lab">기록자</span><select id="rNote"></select></div>
+            <div class="role"><span class="lab">발표자</span><select id="rPres"></select></div>
+            <p class="mu" id="roleHint" style="margin:6px 0 0"></p>
+          </div>
+          <div class="card tight">
+            <h3>구성원 <span class="mu" id="pcnt"></span></h3>
+            <div class="people" id="rPeople"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="sOthers" hidden>
+      <p class="mu">완료 처리한 분임의 내용을 볼 수 있어요. 카드를 누르면 큰 화면으로 열립니다.</p>
+      <div class="grid" id="othersGrid"></div>
+    </section>
+  </div>`;
+
   $('#leave').onclick = async () => { await flushSave(); leaveRoom(); if (isAdmin()) renderAdmin(); else { localStorage.removeItem('wsMe'); renderPick(); } };
-  app.querySelectorAll('.tabs [data-t]').forEach(b => b.onclick = () => {
-    S.roomTab = b.dataset.t; app.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  $$('.tabs [data-t]').forEach(b => b.onclick = () => {
+    S.roomTab = b.dataset.t; $$('.tabs button').forEach(x => x.classList.toggle('on', x === b));
     $('#sMine').hidden = S.roomTab !== 'mine'; $('#sOthers').hidden = S.roomTab !== 'others';
+    if (S.roomTab === 'others') updateRoom();
   });
   bindEditor();
-  R = { lastApplied: null, lastTypeAt: 0, saveTimer: null, pending: null, loaded: false };
+  R = { lastApplied: null, lastTypeAt: 0, saveTimer: null, pending: null, loaded: false, sumLoaded: false };
   R.unsub = DB.watch(ws('docs/' + S.gid), v => { S.docs[S.gid] = v; applyDoc(); });
   R.timer = setInterval(roomTick, 1200);
-  updateRoom();
+  updateRoom(); renderTimerChip();
+}
+
+function roleOptions(ms, cur) {
+  return '<option value="">미지정</option>' + ms.map(m => `<option value="${m.id}" ${m.id === cur ? 'selected' : ''}>${esc(m.name)}</option>`).join('');
 }
 
 function updateRoom() {
   const g = S.groups[S.gid];
   if (!g) { leaveRoom(); toast('분임이 삭제되었어요'); return isAdmin() ? renderAdmin() : renderPick(); }
-  const done = g.status === 'done';
-  $('#rName').textContent = g.name; $('#rWs').textContent = S.meta.title;
-  const p = $('#rPill'); p.textContent = done ? '완료됨' : '토론 중'; p.className = 'pill' + (done ? ' ok' : '');
-  const ms = mlist(g);
-  $('#rChips').innerHTML = ms.map(m => `<span class="chip ${m.id === g.leader ? 'lead' : ''}">${esc(m.name)}${m.id === g.leader ? ' · 분임장' : ''}</span>`).join('') || '<span class="mu">구성원 없음</span>';
+  const done = g.status === 'done', closed = closedForMe(), lock = done || closed;
+  const ms = mlist(g), roles = g.roles || {};
+
+  $('#briefSlot').innerHTML = briefCardHtml(true);
+  const st = $('#rStatus'); st.textContent = done ? '완료' : '토론 중'; st.className = 'badge ' + (done ? 'ok' : 'live');
   $('#rTopic').textContent = g.topic || '(아직 정해지지 않았어요)';
-  const tbn = $('#topicBtn'); tbn.hidden = !canTopic() || done;
-  const closed = closedForMe(), lock = done || closed;
+  $('#topicBtn').hidden = !canTopic() || done;
+  $('#pcnt').textContent = ms.length ? `${ms.length}명` : '';
+  $('#rPeople').innerHTML = ms.map(m => {
+    const tags = [m.id === g.leader ? '분임장' : '', m.id === roles.note ? '기록' : '', m.id === roles.pres ? '발표' : ''].filter(Boolean);
+    return `<span class="person ${m.id === g.leader ? 'lead' : ''}">${esc(m.name)}${tags.length ? ' · ' + tags.join('/') : ''}</span>`;
+  }).join('') || '<span class="mu">구성원 없음</span>';
+
+  const canRole = isAdmin() || isLeader();
+  [['#rLead', g.leader], ['#rNote', roles.note], ['#rPres', roles.pres]].forEach(([sel, cur]) => {
+    const el = $(sel); if (!el) return;
+    if (document.activeElement !== el) el.innerHTML = roleOptions(ms, cur || '');
+    el.disabled = !canRole || done;
+  });
+  $('#roleHint').textContent = canRole ? '분임장과 관리자가 역할을 바꿀 수 있어요.' : '역할 변경은 분임장 또는 진행자가 할 수 있어요.';
+
   const ed = $('#editor'); ed.contentEditable = lock ? 'false' : 'true';
   $('#tb').classList.toggle('off', lock);
+  $('#sumBox').disabled = lock;
+  if (!R.sumLoaded) { const d = S.docs[S.gid]; $('#sumBox').value = (d && d.summary) || ''; R.sumLoaded = true; }
   if (closed && !R.warned) { R.warned = true; toast('접속 기간이 끝나 보기 전용이에요'); }
+
   const db = $('#doneBtn'); db.disabled = closed;
-  db.textContent = done ? '↺ 다시 열어 수정하기' : '✔ 완료 (다른 분임에 공유)'; db.className = done ? 'warn' : 'ok';
+  db.textContent = done ? '↺ 다시 열어 수정하기' : '✔ 완료하고 공유하기';
+  db.className = done ? 'warn' : 'ok';
+
   const others = glist().filter(x => x.id !== S.gid && x.status === 'done');
   $('#tabOthers').textContent = `다른 분임 의견 (${others.length})`;
-  const grid = $('#othersGrid');
-  if (S.roomTab === 'others' || !grid.dataset.k || grid.dataset.k !== others.map(o => o.id + o.topic).join()) {
-    grid.dataset.k = others.map(o => o.id + o.topic).join();
-    grid.innerHTML = others.length ? others.map(o => `<div class="gbox" data-o="${o.id}"><b>${esc(o.name)}</b><div class="mu">${esc(o.topic || '')}</div><div class="snip" id="sn-${o.id}">…</div></div>`).join('') : '<div class="card mu">아직 완료한 다른 분임이 없어요.</div>';
-    grid.querySelectorAll('[data-o]').forEach(b => b.onclick = () => { const ids = glist().filter(x => x.status === 'done').map(x => x.id); openPresent(ids, ids.indexOf(b.dataset.o)); });
-    others.forEach(o => DB.get(ws('docs/' + o.id)).then(d => { const el = $('#sn-' + o.id); if (el) el.textContent = textOf(d && d.html).slice(0, 120) || '(내용 없음)'; }));
+  const grid = $('#othersGrid'), key = others.map(o => o.id + (o.topic || '')).join('|');
+  if (grid && (S.roomTab === 'others' || !grid.dataset.k) && grid.dataset.k !== key) {
+    grid.dataset.k = key;
+    grid.innerHTML = others.length ? others.map(o => `<div class="gbox" data-o="${o.id}">
+      <div class="card-h"><b>${esc(o.name)}</b><span class="badge ok">완료</span></div>
+      <div class="mu">${esc(o.topic || '주제 미정')}</div>
+      <div class="snip" id="sn-${o.id}">내용을 불러오는 중…</div></div>`).join('') : '<div class="card mu">아직 완료한 다른 분임이 없어요.</div>';
+    $$('[data-o]', grid).forEach(b => b.onclick = () => { const ids = glist().filter(x => x.status === 'done').map(x => x.id); openPresent(ids, ids.indexOf(b.dataset.o)); });
+    others.forEach(o => DB.get(ws('docs/' + o.id)).then(d => {
+      const el = $('#sn-' + o.id); if (!el) return;
+      const s = (d && d.summary) ? d.summary : textOf(d && d.html);
+      el.textContent = (s || '').slice(0, 140) || '(내용 없음)';
+    }));
   }
+  updateStats();
 }
 
-/* --- 편집기 --- */
+function updateStats() {
+  const ed = $('#editor'); if (!ed) return;
+  const txt = (ed.innerText || '').replace(/\s+/g, ' ').trim();
+  const tbl = ed.querySelectorAll('table').length, img = ed.querySelectorAll('img').length;
+  $('#chars').textContent = `· ${txt.length}자${tbl ? ` · 표 ${tbl}` : ''}${img ? ` · 그림 ${img}` : ''}`;
+  const d = S.docs[S.gid];
+  $('#lastEdit').textContent = d && d.editorTs ? `마지막 수정 ${fmtAgo(d.editorTs)}${d.editor ? ' · ' + d.editor : ''}` : '';
+}
+
+/* ---------- 편집기 ---------- */
 let savedRange = null;
 document.addEventListener('selectionchange', () => {
   const ed = $('#editor'); if (!ed) return; const s = getSelection();
@@ -415,7 +838,7 @@ function cmd(c, v) {
   document.execCommand('styleWithCSS', false, c === 'hiliteColor');
   document.execCommand(c, false, v || null); afterEdit();
 }
-function afterEdit() { const s = getSelection(); if (s.rangeCount && $('#editor').contains(s.anchorNode)) savedRange = s.getRangeAt(0).cloneRange(); scheduleSave(); }
+function afterEdit() { const s = getSelection(); if (s.rangeCount && $('#editor').contains(s.anchorNode)) savedRange = s.getRangeAt(0).cloneRange(); scheduleSave(); updateStats(); }
 function insertTable(r, c) {
   if (!editable()) return; let h = '<table id="__nt"><tbody>';
   for (let i = 0; i < r; i++) { h += '<tr>'; for (let j = 0; j < c; j++) h += (i === 0 ? '<th><br></th>' : '<td><br></td>'); h += '</tr>'; }
@@ -435,54 +858,71 @@ function tblOp(op) {
   if (op === 'ac') [...table.rows].forEach(r => { const c = r.children[ci]; if (c) { const nc = document.createElement(c.tagName.toLowerCase()); nc.innerHTML = '<br>'; c.after(nc); } });
   if (op === 'dc') { tr.children.length <= 1 ? table.remove() : [...table.rows].forEach(r => r.children[ci] && r.children[ci].remove()); }
   if (op === 'dt') table.remove();
-  savedRange = null; scheduleSave();
+  savedRange = null; scheduleSave(); updateStats();
 }
 function bindEditor() {
   const tb = $('#tb'), ed = $('#editor');
   ['mousedown', 'pointerdown'].forEach(ev => tb.addEventListener(ev, e => { if (!e.target.closest('select')) e.preventDefault(); }));
-  tb.querySelectorAll('[data-c]').forEach(b => b.onclick = () => cmd(b.dataset.c, b.dataset.v));
-  tb.querySelectorAll('[data-t]').forEach(b => b.onclick = () => tblOp(b.dataset.t));
+  $$('[data-c]', tb).forEach(b => b.onclick = () => cmd(b.dataset.c, b.dataset.v));
+  $$('[data-t]', tb).forEach(b => b.onclick = () => tblOp(b.dataset.t));
   $('#fs').onchange = e => { if (e.target.value) cmd('fontSize', e.target.value); e.target.value = ''; };
   $('#addTbl').onclick = () => insertTable(+$('#tr').value, +$('#tc').value);
+  $('#tpl').onchange = e => {
+    const k = e.target.value; e.target.value = '';
+    if (!k || !editable()) return;
+    restoreSel(); document.execCommand('insertHTML', false, TPL[k].html); afterEdit(); toast('양식을 넣었어요');
+  };
   $('#draw').onclick = openDraw;
-  ed.addEventListener('input', scheduleSave);
+  ed.addEventListener('input', () => { scheduleSave(); updateStats(); });
   ed.addEventListener('blur', () => flushSave());
   ed.addEventListener('paste', e => {
     e.preventDefault(); const h = e.clipboardData.getData('text/html'), t = e.clipboardData.getData('text/plain');
     if (h) document.execCommand('insertHTML', false, clean(h)); else document.execCommand('insertText', false, t);
+    afterEdit();
   });
   $('#topicBtn').onclick = async () => {
     const g = S.groups[S.gid]; const t = prompt('이 분임의 토론 주제를 입력하세요', g.topic || ''); if (t === null) return;
-    await DB.update(ws('groups/' + S.gid), { topic: t.trim(), topicBy: isAdmin() ? 'admin' : 'leader' });
+    await DB.update(ws('groups/' + S.gid), { topic: t.trim(), topicBy: isAdmin() ? 'admin' : 'leader' }); toast('주제를 저장했어요');
   };
+  $('#rLead').onchange = e => DB.update(ws('groups/' + S.gid), { leader: e.target.value }).then(() => toast('분임장을 변경했어요'));
+  $('#rNote').onchange = e => DB.update(ws('groups/' + S.gid + '/roles'), { note: e.target.value }).then(() => toast('기록자를 지정했어요'));
+  $('#rPres').onchange = e => DB.update(ws('groups/' + S.gid + '/roles'), { pres: e.target.value }).then(() => toast('발표자를 지정했어요'));
+  const saveSum = () => DB.update(ws('docs/' + S.gid), { summary: $('#sumBox').value.trim(), summaryTs: Date.now() })
+    .then(() => { $('#sumState').textContent = '요약 저장됨 ✓'; }).catch(() => { $('#sumState').textContent = '저장 실패'; });
+  $('#sumSave').onclick = saveSum;
+  $('#sumBox').oninput = () => { $('#sumState').textContent = '입력 중…'; clearTimeout(R.sumTimer); R.sumTimer = setTimeout(saveSum, 1200); };
   $('#doneBtn').onclick = async () => {
     const g = S.groups[S.gid];
     if (g.status === 'done') { await DB.update(ws('groups/' + S.gid), { status: 'open' }); return toast('다시 열었어요. 수정 후 완료를 눌러 주세요'); }
-    if (!confirm('토론 내용을 완료하고 다른 분임에 공유할까요?\n(완료 후에도 "다시 열어 수정"할 수 있어요)')) return;
+    if (!confirm('토론 내용을 완료하고 다른 분임에 공유할까요?\n(완료 후에도 다시 열어 수정할 수 있어요)')) return;
     await flushSave(); await DB.update(ws('groups/' + S.gid), { status: 'done', doneAt: Date.now() }); toast('완료! 다른 분임에서 볼 수 있어요');
   };
   $('#pdf').onclick = async () => { await flushSave(); exportPdf([S.gid]); };
   $('#hwpx').onclick = async () => { await flushSave(); exportHwpx([S.gid]); };
 }
 
-/* --- 저장·동기화 --- */
+/* ---------- 저장·동기화 ---------- */
 function setSaveState(t) { const e = $('#saveState'); if (e) e.textContent = t; }
 function scheduleSave() { if (!R) return; R.lastTypeAt = Date.now(); clearTimeout(R.saveTimer); R.saveTimer = setTimeout(doSave, 700); setSaveState('저장 중…'); }
 function doSave() {
   clearTimeout(R.saveTimer); R.saveTimer = null; const ed = $('#editor'); if (!ed || !editable()) return Promise.resolve();
-  const html = ed.innerHTML; if (html === R.lastApplied) { setSaveState('저장됨'); return Promise.resolve(); }
+  const html = ed.innerHTML; if (html === R.lastApplied) { setSaveState('저장됨 ✓'); return Promise.resolve(); }
   R.lastApplied = html; R.pending = null;
-  return DB.update(ws('docs/' + S.gid), { html, editor: S.me.name, editorTs: Date.now() }).then(() => setSaveState('저장됨 ✓')).catch(() => setSaveState('⚠ 저장 실패 — 네트워크 확인'));
+  return DB.update(ws('docs/' + S.gid), { html, editor: S.me.name, editorTs: Date.now() })
+    .then(() => setSaveState('저장됨 ✓')).catch(() => setSaveState('⚠ 저장 실패 — 네트워크 확인'));
 }
 const flushSave = () => (R && R.saveTimer) ? doSave() : Promise.resolve();
 window.addEventListener('beforeunload', () => { if (R && R.saveTimer) doSave(); });
-function setEditor(html) { const ed = $('#editor'); if (!ed) return; ed.innerHTML = clean(html); R.lastApplied = html; R.pending = null; R.loaded = true; }
+function setEditor(html) { const ed = $('#editor'); if (!ed) return; ed.innerHTML = clean(html); R.lastApplied = html; R.pending = null; R.loaded = true; updateStats(); }
 function applyDoc() {
   const ed = $('#editor'); if (!ed) return; const d = S.docs[S.gid], html = (d && d.html) || '';
-  if (R.loaded && html === R.lastApplied) { updateBadge(); return; }
+  if (!R.loaded) setSaveState('저장됨 ✓');
+  if (R.loaded && html === R.lastApplied) { updateBadge(); updateStats(); return; }
   const typing = document.activeElement === ed && Date.now() - R.lastTypeAt < 4000;
   if (R.loaded && (R.saveTimer || typing)) { R.pending = html; return; }
   setEditor(html); updateBadge();
+  const sb = $('#sumBox');
+  if (sb && document.activeElement !== sb) sb.value = (d && d.summary) || '';
 }
 function roomTick() {
   const ed = $('#editor'); if (!ed) return;
@@ -495,16 +935,17 @@ function updateBadge() {
   b.textContent = (d && d.editor && d.editor !== S.me.name && Date.now() - (d.editorTs || 0) < 6000) ? `✏️ ${d.editor} 님이 입력 중…` : '';
 }
 
-/* --- 그리기 --- */
+/* ---------- 그리기 ---------- */
 function openDraw() {
   if (!editable()) return;
   const m = document.createElement('div'); m.className = 'modal';
   const cols = ['#111111', '#d32f2f', '#1a4fd6', '#16915a', '#e08a00'];
-  m.innerHTML = `<div class="mbox"><div class="mt">그리기 <button id="dx">✕</button></div>
+  m.innerHTML = `<div class="mbox"><div class="mt">그리기 <button id="dx" class="sm">✕</button></div>
   <div class="dtools">${cols.map((c, i) => `<button class="sw ${i ? '' : 'on'}" data-col="${c}" style="background:${c}"></button>`).join('')}
-    <button data-w="3">가늘게</button><button data-w="7">보통</button><button data-w="14">굵게</button><button id="er">지우개</button><button id="un">↶ 되돌리기</button><button id="cl">모두 지우기</button></div>
+    <button class="sm" data-w="3">가늘게</button><button class="sm" data-w="7">보통</button><button class="sm" data-w="14">굵게</button>
+    <button class="sm" id="er">지우개</button><button class="sm" id="un">↶ 되돌리기</button><button class="sm" id="cl">모두 지우기</button></div>
   <canvas id="cv" width="900" height="520"></canvas>
-  <div class="actions"><span class="grow"></span><button id="dc">취소</button><button class="pri" id="di">문서에 넣기</button></div></div>`;
+  <div class="btnrow" style="margin-top:10px"><span class="grow"></span><button id="dc">취소</button><button class="pri" id="di">문서에 넣기</button></div></div>`;
   document.body.appendChild(m);
   const cv = $('#cv', m), ctx = cv.getContext('2d'); let color = '#111111', w = 7, drawing = false, last = null; const hist = [];
   const blank = () => { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); }; blank(); ctx.lineCap = ctx.lineJoin = 'round';
@@ -513,9 +954,9 @@ function openDraw() {
   cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); drawing = true; hist.push(ctx.getImageData(0, 0, cv.width, cv.height)); if (hist.length > 25) hist.shift(); last = pt(e); seg(last, last); });
   cv.addEventListener('pointermove', e => { if (!drawing) return; const p = pt(e); seg(last, p); last = p; });
   ['pointerup', 'pointercancel'].forEach(ev => cv.addEventListener(ev, () => drawing = false));
-  m.querySelectorAll('[data-col]').forEach(b => b.onclick = () => { color = b.dataset.col; m.querySelectorAll('.sw').forEach(x => x.classList.toggle('on', x === b)); });
-  m.querySelectorAll('[data-w]').forEach(b => b.onclick = () => w = +b.dataset.w);
-  $('#er', m).onclick = () => { color = '#ffffff'; w = 24; m.querySelectorAll('.sw').forEach(x => x.classList.remove('on')); };
+  $$('[data-col]', m).forEach(b => b.onclick = () => { color = b.dataset.col; $$('.sw', m).forEach(x => x.classList.toggle('on', x === b)); });
+  $$('[data-w]', m).forEach(b => b.onclick = () => w = +b.dataset.w);
+  $('#er', m).onclick = () => { color = '#ffffff'; w = 24; $$('.sw', m).forEach(x => x.classList.remove('on')); };
   $('#un', m).onclick = () => { const h = hist.pop(); if (h) ctx.putImageData(h, 0, 0); };
   $('#cl', m).onclick = () => { hist.push(ctx.getImageData(0, 0, cv.width, cv.height)); blank(); };
   const close = () => m.remove(); $('#dx', m).onclick = $('#dc', m).onclick = close;
@@ -524,91 +965,268 @@ function openDraw() {
 
 /* ===================== 관리자 ===================== */
 async function adminEnter(code, pin, title, silent) {
-  if (!code || !pin) { toast('코드와 PIN을 입력하세요'); return false; }
+  if (!code || !pin) { if (!silent) toast('코드와 PIN을 입력하세요'); return false; }
   const m = await DB.get(`ws/${code}/meta`), h = await sha(code + ':' + pin);
   if (!m) {
     if (silent) return false;
     if (!title) { toast('새 워크숍이에요. 제목을 입력하세요'); return false; }
-    if (pin.length < 4) { toast('PIN은 4자 이상'); return false; }
+    if (pin.length < 4) { toast('PIN은 4자 이상으로 정해 주세요'); return false; }
     await DB.set(`ws/${code}/meta`, { title, pinHash: h, leaderTopic: true, created: Date.now() });
   } else if (m.pinHash !== h) { if (!silent) toast('PIN이 맞지 않아요'); return false; }
   sessionStorage.setItem('wsAdmin', JSON.stringify({ code, pin }));
+  localStorage.setItem('wsLastCode', code);
   S.role = 'admin'; S.meta = m || { title, leaderTopic: true }; S.groups = (await DB.get(`ws/${code}/groups`)) || {};
-  S.view = 'loading'; connect(code); S.tab = Object.keys(S.groups).length ? 'status' : 'groups'; renderAdmin(); return true;
+  S.view = 'loading'; connect(code);
+  S.tab = Object.keys(S.groups).length ? 'status' : 'groups';
+  if (new URLSearchParams(location.search).get('admin') !== '1') history.replaceState(null, '', adminUrl());
+  renderAdmin(); return true;
 }
 
 function renderAdminLogin(msg) {
   S.view = 'adminLogin';
-  const last = norm(localStorage.getItem('wsLastCode') || 'ws2026');
-  app.innerHTML = modeBanner() + `<div class="wrap narrow"><div class="card hero-card"><h1 class="hero-title">관리자 설정</h1><p class="mu">접속 코드, 분임 구성, QR 안내, 발표와 저장을 관리합니다.</p><label>워크숍 코드</label><input id="acode" value="${esc(last)}" autocapitalize="off"><label>제목 <span class="mu">(새로 만들 때만)</span></label><input id="atitle" placeholder="예) 2026 체육 업무 워크숍"><label>관리자 PIN</label><input id="apin" type="password" placeholder="숫자/문자 4자 이상" autocomplete="off"><p style="margin:14px 0 0"><button class="pri" id="goA" style="width:100%">관리자로 들어가기</button></p></div><p class="home-admin-link"><button id="backHome" class="link-btn">참여자 화면으로 돌아가기</button></p></div>`;
+  app.innerHTML = appbar({ right: `<button class="ghost" id="toHome">참여자 화면</button>` }) + `
+  <div class="wrap narrow">
+    <div class="hero" style="padding:26px 0 2px"><h1 style="font-size:28px">진행자(관리자) 로그인</h1><p>워크숍을 새로 만들거나, 기존 워크숍을 이어서 운영합니다.</p></div>
+    <div class="card">
+      <label>워크숍 코드 <span class="mu">(참여자가 입력/QR에 쓰이는 코드)</span></label>
+      <input id="acode" placeholder="예) ws2026" autocapitalize="off" autocomplete="off" value="${esc(norm(localStorage.getItem('wsLastCode') || ''))}">
+      <label>워크숍 제목 <span class="mu">(새로 만들 때만 필요)</span></label>
+      <input id="atitle" placeholder="예) 2026 학교체육 업무 워크숍">
+      <label>관리자 PIN <span class="mu">(4자 이상 · 분실 시 복구 불가)</span></label>
+      <input id="apin" type="password" placeholder="숫자/문자 4자 이상" autocomplete="off">
+      <p style="margin:16px 0 0"><button class="pri lg block" id="goA">관리자로 들어가기</button></p>
+    </div>
+    <p class="mu" style="text-align:center">처음이라면 코드·제목·PIN을 모두 입력하면 새 워크숍이 만들어집니다.</p>
+  </div>`;
   if (msg) toast(msg);
-  $('#goA').onclick = () => { const c=norm($('#acode').value), title=$('#atitle').value.trim(), pin=$('#apin').value.trim(); if(!c) return toast('워크숍 코드를 입력하세요'); if(!pin||pin.length<4) return toast('관리자 PIN은 4자 이상 입력하세요'); localStorage.setItem('wsLastCode', c); adminEnter(c, pin, title); };
-  $('#apin').onkeydown = e => { if (e.key === 'Enter') $('#goA').click(); };
-  $('#backHome').onclick = () => { history.replaceState(null, '', location.pathname); renderHome(); };
+  const go = () => adminEnter(norm($('#acode').value), $('#apin').value.trim(), $('#atitle').value.trim());
+  $('#goA').onclick = go;
+  $('#apin').onkeydown = e => { if (e.key === 'Enter') go(); };
+  $('#toHome').onclick = () => { history.replaceState(null, '', location.pathname); renderHome(); };
 }
+
+const ATABS = [['settings', '① 기본 설정'], ['groups', '② 분임 구성'], ['brief', '③ 전체 배부·시간'], ['qr', '④ QR·안내'], ['status', '⑤ 진행·발표·저장']];
 function renderAdmin() {
   leaveRoom(); S.view = 'admin';
-  app.innerHTML = modeBanner() + `<div class="wrap"><div class="top"><div><h2 style="margin:0">${esc(S.meta.title)}</h2><span class="mu">관리자 · 코드 <b>${esc(S.code)}</b></span></div><button id="logout">나가기</button></div>
-  <div class="tabs">${[['groups', '① 분임 구성'], ['qr', '② QR·안내'], ['status', '③ 진행·발표·저장']].map(([k, l]) => `<button data-t="${k}" class="${S.tab === k ? 'on' : ''}">${l}</button>`).join('')}</div><div id="abody"></div></div>`;
-  app.querySelectorAll('.tabs [data-t]').forEach(b => b.onclick = () => { S.tab = b.dataset.t; renderAdmin(); });
-  $('#logout').onclick = () => { sessionStorage.removeItem('wsAdmin'); unsubs.forEach(f => f()); unsubs = []; history.replaceState(null, '', location.pathname); renderHome(); };
-  renderAdminBody();
+  const gs = glist(), ppl = gs.reduce((a, g) => a + mlist(g).length, 0);
+  app.innerHTML = appbar({
+    title: S.meta.title,
+    sub: `관리자 · 코드 <b>${esc(S.code)}</b> · 분임 ${gs.length} · 참여자 ${ppl}`,
+    right: `<button class="sm" id="qrQuick">QR 띄우기</button><button class="ghost" id="logout">나가기</button>`
+  }) + `<div class="wrap">
+    <div class="tabs">${ATABS.map(([k, l]) => `<button data-t="${k}" class="${S.tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+    <div id="abody"></div>
+  </div>`;
+  $$('.tabs [data-t]').forEach(b => b.onclick = () => { S.tab = b.dataset.t; renderAdmin(); });
+  $('#qrQuick').onclick = () => openStage(S.code, S.meta.title);
+  $('#logout').onclick = () => {
+    sessionStorage.removeItem('wsAdmin'); unsubs.forEach(f => f()); unsubs = [];
+    history.replaceState(null, '', location.pathname); renderHome('관리자 화면에서 나왔어요');
+  };
+  renderAdminBody(); renderTimerChip();
 }
 function renderAdminBody() {
   const b = $('#abody'); if (!b) return;
-  if (S.tab === 'groups') adminGroups(b); else if (S.tab === 'qr') adminQr(b); else adminStatus(b);
+  if (S.tab === 'settings') adminSettings(b);
+  else if (S.tab === 'groups') adminGroups(b);
+  else if (S.tab === 'brief') adminBrief(b);
+  else if (S.tab === 'qr') adminQr(b);
+  else adminStatus(b);
 }
-const joinUrl = () => `${location.origin}${location.pathname}?w=${encodeURIComponent(S.code)}`;
-function parseNames(str) {
-  return String(str).split(/[\n,，、]+/).map(s => s.trim()).filter(Boolean).map(s => s.startsWith('*') ? { name: s.slice(1).trim(), leader: true } : { name: s, leader: false }).filter(x => x.name);
-}
-async function saveGroup(gid, name, names, topic) {
-  const old = S.groups[gid] || {}, byName = {}; Object.entries(old.members || {}).forEach(([id, m]) => byName[m.name] = id);
-  const members = {}; let leader = '';
-  names.forEach((n, i) => { const id = byName[n.name] || uid('m'); members[id] = { name: n.name, o: i }; if (n.leader && !leader) leader = id; });
-  const order = old.order != null ? old.order : (Math.max(0, ...glist().map(g => g.order || 0)) + 1);
-  const upd = { name, members, leader, order, status: old.status || 'open' };
-  if (topic !== undefined && topic !== (old.topic || '')) { upd.topic = topic; upd.topicBy = 'admin'; }
-  await DB.update(ws('groups/' + gid), upd);
-}
-function groupCard(g) {
-  const lines = mlist(g).map(m => (m.id === g.leader ? '*' : '') + m.name).join('\n');
-  return `<div class="card" data-gc="${g.id}"><div class="row"><input class="gn" value="${esc(g.name)}" placeholder="분임명"><button class="danger" data-del="${g.id}">삭제</button></div>
-  <label>주제 (관리자 지정 — 비워두면 분임장이 정함)</label><input class="gt" value="${esc(g.topic || '')}" placeholder="예) 학교운동부 운영 개선 방안">
-  <label>구성원 (한 줄에 한 명 · 분임장은 이름 앞에 *)</label><textarea class="gm" rows="${Math.max(4, mlist(g).length + 1)}">${esc(lines)}</textarea>
-  <p style="margin:10px 0 0"><button class="pri" data-save="${g.id}">저장</button></p></div>`;
-}
-function adminGroups(b) {
-  const gs = glist();
-  b.innerHTML = `<div class="card"><h3>기본 설정</h3>
-  <label>워크숍 제목</label><div class="row"><input id="wTitle" value="${esc(S.meta.title)}"><button id="wTitleSave">저장</button></div>
-  <label class="chk"><input type="checkbox" id="wLT" ${S.meta.leaderTopic ? 'checked' : ''}> 분임장이 자기 분임의 주제를 정하거나 바꿀 수 있게 하기</label>
-  <label>모든 분임에 같은 주제 적용</label><div class="row"><input id="allTopic" placeholder="전체 공통 주제"><button id="allTopicBtn">모두 적용</button></div>
-  <label>참여자 접속 기간 <span class="mu">(비우면 제한 없음 · 관리자는 기간과 상관없이 접속)</span></label>
-  <div class="row wrap"><span>시작</span><input type="datetime-local" id="pFrom" value="${toLocalInput(S.meta.openFrom)}" style="width:auto;flex:1"><span>종료</span><input type="datetime-local" id="pUntil" value="${toLocalInput(S.meta.openUntil)}" style="width:auto;flex:1"><button id="pSave">기간 저장</button></div>
-  <p class="mu" id="pInfo" style="margin:6px 0 0">${periodInfo(S.meta)}</p></div>
-  <div class="card"><h3>분임 한 번에 만들기</h3><p class="mu">한 줄에 한 분임 — <b>분임명: 이름, 이름, 이름</b> (분임장은 이름 앞에 *). 같은 분임명이 있으면 갱신해요.</p>
-  <textarea id="bulk" rows="6" placeholder="1분임: *김철수, 이영희, 박민수&#10;2분임: *최유리, 정다은, 한지우"></textarea>
-  <p style="margin:10px 0 0"><button class="pri" id="bulkBtn">만들기 / 갱신</button></p></div>
-  <div id="gcards">${gs.map(groupCard).join('')}</div><button id="addG">+ 분임 하나 추가</button>
-  <div class="card" style="margin-top:24px"><h3>워크숍 끝난 뒤</h3><p class="mu">먼저 ③에서 PDF/HWPX를 저장한 다음, 필요하면 이 워크숍의 모든 데이터를 지우세요.</p><button class="danger" id="delWs">이 워크숍 데이터 전체 삭제</button></div>`;
-  $('#wTitleSave').onclick = async () => { const t = $('#wTitle').value.trim(); if (!t) return; await DB.update(ws('meta'), { title: t }); S.meta.title = t; toast('저장했어요'); renderAdmin(); };
-  $('#wLT').onchange = e => DB.update(ws('meta'), { leaderTopic: e.target.checked });
+
+/* ---------- ① 기본 설정 ---------- */
+function adminSettings(b) {
+  b.innerHTML = `
+  <div class="card">
+    <h3>워크숍 정보</h3>
+    <label>제목</label><div class="row"><input id="wTitle" value="${esc(S.meta.title)}"><button id="wTitleSave">저장</button></div>
+    <label>접속 코드 <span class="mu">(바꾸면 기존 자료를 새 코드로 그대로 옮깁니다 · QR도 새로 만들어집니다)</span></label>
+    <div class="row"><input id="wCode" value="${esc(S.code)}" autocapitalize="off"><button id="wCodeSave">코드 변경</button></div>
+    <label>관리자 PIN 변경</label><div class="row"><input id="wPin" type="password" placeholder="새 PIN (4자 이상)" autocomplete="off"><button id="wPinSave">PIN 변경</button></div>
+    <div class="hr"></div>
+    <label class="chk"><input type="checkbox" id="wLT" ${S.meta.leaderTopic ? 'checked' : ''}><span>분임장이 자기 분임의 주제를 직접 정하거나 바꿀 수 있게 하기<br><span class="mu">끄면 주제는 진행자만 바꿀 수 있어요.</span></span></label>
+  </div>
+
+  <div class="card">
+    <h3>분임 수</h3>
+    <p class="mu">분임 개수를 정하면 부족한 만큼 자동으로 만들고, 줄이면 뒤쪽 분임을 삭제합니다.</p>
+    <div class="row wrap" style="margin-top:10px">
+      <button class="sm" id="gcMinus">−</button>
+      <input class="num" id="gcNum" type="number" min="0" max="40" value="${glist().length}">
+      <button class="sm" id="gcPlus">+</button>
+      <button class="pri" id="gcApply">이 개수로 맞추기</button>
+      <span class="mu">현재 ${glist().length}개</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>참여자 접속 기간</h3>
+    <p class="mu">비우면 제한이 없습니다. 관리자는 기간과 상관없이 접속할 수 있어요.</p>
+    <div class="row wrap" style="margin-top:8px">
+      <span class="mu">시작</span><input type="datetime-local" id="pFrom" value="${toLocalInput(S.meta.openFrom)}" style="flex:1;min-width:190px">
+      <span class="mu">종료</span><input type="datetime-local" id="pUntil" value="${toLocalInput(S.meta.openUntil)}" style="flex:1;min-width:190px">
+      <button id="pSave">기간 저장</button><button class="sm" id="pClear">제한 없음</button>
+    </div>
+    <p class="mu" id="pInfo" style="margin:8px 0 0">${esc(periodInfo(S.meta))}</p>
+  </div>
+
+  <div class="card">
+    <h3>워크숍 마무리</h3>
+    <p class="mu">⑤ 진행·발표·저장 탭에서 PDF/HWPX로 먼저 보관한 뒤 삭제하세요. 삭제하면 되돌릴 수 없습니다.</p>
+    <div class="btnrow" style="margin-top:10px"><button class="danger" id="delWs">이 워크숍 데이터 전체 삭제</button></div>
+  </div>`;
+
+  $('#wTitleSave').onclick = async () => { const t = $('#wTitle').value.trim(); if (!t) return toast('제목을 입력하세요'); await DB.update(ws('meta'), { title: t }); S.meta.title = t; toast('제목을 저장했어요'); renderAdmin(); };
+  $('#wLT').onchange = e => DB.update(ws('meta'), { leaderTopic: e.target.checked }).then(() => toast('저장했어요'));
+  $('#wPinSave').onclick = async () => {
+    const p = $('#wPin').value.trim(); if (p.length < 4) return toast('새 PIN은 4자 이상');
+    await DB.update(ws('meta'), { pinHash: await sha(S.code + ':' + p) });
+    sessionStorage.setItem('wsAdmin', JSON.stringify({ code: S.code, pin: p })); $('#wPin').value = ''; toast('PIN을 변경했어요');
+  };
+  $('#wCodeSave').onclick = () => changeCode($('#wCode').value);
+  const num = $('#gcNum');
+  $('#gcMinus').onclick = () => num.value = Math.max(0, (+num.value || 0) - 1);
+  $('#gcPlus').onclick = () => num.value = Math.min(40, (+num.value || 0) + 1);
+  $('#gcApply').onclick = () => setGroupCount(+num.value || 0);
   $('#pSave').onclick = async () => {
     const f = $('#pFrom').value ? new Date($('#pFrom').value).getTime() : null, u = $('#pUntil').value ? new Date($('#pUntil').value).getTime() : null;
     if (f && u && u <= f) return toast('종료 시각이 시작보다 늦어야 해요');
     await DB.update(ws('meta'), { openFrom: f, openUntil: u }); S.meta.openFrom = f; S.meta.openUntil = u;
     $('#pInfo').textContent = periodInfo(S.meta); toast('접속 기간을 저장했어요');
   };
+  $('#pClear').onclick = async () => { await DB.update(ws('meta'), { openFrom: null, openUntil: null }); S.meta.openFrom = null; S.meta.openUntil = null; renderAdminBody(); toast('접속 제한을 없앴어요'); };
   $('#delWs').onclick = async () => {
     if (!confirm('이 워크숍의 모든 분임과 토론 내용을 삭제할까요?\n(PDF/HWPX로 저장하지 않았다면 복구할 수 없어요)')) return;
     if (prompt('확인을 위해 워크숍 코드를 입력하세요: ' + S.code) !== S.code) return toast('코드가 달라 취소했어요');
     unsubs.forEach(f => f()); unsubs = []; await DB.remove(`ws/${S.code}`);
     sessionStorage.removeItem('wsAdmin'); history.replaceState(null, '', location.pathname); renderHome('워크숍 데이터를 삭제했어요');
   };
-  $('#allTopicBtn').onclick = async () => {
-    const t = $('#allTopic').value.trim(); if (!t) return toast('주제를 입력하세요');
-    const u = {}; glist().forEach(g => { u[g.id + '/topic'] = t; u[g.id + '/topicBy'] = 'admin'; }); await DB.update(ws('groups'), u); toast('모든 분임에 적용했어요'); renderAdminBody();
+}
+
+async function changeCode(v) {
+  const nc = norm(v);
+  if (!nc) return toast('새 코드를 입력하세요');
+  if (nc === S.code) return toast('현재 코드와 같아요');
+  if (await DB.get(`ws/${nc}/meta`)) return toast('이미 사용 중인 코드예요. 다른 코드를 써 주세요');
+  if (!confirm(`접속 코드를 "${S.code}" → "${nc}" 로 바꿀까요?\n기존 분임·내용은 그대로 옮겨지고, 참여자는 새 QR/코드로 들어와야 합니다.`)) return;
+  let pin = ''; try { pin = (JSON.parse(sessionStorage.getItem('wsAdmin') || '{}').pin) || ''; } catch (e) { }
+  const all = await DB.get(`ws/${S.code}`);
+  if (!all) return toast('데이터를 읽지 못했어요');
+  if (pin) { all.meta = all.meta || {}; all.meta.pinHash = await sha(nc + ':' + pin); }
+  await DB.set(`ws/${nc}`, all);
+  await DB.remove(`ws/${S.code}`);
+  sessionStorage.setItem('wsAdmin', JSON.stringify({ code: nc, pin }));
+  localStorage.setItem('wsLastCode', nc);
+  unsubs.forEach(f => f()); unsubs = [];
+  S.code = nc; S.meta = all.meta; S.groups = all.groups || {};
+  connect(nc); renderAdmin(); toast('코드를 변경했어요. QR을 다시 안내해 주세요');
+}
+
+async function setGroupCount(n) {
+  const gs = glist();
+  if (n === gs.length) return toast('이미 그 개수예요');
+  if (n > gs.length) {
+    for (let i = gs.length; i < n; i++) await saveGroup(uid('g'), (i + 1) + '분임', []);
+  } else {
+    const kill = gs.slice(n);
+    if (!confirm(`뒤쪽 ${kill.length}개 분임(${kill.map(g => g.name).join(', ')})을 삭제할까요?\n작성한 내용도 함께 지워집니다.`)) return;
+    for (const g of kill) { await DB.remove(ws('groups/' + g.id)); await DB.remove(ws('docs/' + g.id)); }
+  }
+  S.groups = (await DB.get(ws('groups'))) || {};
+  renderAdmin(); toast(`분임을 ${n}개로 맞췄어요`);
+}
+
+/* ---------- ② 분임 구성 ---------- */
+function parseNames(str) {
+  return String(str).split(/[\n,，、]+/).map(s => s.trim()).filter(Boolean)
+    .map(s => s.startsWith('*') ? { name: s.slice(1).trim(), leader: true } : { name: s, leader: false }).filter(x => x.name);
+}
+async function saveGroup(gid, name, names, topic) {
+  const old = S.groups[gid] || {}, byName = {}; Object.entries(old.members || {}).forEach(([id, m]) => byName[m.name] = id);
+  const members = {}; let leader = '';
+  names.forEach((n, i) => { const id = byName[n.name] || uid('m'); members[id] = { name: n.name, o: i }; if (n.leader && !leader) leader = id; });
+  if (!leader && old.leader && members[old.leader]) leader = old.leader;
+  const order = old.order != null ? old.order : (Math.max(0, ...glist().map(g => g.order || 0)) + 1);
+  const upd = { name, members, leader, order, status: old.status || 'open' };
+  if (topic !== undefined && topic !== (old.topic || '')) { upd.topic = topic; upd.topicBy = 'admin'; }
+  await DB.update(ws('groups/' + gid), upd);
+}
+function groupEditor(g, i, n) {
+  const lines = mlist(g).map(m => (m.id === g.leader ? '*' : '') + m.name).join('\n');
+  const roles = g.roles || {}, ms = mlist(g);
+  const rn = id => { const m = ms.find(x => x.id === id); return m ? m.name : '미지정'; };
+  return `<div class="gedit" data-gc="${g.id}">
+    <div class="hd">
+      <span class="chip gray">${i + 1}</span>
+      <input class="gn" value="${esc(g.name)}" placeholder="분임명">
+      <span class="ord"><button class="sm" data-up="${g.id}" ${i === 0 ? 'disabled' : ''}>↑</button><button class="sm" data-dn="${g.id}" ${i === n - 1 ? 'disabled' : ''}>↓</button></span>
+      <button class="sm danger" data-del="${g.id}">삭제</button>
+    </div>
+    <label>주제 <span class="mu">(비우면 분임장이 정함)</span></label>
+    <input class="gt" value="${esc(g.topic || '')}" placeholder="예) 학교운동부 운영 개선 방안">
+    <label>구성원 <span class="mu">(한 줄에 한 명 · 분임장은 이름 앞에 *)</span></label>
+    <textarea class="gm" rows="${Math.max(3, mlist(g).length + 1)}">${esc(lines)}</textarea>
+    <div class="btnrow" style="margin-top:10px">
+      <span class="mu">기록 ${esc(rn(roles.note))} · 발표 ${esc(rn(roles.pres))}</span>
+      <span class="grow"></span>
+      <span class="badge ${g.status === 'done' ? 'ok' : ''}">${g.status === 'done' ? '완료' : '토론 중'}</span>
+      <button class="pri sm" data-save="${g.id}">저장</button>
+    </div>
+  </div>`;
+}
+function adminGroups(b) {
+  const gs = glist();
+  b.innerHTML = `
+  <div class="card">
+    <h3>전체 명단 한 번에 배부</h3>
+    <p class="mu">참석자 명단을 붙여넣으면 분임 수에 맞춰 자동으로 나눠 담습니다. (기존 구성원은 교체됩니다)</p>
+    <label>참석자 명단 <span class="mu">(줄바꿈 또는 쉼표로 구분)</span></label>
+    <textarea id="dnames" rows="5" placeholder="김철수, 이영희, 박민수, 최유리, 정다은, 한지우 …"></textarea>
+    <div class="row wrap" style="margin-top:10px">
+      <span class="mu">분임 수</span><input class="num" id="dn" type="number" min="1" max="40" value="${Math.max(1, gs.length || 4)}">
+      <label class="chk" style="flex:1;min-width:180px"><input type="checkbox" id="dshuf" checked><span>무작위로 섞어서 배부</span></label>
+      <label class="chk" style="flex:1;min-width:180px"><input type="checkbox" id="dlead" checked><span>각 분임 첫 사람을 분임장으로</span></label>
+      <button class="pri" id="dgo">자동 배부 실행</button>
+    </div>
+    <p class="mu" id="dprev" style="margin:10px 0 0"></p>
+  </div>
+
+  <div class="card">
+    <h3>직접 입력해서 만들기</h3>
+    <p class="mu">한 줄에 한 분임 — <b>분임명: 이름, 이름, 이름</b> (분임장은 이름 앞에 *). 같은 분임명이 있으면 갱신합니다.</p>
+    <textarea id="bulk" rows="5" placeholder="1분임: *김철수, 이영희, 박민수&#10;2분임: *최유리, 정다은, 한지우"></textarea>
+    <div class="btnrow" style="margin-top:10px"><button class="pri" id="bulkBtn">만들기 / 갱신</button><button id="addG">+ 분임 하나 추가</button></div>
+  </div>
+
+  <div class="sect">분임 ${gs.length}개</div>
+  <div id="gcards">${gs.map((g, i) => groupEditor(g, i, gs.length)).join('') || '<div class="card mu">아직 분임이 없어요. 위에서 만들어 주세요.</div>'}</div>`;
+
+  const prev = () => {
+    const names = parseNames($('#dnames').value), n = Math.max(1, +$('#dn').value || 1);
+    $('#dprev').textContent = names.length ? `${names.length}명을 ${n}개 분임으로 → 분임당 ${Math.floor(names.length / n)}~${Math.ceil(names.length / n)}명` : '';
+  };
+  $('#dnames').oninput = prev; $('#dn').oninput = prev; prev();
+  $('#dgo').onclick = async () => {
+    let names = parseNames($('#dnames').value).map(x => x.name);
+    const n = Math.max(1, +$('#dn').value || 1);
+    if (!names.length) return toast('명단을 입력하세요');
+    if (!confirm(`${names.length}명을 ${n}개 분임으로 배부할까요?\n기존 분임의 구성원 명단은 새로 덮어씁니다.`)) return;
+    if ($('#dshuf').checked) names = names.map(v => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+    const buckets = Array.from({ length: n }, () => []);
+    names.forEach((nm, i) => buckets[i % n].push(nm));
+    const cur = glist();
+    for (let i = 0; i < n; i++) {
+      const gid = cur[i] ? cur[i].id : uid('g');
+      const nm = cur[i] ? cur[i].name : (i + 1) + '분임';
+      const list = buckets[i].map((x, j) => ({ name: x, leader: $('#dlead').checked && j === 0 }));
+      await saveGroup(gid, nm, list);
+      S.groups = (await DB.get(ws('groups'))) || {};
+    }
+    if (cur.length > n && confirm(`남는 분임 ${cur.length - n}개를 삭제할까요?`)) {
+      for (const g of cur.slice(n)) { await DB.remove(ws('groups/' + g.id)); await DB.remove(ws('docs/' + g.id)); }
+      S.groups = (await DB.get(ws('groups'))) || {};
+    }
+    renderAdmin(); toast('명단을 배부했어요');
   };
   $('#bulkBtn').onclick = async () => {
     const lines = $('#bulk').value.split('\n').map(s => s.trim()).filter(Boolean); if (!lines.length) return toast('내용을 입력하세요');
@@ -617,91 +1235,345 @@ function adminGroups(b) {
       if (!name) continue; const ex = glist().find(g => g.name === name); await saveGroup(ex ? ex.id : uid('g'), name, names);
       S.groups = (await DB.get(ws('groups'))) || {};
     }
-    toast('분임을 만들었어요'); renderAdminBody();
+    toast('분임을 만들었어요'); renderAdmin();
   };
-  $('#addG').onclick = async () => { await saveGroup(uid('g'), (glist().length + 1) + '분임', []); S.groups = (await DB.get(ws('groups'))) || {}; renderAdminBody(); };
-  b.querySelectorAll('[data-save]').forEach(btn => btn.onclick = async () => {
+  $('#addG').onclick = async () => { await saveGroup(uid('g'), (glist().length + 1) + '분임', []); S.groups = (await DB.get(ws('groups'))) || {}; renderAdmin(); };
+  $$('[data-save]', b).forEach(btn => btn.onclick = async () => {
     const c = btn.closest('[data-gc]'), gid = btn.dataset.save, name = $('.gn', c).value.trim();
     if (!name) return toast('분임명을 입력하세요');
-    await saveGroup(gid, name, parseNames($('.gm', c).value), $('.gt', c).value.trim()); toast('저장했어요 ✓');
-    S.groups = (await DB.get(ws('groups'))) || {};
+    await saveGroup(gid, name, parseNames($('.gm', c).value), $('.gt', c).value.trim());
+    S.groups = (await DB.get(ws('groups'))) || {}; toast('저장했어요 ✓');
   });
-  b.querySelectorAll('[data-del]').forEach(btn => btn.onclick = async () => {
+  $$('[data-del]', b).forEach(btn => btn.onclick = async () => {
     const g = S.groups[btn.dataset.del]; if (!confirm(`"${g.name}" 분임을 삭제할까요? 작성한 내용도 함께 지워져요.`)) return;
-    await DB.remove(ws('groups/' + btn.dataset.del)); await DB.remove(ws('docs/' + btn.dataset.del)); S.groups = (await DB.get(ws('groups'))) || {}; renderAdminBody();
+    await DB.remove(ws('groups/' + btn.dataset.del)); await DB.remove(ws('docs/' + btn.dataset.del));
+    S.groups = (await DB.get(ws('groups'))) || {}; renderAdmin();
   });
+  const move = async (gid, d) => {
+    const gs2 = glist(), i = gs2.findIndex(g => g.id === gid), j = i + d;
+    if (i < 0 || j < 0 || j >= gs2.length) return;
+    const a = gs2[i], c = gs2[j];
+    await DB.update(ws('groups/' + a.id), { order: j }); await DB.update(ws('groups/' + c.id), { order: i });
+    S.groups = (await DB.get(ws('groups'))) || {}; renderAdminBody();
+  };
+  $$('[data-up]', b).forEach(btn => btn.onclick = () => move(btn.dataset.up, -1));
+  $$('[data-dn]', b).forEach(btn => btn.onclick = () => move(btn.dataset.dn, 1));
 }
-function adminQr(b) {
-  const url = joinUrl(), local = location.protocol === 'file:';
-  b.innerHTML = `<div class="card" style="text-align:center"><h3>참여 QR</h3>
-  ${local ? '<p class="mu" style="color:#b3261e">⚠ 지금은 파일로 열려 있어요. GitHub Pages 주소로 접속한 상태에서 이 화면을 열어야 QR이 올바른 주소가 돼요.</p>' : ''}
-  <div id="qr" style="display:inline-block;padding:12px;background:#fff"></div>
-  <p style="word-break:break-all"><b>${esc(url)}</b></p>
-  <div class="row wrap" style="justify-content:center"><button id="cp">주소 복사</button><button class="pri" id="qp">QR 안내문 인쇄</button></div>
-  <p class="mu">참여자는 QR을 찍으면 이 워크숍(코드 <b>${esc(S.code)}</b>)으로 바로 들어와 분임과 이름을 고릅니다.</p></div>`;
-  makeQR($('#qr'), url, 240);
-  $('#cp').onclick = () => navigator.clipboard.writeText(url).then(() => toast('복사했어요'), () => toast('복사 실패'));
-  $('#qp').onclick = () => {
-    $('#printArea').innerHTML = `<div class="qrp"><h1>${esc(S.meta.title)}</h1><p style="font-size:16pt">QR 코드를 찍어 우리 분임방으로 들어오세요</p><div class="qrbox" id="qrp"></div><p style="font-size:13pt">${esc(url)}</p></div>`;
-    makeQR($('#qrp'), url, 420); document.body.classList.add('printing'); setTimeout(() => window.print(), 400);
+
+/* ---------- ③ 전체 배부 · 시간 ---------- */
+function adminBrief(b) {
+  const br = S.meta.brief || {}, t = S.meta.timer, r = timerRemain();
+  b.innerHTML = `
+  <div class="card">
+    <div class="card-h"><h3>전체 공통 과제 배부</h3>${br.at ? `<span class="chip">${esc(fmtAgo(br.at))} 배부됨</span>` : '<span class="chip gray">미배부</span>'}</div>
+    <p class="mu">여기에 쓴 내용이 모든 분임 작업실 맨 위와 참여자 입장 화면에 표시됩니다.</p>
+    <label>공통 과제 / 안내문</label>
+    <textarea id="brText" rows="6" placeholder="1. 우리 분임의 핵심 문제 3가지를 적어주세요.&#10;2. 해결 방안을 우선순위대로 정리해 주세요.&#10;3. 발표는 2분 이내로 요약해 주세요.">${esc(br.text || '')}</textarea>
+    <label>참고 링크 <span class="mu">(선택)</span></label>
+    <input id="brLink" placeholder="https://..." value="${esc(br.link || '')}">
+    <div class="btnrow" style="margin-top:12px"><button class="pri" id="brSave">모든 분임에 배부</button><button id="brClear">배부 해제</button></div>
+  </div>
+
+  <div class="card">
+    <h3>토론 시간 (전체 타이머)</h3>
+    <p class="mu">시작하면 모든 참여자 화면 상단에 남은 시간이 함께 표시됩니다.</p>
+    <div class="row wrap" style="margin-top:10px">
+      <span class="mu">시간</span>
+      <select id="tmMin" style="flex:none;width:120px">${[5, 10, 15, 20, 25, 30, 40, 50, 60].map(n => `<option value="${n}" ${(t && t.mins === n) ? 'selected' : (!t && n === 20 ? 'selected' : '')}>${n}분</option>`).join('')}</select>
+      <button class="pri" id="tmStart">시작 / 다시 시작</button>
+      ${t ? `<button id="tmPause">${t.paused ? '재개' : '일시정지'}</button><button id="tmStop">타이머 끄기</button>` : ''}
+      <span class="grow"></span>
+      <span class="timer ${r == null ? '' : (r <= 0 ? 'end' : (t.paused ? '' : 'run'))}">${r == null ? '미사용' : (r <= 0 ? '시간 종료' : fmtClock(r) + ' 남음')}</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>주제 배부</h3>
+    <label>모든 분임에 같은 주제 적용</label>
+    <div class="row"><input id="allTopic" placeholder="전체 공통 주제"><button id="allTopicBtn">모두 적용</button></div>
+    <label>분임별로 다른 주제 <span class="mu">(한 줄에 <b>분임명: 주제</b>)</span></label>
+    <textarea id="eachTopic" rows="4" placeholder="1분임: 학교운동부 운영 개선&#10;2분임: 체육수업 안전 관리">${esc(glist().filter(g => g.topic).map(g => g.name + ': ' + g.topic).join('\n'))}</textarea>
+    <div class="btnrow" style="margin-top:10px"><button class="pri" id="eachBtn">분임별 주제 적용</button></div>
+  </div>
+
+  <div class="card">
+    <h3>작성 양식 배부</h3>
+    <p class="mu">모든 분임 작업실 문서에 같은 양식을 넣어 줍니다.</p>
+    <div class="row wrap" style="margin-top:10px">
+      <select id="tplSel" style="flex:1;min-width:200px">${Object.entries(TPL).map(([k, v]) => `<option value="${k}">${esc(v.name)}</option>`).join('')}</select>
+      <select id="tplMode" style="flex:none;width:200px"><option value="empty">빈 분임에만 넣기</option><option value="all">모든 분임 덮어쓰기</option></select>
+      <button class="pri" id="tplGo">양식 배부</button>
+    </div>
+  </div>`;
+
+  $('#brSave').onclick = async () => {
+    await DB.update(ws('meta'), { brief: { text: $('#brText').value.trim(), link: $('#brLink').value.trim(), at: Date.now() } });
+    toast('모든 분임에 배부했어요'); renderAdminBody();
+  };
+  $('#brClear').onclick = async () => { await DB.update(ws('meta'), { brief: null }); toast('배부를 해제했어요'); renderAdminBody(); };
+  $('#tmStart').onclick = async () => {
+    const m = +$('#tmMin').value || 20;
+    await DB.update(ws('meta'), { timer: { mins: m, endsAt: Date.now() + m * 60000, paused: false } });
+    toast(`${m}분 타이머를 시작했어요`); renderAdminBody();
+  };
+  if ($('#tmPause')) $('#tmPause').onclick = async () => {
+    const t2 = S.meta.timer || {};
+    if (t2.paused) await DB.update(ws('meta'), { timer: { mins: t2.mins, endsAt: Date.now() + (t2.remain || 0), paused: false } });
+    else await DB.update(ws('meta'), { timer: { mins: t2.mins, endsAt: t2.endsAt, paused: true, remain: Math.max(0, (t2.endsAt || 0) - Date.now()) } });
+    renderAdminBody();
+  };
+  if ($('#tmStop')) $('#tmStop').onclick = async () => { await DB.update(ws('meta'), { timer: null }); renderAdminBody(); };
+  $('#allTopicBtn').onclick = async () => {
+    const t2 = $('#allTopic').value.trim(); if (!t2) return toast('주제를 입력하세요');
+    const u = {}; glist().forEach(g => { u[g.id + '/topic'] = t2; u[g.id + '/topicBy'] = 'admin'; });
+    await DB.update(ws('groups'), u); toast('모든 분임에 적용했어요'); renderAdminBody();
+  };
+  $('#eachBtn').onclick = async () => {
+    const lines = $('#eachTopic').value.split('\n').map(s => s.trim()).filter(Boolean);
+    let n = 0;
+    for (const ln of lines) {
+      const i = ln.search(/[:：]/); if (i < 0) continue;
+      const nm = ln.slice(0, i).trim(), tp = ln.slice(i + 1).trim();
+      const g = glist().find(x => x.name === nm); if (!g) continue;
+      await DB.update(ws('groups/' + g.id), { topic: tp, topicBy: 'admin' }); n++;
+    }
+    toast(n ? `${n}개 분임의 주제를 적용했어요` : '일치하는 분임명이 없어요');
+  };
+  $('#tplGo').onclick = async () => {
+    const k = $('#tplSel').value, mode = $('#tplMode').value, gs = glist();
+    if (!gs.length) return toast('먼저 분임을 만들어 주세요');
+    if (mode === 'all' && !confirm('모든 분임의 작성 내용을 양식으로 덮어쓸까요?\n기존 내용은 사라집니다.')) return;
+    const docs = await fetchDocs(gs.map(g => g.id));
+    let n = 0;
+    for (const g of gs) {
+      const has = textOf(docs[g.id] && docs[g.id].html).length > 0;
+      if (mode === 'empty' && has) continue;
+      await DB.update(ws('docs/' + g.id), { html: TPL[k].html, editor: '관리자', editorTs: Date.now() }); n++;
+    }
+    toast(`${n}개 분임에 양식을 배부했어요`);
   };
 }
-function makeQR(el, text, size) {
-  el.innerHTML = '';
-  if (window.QRCode) new QRCode(el, { text, width: size, height: size, correctLevel: QRCode.CorrectLevel.M });
-  else el.innerHTML = '<span class="mu">QR 라이브러리를 불러오지 못했어요 (인터넷 확인)</span>';
+
+/* ---------- ④ QR · 안내 ---------- */
+function adminQr(b) {
+  const url = joinUrl(), local = location.protocol === 'file:';
+  b.innerHTML = `
+  ${local ? '<div class="card" style="border-color:#f0c7c2;background:var(--dg-s)"><b>주의</b><p class="mu" style="margin:4px 0 0">지금 파일(file://)로 열려 있어요. 실제 배포 주소(예: GitHub Pages)에서 이 화면을 열어야 QR이 올바른 주소로 만들어집니다.</p></div>' : ''}
+  <div class="qrcard">
+    <div class="qrbox" id="qr"></div>
+    <div class="qrinfo">
+      <div class="mu" style="font-weight:700">접속 코드</div>
+      <div class="codebig">${esc(S.code)}</div>
+      <div class="url">${esc(url)}</div>
+      <div class="btnrow">
+        <button id="cp">주소 복사</button>
+        <button class="pri" id="big">큰 화면으로 띄우기</button>
+        <button id="qp">QR 안내문 인쇄</button>
+      </div>
+      <p class="mu" style="margin-top:10px">참여자가 QR을 찍으면 코드 입력 없이 바로 이 워크숍으로 들어와 분임과 이름을 고릅니다.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>현장 안내 멘트</h3>
+    <ol class="mu" style="padding-left:20px;line-height:1.9">
+      <li>화면의 QR을 휴대폰 카메라로 찍어 주세요. (또는 주소 입력 후 코드 <b>${esc(S.code)}</b>)</li>
+      <li>내 분임을 고르고, 명단에서 내 이름을 누르세요. (없으면 직접 추가)</li>
+      <li>분임별 작업실에서 함께 내용을 작성합니다. 자동 저장됩니다.</li>
+      <li>정리가 끝나면 <b>완료하고 공유하기</b>를 누르면 다른 분임도 볼 수 있습니다.</li>
+    </ol>
+  </div>`;
+  makeQR($('#qr'), url, 212);
+  $('#cp').onclick = () => navigator.clipboard.writeText(url).then(() => toast('복사했어요'), () => toast('복사 실패'));
+  $('#big').onclick = () => openStage(S.code, S.meta.title);
+  $('#qp').onclick = () => printQR(S.code, S.meta.title);
 }
+
+/* ---------- ⑤ 진행 · 발표 · 저장 ---------- */
 function adminStatus(b) {
   const gs = glist(), doneN = gs.filter(g => g.status === 'done').length;
-  b.innerHTML = `<div class="card"><div class="row wrap"><b>완료 ${doneN} / ${gs.length}</b><span class="grow" style="flex:1"></span>
-  <button class="pri" id="pAll">전체 발표 시작</button><button id="pDone">완료된 분임만 발표</button><button id="pdfAll">전체 PDF 저장·인쇄</button><button id="hwpxAll">전체 HWPX 저장</button></div></div>
-  ${gs.length ? gs.map(g => `<div class="srow"><div class="info"><b>${esc(g.name)}</b> <span class="pill ${g.status === 'done' ? 'ok' : ''}">${g.status === 'done' ? '완료' : '토론 중'}</span>
-   <div class="mu">${esc(membersText(g) || '구성원 없음')}</div><div>주제: ${esc(g.topic || '미정')}</div></div>
-   <div class="row wrap" data-g="${g.id}"><button data-a="enter">방 열기</button><button data-a="present">발표</button><button data-a="pdf">PDF</button><button data-a="hwpx">HWPX</button>${g.status === 'done' ? '<button data-a="reopen" class="warn">다시 열기</button>' : '<button data-a="done">완료 처리</button>'}</div></div>`).join('') : '<div class="card mu">먼저 ① 분임 구성에서 분임을 만들어 주세요.</div>'}`;
+  const ppl = gs.reduce((a, g) => a + mlist(g).length, 0);
+  b.innerHTML = `
+  <div class="kpis">
+    <div class="kpi"><div class="lab">분임</div><div class="val">${gs.length}<small>개</small></div></div>
+    <div class="kpi"><div class="lab">완료</div><div class="val">${doneN}<small> / ${gs.length}</small></div></div>
+    <div class="kpi"><div class="lab">참여자</div><div class="val">${ppl}<small>명</small></div></div>
+    <div class="kpi"><div class="lab">작성 분량 합계</div><div class="val" id="kChars">-<small>자</small></div></div>
+  </div>
+  <div class="card">
+    <div class="btnrow">
+      <button class="pri" id="pAll">전체 발표 시작</button>
+      <button id="pDone">완료된 분임만 발표</button>
+      <button id="pSel">선택한 분임 발표</button>
+      <span class="grow"></span>
+      <button id="pdfAll">전체 PDF 저장·인쇄</button>
+      <button id="hwpxAll">전체 HWPX 저장</button>
+    </div>
+    <p class="mu" style="margin:10px 0 0">발표 화면에서는 ← → 로 이동, <b>Space</b> 타이머, <b>S</b> 요약만 보기, <b>F</b> 전체화면, <b>Esc</b> 닫기입니다.</p>
+  </div>
+  ${gs.length ? gs.map((g, i) => {
+    const done = g.status === 'done', roles = g.roles || {}, ms = mlist(g);
+    const rn = id => { const m = ms.find(x => x.id === id); return m ? m.name : '-'; };
+    return `<div class="srow">
+      <div class="info">
+        <div class="card-h" style="margin:0">
+          <div><label class="chk" style="display:inline-flex;border:0;background:none;padding:0;margin:0">
+            <input type="checkbox" class="selg" value="${g.id}" ${S.sel[g.id] ? 'checked' : ''}>
+            <b>${i + 1}. ${esc(g.name)}</b></label></div>
+          <span class="badge ${done ? 'ok' : 'live'}">${done ? '완료' : '토론 중'}</span>
+        </div>
+        <div class="mu">${esc(membersText(g) || '구성원 없음')}</div>
+        <div style="font-size:.95em;margin-top:2px">주제 · <b>${esc(g.topic || '미정')}</b></div>
+        <div class="mu">기록 ${esc(rn(roles.note))} · 발표 ${esc(rn(roles.pres))} · <span id="ag-${g.id}">-</span></div>
+        <div class="bar"><i id="bar-${g.id}" class="${done ? 'ok' : ''}" style="width:${done ? 100 : 4}%"></i></div>
+      </div>
+      <div class="btnrow" data-g="${g.id}">
+        <button data-a="enter">방 열기</button>
+        <button data-a="present">발표</button>
+        <button class="sm" data-a="pdf">PDF</button>
+        <button class="sm" data-a="hwpx">HWPX</button>
+        ${done ? '<button class="warn sm" data-a="reopen">다시 열기</button>' : '<button class="sm" data-a="done">완료 처리</button>'}
+      </div>
+    </div>`;
+  }).join('') : '<div class="card mu">먼저 ② 분임 구성에서 분임을 만들어 주세요.</div>'}`;
+
   const ids = gs.map(g => g.id);
+  const selected = () => $$('.selg', b).filter(c => c.checked).map(c => c.value);
+  $$('.selg', b).forEach(c => c.onchange = () => { S.sel[c.value] = c.checked; });
   $('#pAll').onclick = () => openPresent(ids, 0);
   $('#pDone').onclick = () => openPresent(gs.filter(g => g.status === 'done').map(g => g.id), 0);
-  $('#pdfAll').onclick = () => exportPdf(ids); $('#hwpxAll').onclick = () => exportHwpx(ids);
-  b.querySelectorAll('[data-a]').forEach(btn => btn.onclick = async () => {
+  $('#pSel').onclick = () => { const s = selected(); if (!s.length) return toast('발표할 분임을 선택하세요'); openPresent(s, 0); };
+  $('#pdfAll').onclick = () => exportPdf(selected().length ? selected() : ids);
+  $('#hwpxAll').onclick = () => exportHwpx(selected().length ? selected() : ids);
+  $$('[data-a]', b).forEach(btn => btn.onclick = async () => {
     const gid = btn.parentElement.dataset.g, a = btn.dataset.a;
     if (a === 'enter') { S.gid = gid; S.me = { id: 'admin', name: '관리자' }; renderRoom(); }
     if (a === 'present') openPresent(ids, ids.indexOf(gid));
-    if (a === 'pdf') exportPdf([gid]); if (a === 'hwpx') exportHwpx([gid]);
+    if (a === 'pdf') exportPdf([gid]);
+    if (a === 'hwpx') exportHwpx([gid]);
     if (a === 'reopen') DB.update(ws('groups/' + gid), { status: 'open' });
     if (a === 'done') DB.update(ws('groups/' + gid), { status: 'done', doneAt: Date.now() });
   });
+  if (ids.length) fetchDocs(ids).then(docs => {
+    if (S.view !== 'admin' || S.tab !== 'status') return;
+    let total = 0;
+    ids.forEach(id => {
+      const d = docs[id], len = textOf(d && d.html).length, g = S.groups[id] || {};
+      total += len;
+      const bar = $('#bar-' + id), ag = $('#ag-' + id);
+      if (bar) bar.style.width = (g.status === 'done' ? 100 : Math.max(4, Math.min(96, Math.round(len / 500 * 100)))) + '%';
+      if (ag) ag.textContent = `${len}자${d && d.summary ? ' · 요약 작성됨' : ''} · ${d && d.editorTs ? fmtAgo(d.editorTs) + ' 수정' : '작성 전'}`;
+    });
+    const k = $('#kChars'); if (k) k.innerHTML = total.toLocaleString() + '<small>자</small>';
+  });
 }
 
-/* ===================== 발표 화면 ===================== */
-const P = { open: false, ids: [], i: 0, size: parseInt(localStorage.getItem('wsPs')) || 30, unsub: null, doc: null };
+/* ===================== 발표 스테이지 ===================== */
+const P = {
+  open: false, ids: [], i: 0, size: parseInt(localStorage.getItem('wsPs')) || 30, unsub: null, doc: null,
+  sumOnly: false, t: { mins: parseInt(localStorage.getItem('wsPmin')) || 3, endsAt: null, paused: true, remain: 0 }
+};
 function openPresent(ids, i) {
-  if (!ids.length) return toast('발표할 분임이 없어요');
-  P.ids = ids; P.i = Math.max(0, i); P.open = true; document.body.classList.add('noscroll');
+  if (!ids || !ids.length) return toast('발표할 분임이 없어요');
+  P.ids = ids; P.i = Math.max(0, i || 0); P.open = true; P.sumOnly = false;
+  document.body.classList.add('noscroll');
   const el = $('#present'); el.hidden = false;
-  el.innerHTML = `<div class="pbar"><button id="pp">◀ 이전</button><b id="pc"></b><button id="pn">다음 ▶</button><span class="sp"></span>
-  <button id="fm">A−</button><button id="fp">A+</button><button id="ff">전체화면</button><button id="pf">PDF</button><button id="ph">HWPX</button><button id="px">닫기 ✕</button></div><div class="pbody" id="pbody"></div>`;
+  el.innerHTML = `
+  <div class="pbar">
+    <button id="pp">◀ 이전</button><span class="cnt" id="pc"></span><button id="pn">다음 ▶</button>
+    <span class="sep"></span>
+    <span class="ptimer" id="ptimer">${fmtClock(P.t.mins * 60000)}</span>
+    <button id="tgo">▶ 시작</button><button id="trs">↺</button>
+    <select id="tmin" title="발표 제한 시간">${[1, 2, 3, 5, 7, 10, 15].map(n => `<option value="${n}" ${n === P.t.mins ? 'selected' : ''}>${n}분</option>`).join('')}</select>
+    <span class="sp"></span>
+    <button id="ps">요약만</button>
+    <button id="fm">A−</button><button id="fp">A+</button>
+    <button id="ff">전체화면</button>
+    <button id="pf">PDF</button><button id="ph">HWPX</button>
+    <button id="px">닫기 ✕</button>
+  </div>
+  <div class="pdots" id="pdots"></div>
+  <div class="pbody" id="pbody"></div>
+  <div class="pfoot">
+    <span>발표 <b id="fnow">-</b></span><span>다음 <b id="fnext">-</b></span>
+    <span class="sp"></span>
+    <span>← → 이동 · Space 타이머 · S 요약 · F 전체화면 · Esc 닫기</span>
+  </div>`;
   $('#pp').onclick = () => goP(-1); $('#pn').onclick = () => goP(1);
   $('#fm').onclick = () => sizeP(-3); $('#fp').onclick = () => sizeP(3);
+  $('#ps').onclick = toggleSumOnly;
   $('#ff').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else el.requestFullscreen && el.requestFullscreen(); };
-  $('#pf').onclick = () => exportPdf([P.ids[P.i]]); $('#ph').onclick = () => exportHwpx([P.ids[P.i]]); $('#px').onclick = closePresent;
-  watchP();
+  $('#pf').onclick = () => exportPdf([P.ids[P.i]]);
+  $('#ph').onclick = () => exportHwpx([P.ids[P.i]]);
+  $('#px').onclick = closePresent;
+  $('#tgo').onclick = togglePresentTimer;
+  $('#trs').onclick = resetPresentTimer;
+  $('#tmin').onchange = e => { P.t.mins = +e.target.value; localStorage.setItem('wsPmin', P.t.mins); resetPresentTimer(); };
+  resetPresentTimer(); watchP();
 }
-function watchP() { if (P.unsub) P.unsub(); P.doc = null; P.unsub = DB.watch(ws('docs/' + P.ids[P.i]), v => { P.doc = v; paintPresent(); }); paintPresent(); }
-function goP(d) { const n = P.i + d; if (n < 0 || n >= P.ids.length) return; P.i = n; watchP(); const b = $('#pbody'); if (b) b.scrollTop = 0; }
-function sizeP(d) { P.size = Math.min(72, Math.max(14, P.size + d)); localStorage.setItem('wsPs', P.size); paintPresent(); }
+function watchP() {
+  if (P.unsub) P.unsub(); P.doc = null;
+  P.unsub = DB.watch(ws('docs/' + P.ids[P.i]), v => { P.doc = v; paintPresent(); });
+  paintPresent();
+}
+function goP(d) {
+  const n = P.i + d; if (n < 0 || n >= P.ids.length) return;
+  P.i = n; resetPresentTimer(); watchP(); const b = $('#pbody'); if (b) b.scrollTop = 0;
+}
+function sizeP(d) { P.size = Math.min(80, Math.max(14, P.size + d)); localStorage.setItem('wsPs', P.size); paintPresent(); }
+function toggleSumOnly() { P.sumOnly = !P.sumOnly; const b = $('#ps'); if (b) b.classList.toggle('on', P.sumOnly); paintPresent(); }
+function resetPresentTimer() { P.t.endsAt = null; P.t.paused = true; P.t.remain = P.t.mins * 60000; const g = $('#tgo'); if (g) g.textContent = '▶ 시작'; tickPresentTimer(); }
+function togglePresentTimer() {
+  if (P.t.paused) { P.t.endsAt = Date.now() + (P.t.remain || P.t.mins * 60000); P.t.paused = false; $('#tgo').textContent = '⏸ 정지'; }
+  else { P.t.remain = Math.max(0, P.t.endsAt - Date.now()); P.t.paused = true; $('#tgo').textContent = '▶ 계속'; }
+  tickPresentTimer();
+}
+function tickPresentTimer() {
+  const el = $('#ptimer'); if (!el) return;
+  const left = P.t.paused ? (P.t.remain || 0) : Math.max(0, P.t.endsAt - Date.now());
+  el.textContent = left <= 0 ? '시간 종료' : fmtClock(left);
+  el.className = 'ptimer ' + (left <= 0 ? 'end' : (P.t.paused ? '' : 'run'));
+}
 function paintPresent() {
-  if (!P.open) return; const g = S.groups[P.ids[P.i]], b = $('#pbody'); if (!b) return;
+  if (!P.open) return;
+  const g = S.groups[P.ids[P.i]], b = $('#pbody'); if (!b) return;
   if (!g) return closePresent();
   b.style.setProperty('--ps', P.size + 'px');
-  $('#pc').textContent = `${P.i + 1} / ${P.ids.length}`; $('#pp').disabled = P.i === 0; $('#pn').disabled = P.i === P.ids.length - 1;
+  b.classList.toggle('sumonly', P.sumOnly);
+  $('#pc').textContent = `${P.i + 1} / ${P.ids.length}`;
+  $('#pp').disabled = P.i === 0; $('#pn').disabled = P.i === P.ids.length - 1;
+  $('#pdots').innerHTML = P.ids.map((id, k) => `<i class="${k === P.i ? 'on' : ((S.groups[id] || {}).status === 'done' ? 'done' : '')}"></i>`).join('');
+  const nx = S.groups[P.ids[P.i + 1]];
+  $('#fnow').textContent = g.name; $('#fnext').textContent = nx ? nx.name : '마지막 발표';
+  const roles = g.roles || {}, ms = mlist(g), pres = ms.find(m => m.id === roles.pres);
+  const sum = (P.doc && P.doc.summary) || '';
   const top = b.scrollTop;
-  b.innerHTML = `<h1>${esc(g.name)} ${g.status === 'done' ? '' : '<span class="pill">토론 중</span>'}</h1><div class="pm">${esc(membersText(g))}</div>
-  ${g.topic ? `<div class="pt">주제 · ${esc(g.topic)}</div>` : ''}<div class="doc">${clean(P.doc && P.doc.html) || '<span class="mu">(작성된 내용이 없어요)</span>'}</div>`;
+  b.innerHTML = `
+    <div class="pname"><h1>${esc(g.name)}</h1>
+      ${g.status === 'done' ? '<span class="badge ok">완료</span>' : '<span class="badge live">토론 중</span>'}
+      ${pres ? `<span class="badge">발표 ${esc(pres.name)}</span>` : ''}
+    </div>
+    <div class="pm">${esc(membersText(g) || '구성원 없음')} · ${esc(S.meta.title)}</div>
+    ${g.topic ? `<div class="pt">주제 · ${esc(g.topic)}</div>` : ''}
+    ${sum ? `<div class="psum">${nl2(sum)}</div>` : (P.sumOnly ? '<div class="psum">작성된 발표 요약이 없어요. (작업실의 “발표 요약”에 입력하면 여기 크게 표시됩니다)</div>' : '')}
+    <div class="doc">${clean(P.doc && P.doc.html) || '<span style="color:#8c9ab9">(작성된 내용이 없어요)</span>'}</div>`;
   b.scrollTop = top;
+  tickPresentTimer();
 }
-function closePresent() { P.open = false; if (P.unsub) P.unsub(); P.unsub = null; if (document.fullscreenElement) document.exitFullscreen(); $('#present').hidden = true; document.body.classList.remove('noscroll'); }
+function closePresent() {
+  P.open = false; if (P.unsub) P.unsub(); P.unsub = null;
+  if (document.fullscreenElement) document.exitFullscreen();
+  $('#present').hidden = true; $('#present').innerHTML = '';
+  document.body.classList.remove('noscroll');
+}
 document.addEventListener('keydown', e => {
-  if (!P.open) return; if (e.key === 'ArrowRight' || e.key === 'PageDown') goP(1); if (e.key === 'ArrowLeft' || e.key === 'PageUp') goP(-1); if (e.key === 'Escape') closePresent();
+  if (!$('#stage').hidden && e.key === 'Escape') return closeStage();
+  if (!P.open) return;
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') goP(1);
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') goP(-1);
+  else if (e.key === 'Escape') closePresent();
+  else if (e.key === ' ') { e.preventDefault(); togglePresentTimer(); }
+  else if (e.key === 's' || e.key === 'S') toggleSumOnly();
+  else if (e.key === 'f' || e.key === 'F') $('#ff').click();
 });
 
 /* ===================== 저장: PDF(인쇄) / HWPX ===================== */
@@ -710,9 +1582,19 @@ async function fetchDocs(ids) {
 }
 async function exportPdf(ids) {
   const docs = await fetchDocs(ids);
-  $('#printArea').innerHTML = ids.map(id => { const g = S.groups[id]; return `<section class="pr"><div class="pr-ws">${esc(S.meta.title)}</div><h2>${esc(g.name)}</h2>
-    <div class="pr-mem">${esc(membersText(g))}</div>${g.topic ? `<div class="pr-topic">주제: ${esc(g.topic)}</div>` : ''}<hr><div class="doc">${clean(docs[id] && docs[id].html)}</div></section>`; }).join('');
-  const old = document.title; document.title = `${S.meta.title}_${ids.length === 1 ? S.groups[ids[0]].name : '전체'}`;
+  $('#printArea').innerHTML = ids.map((id, i) => {
+    const g = S.groups[id] || {}, d = docs[id] || {};
+    return `<section class="pr">
+      <div class="hd"><span>${esc(S.meta.title)}</span><span>${esc(g.name)} · ${ids.length > 1 ? (i + 1) + ' / ' + ids.length : fmtT(Date.now())}</span></div>
+      <h2>${esc(g.name)}</h2>
+      <div class="pr-mem">${esc(membersText(g) || '')}</div>
+      ${g.topic ? `<div class="pr-topic">주제 · ${esc(g.topic)}</div>` : ''}
+      ${d.summary ? `<div class="pr-sum"><b>발표 요약</b>\n${esc(d.summary)}</div>` : ''}
+      <div class="doc">${clean(d.html) || '(작성된 내용이 없습니다)'}</div>
+    </section>`;
+  }).join('');
+  const old = document.title;
+  document.title = `${S.meta.title}_${ids.length === 1 ? (S.groups[ids[0]] || {}).name : '전체'}`;
   document.body.classList.add('printing');
   toast('인쇄 창에서 "PDF로 저장"을 선택하면 파일로 저장돼요');
   setTimeout(() => { window.print(); document.title = old; }, 500);
@@ -745,15 +1627,30 @@ async function exportHwpx(ids) {
   if (!window.JSZip || !window.HWPX) return toast('저장 라이브러리를 불러오지 못했어요 (인터넷 확인)');
   try {
     const docs = await fetchDocs(ids);
-    const data = { title: S.meta.title, groups: ids.map(id => { const g = S.groups[id]; return { name: g.name, members: membersText(g), topic: g.topic || '', blocks: blocksFromHtml(docs[id] && docs[id].html) }; }) };
+    const data = {
+      title: S.meta.title,
+      groups: ids.map(id => {
+        const g = S.groups[id] || {}, d = docs[id] || {};
+        let blocks = [];
+        if (d.summary) {
+          blocks.push({ type: 'p', runs: [{ t: '[발표 요약]', b: true }] });
+          String(d.summary).split('\n').forEach(ln => { if (ln.trim()) blocks.push({ type: 'p', runs: [{ t: ln.trim(), b: false }] }); });
+          blocks.push({ type: 'p', runs: [{ t: ' ', b: false }] });
+        }
+        blocks = blocks.concat(blocksFromHtml(d.html));
+        return { name: g.name, members: membersText(g), topic: g.topic || '', blocks };
+      })
+    };
     const zip = await HWPX.buildHwpx(JSZip, window.HWPX_TEMPLATE_B64, data);
     const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/hwp+zip', compression: 'DEFLATE' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = `${S.meta.title}_${ids.length === 1 ? S.groups[ids[0]].name : '전체'}.hwpx`.replace(/[\\/:*?"<>|]/g, '_');
+    a.download = `${S.meta.title}_${ids.length === 1 ? (S.groups[ids[0]] || {}).name : '전체'}.hwpx`.replace(/[\\/:*?"<>|]/g, '_');
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
     toast('HWPX 파일을 저장했어요 (그림은 PDF로 확인)');
   } catch (e) { console.error(e); toast('HWPX 저장 중 오류가 났어요'); }
 }
+
+window.addEventListener('popstate', () => { closePresent(); start(); });
 start();
 </script>
 </body>
