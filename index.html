@@ -398,6 +398,30 @@ body{background-image:radial-gradient(900px 420px at 50% -160px,rgba(58,91,217,.
 .loginhead h1{font-size:clamp(22px,4vw,28px);margin:0 0 6px}
 .loginhead p{color:var(--mu);margin:0}
 
+/* ---------- 토의 차수(라운드) ---------- */
+.rbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px;padding:10px 12px;border:1px solid var(--bd);border-radius:var(--r);background:var(--panel);box-shadow:var(--sh)}
+.rbar .rlab{font-size:11.5px;letter-spacing:.07em;color:var(--mu);font-weight:800}
+.rchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--bd);background:#fff;border-radius:999px;padding:7px 14px;min-height:0;font-weight:700;font-size:.93em}
+.rchip small{font-weight:600;font-size:.82em;color:var(--mu)}
+.rchip:hover{border-color:var(--pri);background:var(--pri-s)}
+.rchip.on,.rchip.on:hover{background:var(--pri);border-color:var(--pri);color:#fff;cursor:default}
+.rchip.on small{color:#dbe3ff}
+.radd{border:1px dashed var(--pri);background:#fff;color:var(--pri-d);border-radius:999px;padding:7px 14px;min-height:0;font-weight:800}
+.radd:hover{background:var(--pri-s)}
+.rbar .rtp{font-weight:700;color:var(--pri-d);font-size:.95em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rbar .rnote{font-size:.88em;color:var(--mu)}
+.rlist{display:grid;gap:8px;margin-top:12px}
+.rrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--bd);border-radius:var(--rs);padding:10px 12px;background:var(--panel-2)}
+.rrow.cur{border-color:var(--pri);background:var(--pri-s)}
+.rrow .rn{font-weight:800}
+.rvlist{display:grid;gap:12px;margin-top:4px}
+.rvbox{border:1px solid var(--bd);border-radius:var(--rs);padding:13px 15px;background:var(--panel-2)}
+.rvbox .rvh{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rvbox .rvh b{font-size:1.04em}
+.rvbox .rvsum{margin-top:8px;padding:9px 11px;border-left:3px solid var(--pri);background:var(--pri-s);border-radius:0 8px 8px 0;white-space:pre-wrap;font-weight:600}
+.rvbox .doc{max-height:320px;overflow:auto;border:1px solid var(--bd);border-radius:10px;padding:11px 13px;margin-top:9px;background:#fff;font-size:.95em;min-height:0}
+@media (max-width:640px){.rbar{padding:9px 10px}.rbar .rnote{display:none}}
+
 </style>
 </head>
 <body>
@@ -419,7 +443,9 @@ body{background-image:radial-gradient(900px 420px at 50% -160px,rgba(58,91,217,.
 /* ===================================================================
    생각 모아 봄 — 분임토의 의견 모음 (v3 브랜드 개편)
    화면: 홈(QR 상시) / 참여자 선택 / 모둠 작업실 / 관리자(5탭) / 발표 스테이지
-   데이터 경로(기존 호환): ws/<code>/meta, ws/<code>/groups/<gid>, ws/<code>/docs/<gid>
+   토의 차수(라운드): meta.round = 현재 차수, meta.rounds[r] = {name, topic, brief}
+   데이터 경로(기존 호환): 1차 → ws/<code>/{groups,docs,notes,cats}
+                           2차 이상 → ws/<code>/r/<n>/{gs,docs,notes,cats}
    =================================================================== */
 
 /* ---------- 공통 도구 ---------- */
@@ -504,17 +530,101 @@ const DB = (() => {
 })();
 
 /* ---------- 상태 ---------- */
-const S = { code: null, meta: null, groups: {}, docs: {}, notes: {}, cats: {}, role: null, gid: null, me: null, view: 'home', tab: 'status', roomTab: 'mine', sel: {}, tplKey: 'basic' };
+const S = { code: null, meta: null, groups: {}, graw: {}, gs: {}, gsCache: {}, docs: {}, notes: {}, cats: {}, role: null, gid: null, me: null, view: 'home', tab: 'status', roomTab: 'mine', sel: {}, tplKey: 'basic' };
 let B = { col: 0, sort: 'new', mine: false, sel: {}, view: 'wall', cat: null, drag: null };
 const app = $('#app');
-const ws = p => `ws/${S.code}/${p}`;
-let unsubs = [];
+/* ---------- 토의 차수(라운드) ----------
+   1차: ws/<code>/{groups,docs,notes,cats}  (예전 데이터와 그대로 호환)
+   2차+: ws/<code>/r/<n>/{gs,docs,notes,cats}  (gs = 차수별 분임 상태: 주제·완료·역할)
+   분임 구성(이름·구성원·분임장·순서)은 모든 차수가 함께 씁니다.               */
+const RN = () => { const r = Math.floor(+((S.meta && S.meta.round) || 1)); return r >= 1 ? r : 1; };
+const RP = r => (r > 1 ? 'r/' + r + '/' : '');
+const RSCOPE = /^(docs|notes|cats)(\/|$)/;
+const wsAt = (r, p) => `ws/${S.code}/${RP(r)}${p}`;
+function ws(p) { return RSCOPE.test(p) ? `ws/${S.code}/${RP(RN())}${p}` : `ws/${S.code}/${p}`; }
+const gsPath = (r, gid) => (r > 1 ? `ws/${S.code}/r/${r}/gs` : `ws/${S.code}/groups`) + (gid ? '/' + gid : '');
+const gRound = gid => gsPath(RN(), gid);
+const roundInfo = r => (S.meta && S.meta.rounds && S.meta.rounds[r]) || {};
+const roundName = r => (roundInfo(r).name || (r + '차 토의'));
+const roundTopic = r => (roundInfo(r).topic || '');
+function roundNums() {
+  const set = new Set([1, RN()]);
+  Object.keys((S.meta && S.meta.rounds) || {}).forEach(k => { const n = Math.floor(+k); if (n >= 1) set.add(n); });
+  return [...set].sort((a, b) => a - b);
+}
+const lastRound = () => roundNums().slice(-1)[0];
+const briefOf = r => { r = r || RN(); return r === 1 ? ((S.meta && S.meta.brief) || null) : (roundInfo(r).brief || null); };
+const briefPatch = (r, v) => { const o = {}; if (r === 1) o.brief = v; else o['rounds/' + r + '/brief'] = v; return o; };
+function briefLocal(r, v) {
+  if (!S.meta) return;
+  if (r === 1) S.meta.brief = v;
+  else { S.meta.rounds = S.meta.rounds || {}; S.meta.rounds[r] = Object.assign({}, S.meta.rounds[r], { brief: v }); }
+}
+function gRoundState(id, r, map) {
+  const base = (S.graw && S.graw[id]) || null; if (!base) return null;
+  if (r <= 1) return base;
+  const x = (map || {})[id] || {};
+  return Object.assign({}, base, {
+    topic: x.topic || '', topicBy: x.topicBy || '',
+    status: x.status === 'done' ? 'done' : 'open', doneAt: x.doneAt || 0, roles: x.roles || null
+  });
+}
+function composeGroups() {
+  const out = {};
+  Object.keys(S.graw || {}).forEach(id => { const g = gRoundState(id, RN(), S.gs); if (g) out[id] = g; });
+  S.groups = out;
+}
+async function reloadGroups() {
+  S.graw = (await DB.get(`ws/${S.code}/groups`)) || {};
+  if (RN() > 1) S.gs = (await DB.get(gsPath(RN()))) || {};
+  composeGroups();
+}
+async function ensureGs(r) {
+  if (r <= 1) return {};
+  if (!S.gsCache) S.gsCache = {};
+  if (!S.gsCache[r]) S.gsCache[r] = (await DB.get(gsPath(r))) || {};
+  return S.gsCache[r];
+}
+async function removeGroupData(gid) {
+  for (const r of roundNums()) {
+    await DB.remove(wsAt(r, 'docs/' + gid)); await DB.remove(wsAt(r, 'notes/' + gid)); await DB.remove(wsAt(r, 'cats/' + gid));
+    if (r > 1) await DB.remove(gsPath(r, gid));
+  }
+  await DB.remove(`ws/${S.code}/groups/${gid}`);
+}
+
+let unsubs = [], runsubs = [], curRound = 0;
+function killWatch() { unsubs.forEach(f => f()); unsubs = []; runsubs.forEach(f => f()); runsubs = []; curRound = 0; }
 function connect(code) {
-  S.code = code; unsubs.forEach(f => f()); unsubs = [];
-  unsubs.push(DB.watch(`ws/${code}/meta`, v => { S.meta = v || S.meta; onData(); }));
-  unsubs.push(DB.watch(`ws/${code}/groups`, v => { S.groups = v || {}; onData(); }));
-  unsubs.push(DB.watch(`ws/${code}/notes`, v => { S.notes = v || {}; onData(); }));
-  unsubs.push(DB.watch(`ws/${code}/cats`, v => { S.cats = v || {}; onData(); }));
+  S.code = code; killWatch();
+  unsubs.push(DB.watch(`ws/${code}/meta`, v => { S.meta = v || S.meta; syncRound(); onData(); }));
+  unsubs.push(DB.watch(`ws/${code}/groups`, v => { S.graw = v || {}; composeGroups(); onData(); }));
+  syncRound();
+}
+/* 현재 차수가 바뀌면 차수 전용 구독(포스트잇·주제묶음·분임상태)을 다시 연결 */
+function syncRound() {
+  if (!S.code) return;
+  const r = RN(); if (r === curRound) return;
+  const prev = curRound; curRound = r;
+  if (prev && prev !== r && R && R.saveTimer && S.gid) doSave(wsAt(prev, 'docs/' + S.gid));
+  S.gsCache = {}; S.notes = {}; S.cats = {}; S.gs = {};
+  runsubs.forEach(f => f()); runsubs = [];
+  const code = S.code;
+  runsubs.push(DB.watch(`ws/${code}/${RP(r)}notes`, v => { S.notes = v || {}; onData(); }));
+  runsubs.push(DB.watch(`ws/${code}/${RP(r)}cats`, v => { S.cats = v || {}; onData(); }));
+  if (r > 1) runsubs.push(DB.watch(gsPath(r), v => { S.gs = v || {}; composeGroups(); onData(); }));
+  composeGroups();
+  if (!prev || prev === r) return;
+  if (P.open) closePresent();
+  const v = S.view;
+  setTimeout(() => {
+    if (v !== S.view) return;
+    if (v === 'room') {
+      delete S.docs[S.gid];
+      if (S.groups[S.gid]) { renderRoom(); toast(roundName(r) + '(으)로 바뀌었어요'); } else renderPick();
+    } else if (v === 'admin') renderAdmin();
+    else if (v === 'pick') renderPick();
+  }, 80);
 }
 const glist = () => Object.entries(S.groups).map(([id, g]) => ({ id, ...g })).sort((a, b) => (a.order || 0) - (b.order || 0));
 const mlist = g => Object.entries((g && g.members) || {}).map(([id, m]) => ({ id, ...m })).sort((a, b) => (a.o || 0) - (b.o || 0));
@@ -924,7 +1034,8 @@ function renderHome(msg) {
       if (!m) { $('#hinfo').textContent = '이 코드로 열린 워크숍이 없어요. 코드를 확인해 주세요.'; $('#hcnt').textContent = '코드 없음'; $('#hcnt').className = 'chip warn'; return; }
       const gs = (await DB.get(`ws/${c}/groups`)) || {};
       const n = Object.keys(gs).length, ppl = Object.values(gs).reduce((a, g) => a + Object.keys(g.members || {}).length, 0);
-      $('#hinfo').innerHTML = `<b>${esc(m.title)}</b> · 분임 ${n}개 · 참여자 ${ppl}명 · ${esc(periodInfo(m).replace('현재: ', ''))}`;
+      const rc = Math.max(1, Math.floor(+(m.round || 1))), rnm = (m.rounds && m.rounds[rc] && m.rounds[rc].name) || (rc + '차 토의');
+      $('#hinfo').innerHTML = `<b>${esc(m.title)}</b> · 분임 ${n}개 · 참여자 ${ppl}명${rc > 1 ? ' · <b>' + esc(rnm) + '</b> 진행 중' : ''} · ${esc(periodInfo(m).replace('현재: ', ''))}`;
       const open = periodState(m) === 'open';
       $('#hcnt').textContent = open ? '입장 가능' : (periodState(m) === 'before' ? '시작 전' : '종료됨');
       $('#hcnt').className = 'chip ' + (open ? 'ok' : 'warn');
@@ -947,7 +1058,7 @@ async function openMember(code) {
   const ps = periodState(m);
   if (ps !== 'open') { history.replaceState(null, '', location.pathname); renderHome(); toast(ps === 'before' ? `아직 열리지 않았어요 (${fmtT(m.openFrom)}부터)` : '접속 기간이 끝난 워크숍이에요'); return; }
   localStorage.setItem('wsLastCode', code);
-  S.role = 'member'; S.meta = m; S.groups = (await DB.get(`ws/${code}/groups`)) || {};
+  S.role = 'member'; S.meta = m; S.graw = (await DB.get(`ws/${code}/groups`)) || {}; S.gs = {}; composeGroups();
   S.view = 'loading'; connect(code);
   let saved = null; try { saved = JSON.parse(localStorage.getItem('wsMe') || 'null'); } catch (e) { }
   const g = saved && saved.code === code && S.groups[saved.gid];
@@ -955,11 +1066,120 @@ async function openMember(code) {
   else renderPick();
 }
 
+/* ===================== 토의 차수(라운드) ===================== */
+function roundBarHtml(opt) {
+  opt = opt || {};
+  const rs = roundNums(), cur = RN(), tp = roundTopic(cur), adm = isAdmin();
+  const chips = (adm ? rs : [cur]).map(r => {
+    const on = r === cur;
+    return `<button class="rchip ${on ? 'on' : ''}" data-rc="${r}" ${on ? 'disabled' : ''}>${esc(roundName(r))}${on ? '<small>진행 중</small>' : '<small>전환</small>'}</button>`;
+  }).join('');
+  return `<div class="rbar">
+    <span class="rlab">토의 차수</span>
+    ${chips}
+    ${adm ? '<button class="radd" id="rAdd">+ 새 차수</button>' : ''}
+    <span class="sp" style="flex:1"></span>
+    ${tp ? `<span class="rtp">주제 · ${esc(tp)}</span>` : ''}
+    <span class="rnote">${adm ? '차수를 누르면 모든 참여자 화면이 함께 바뀝니다' : (rs.length > 1 ? `전체 ${rs.length}차 중 ${cur}차 진행 중` : '')}</span>
+  </div>`;
+}
+function bindRoundBar(scope) {
+  const root = scope || document;
+  $$('[data-rc]', root).forEach(btn => btn.onclick = () => { if (isAdmin()) switchRound(+btn.dataset.rc); });
+  const a = $('#rAdd', root); if (a) a.onclick = openAddRound;
+}
+async function switchRound(n) {
+  if (!isAdmin()) return;
+  if (!(n >= 1) || n === RN()) return;
+  await flushSave();
+  await DB.update(ws('meta'), { round: n });
+  S.meta.round = n; syncRound();
+  toast(roundName(n) + '(으)로 전환했어요 — 참여자 화면도 함께 바뀝니다');
+}
+function openAddRound() {
+  const n = lastRound() + 1, gs = glist();
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="mbox" style="width:min(560px,100%)">
+    <div class="mt"><span>새 토의 차수 만들기</span><button class="sm" id="rx">✕ 닫기</button></div>
+    <p class="mu" style="margin-top:0">분임 구성(이름·구성원·분임장)은 그대로 쓰고, <b>작업실 문서·포스트잇·주제 묶음은 새로 비어 있는 상태</b>로 시작합니다. 이전 차수 내용은 그대로 보관됩니다.</p>
+    <label>차수 이름</label>
+    <input id="rName" value="${esc(n + '차 토의')}">
+    <label>공통 주제 <span class="mu">(비우면 분임별로 정함)</span></label>
+    <input id="rTopic" placeholder="예) 2차 — 1차에서 뽑은 과제의 실행 방안">
+    <label>공통 과제 / 안내문 <span class="mu">(선택)</span></label>
+    <textarea id="rBrief" rows="4" placeholder="이 차수에서 할 일을 적어 주세요."></textarea>
+    <label class="chk" style="margin-top:12px"><input type="checkbox" id="rRoles" checked> 지난 차수의 역할(기록자·발표자)을 그대로 가져오기</label>
+    <label class="chk"><input type="checkbox" id="rCats"> 지난 차수의 <b>주제 묶음</b>(포스트잇 분류 칸)도 그대로 만들기</label>
+    <div class="btnrow" style="margin-top:14px"><button class="pri" id="rGo">${esc(n)}차 만들고 전환</button><span class="grow"></span><span class="mu">분임 ${gs.length}개</span></div>
+  </div>`;
+  document.body.appendChild(m); document.body.classList.add('noscroll');
+  const close = () => { m.remove(); document.body.classList.remove('noscroll'); document.removeEventListener('keydown', key); };
+  const key = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', key);
+  $('#rx', m).onclick = close; m.onclick = e => { if (e.target === m) close(); };
+  $('#rGo', m).onclick = async () => {
+    const name = $('#rName', m).value.trim() || (n + '차 토의');
+    const topic = $('#rTopic', m).value.trim();
+    const bt = $('#rBrief', m).value.trim();
+    const keepRoles = $('#rRoles', m).checked, keepCats = $('#rCats', m).checked;
+    close();
+    await addRound(n, { name, topic, brief: bt, keepRoles, keepCats });
+  };
+}
+async function addRound(n, o) {
+  const from = RN(), gs = glist();
+  const patch = { round: n };
+  patch['rounds/' + n] = { name: o.name, topic: o.topic || '', at: Date.now(), brief: o.brief ? { text: o.brief, link: '', at: Date.now() } : null };
+  await flushSave();
+  for (const g of gs) {
+    const u = { status: 'open' };
+    if (o.topic) { u.topic = o.topic; u.topicBy = 'admin'; }
+    if (o.keepRoles && g.roles) u.roles = g.roles;
+    await DB.update(gsPath(n, g.id), u);
+    if (o.keepCats) for (const c of catList(g.id)) await DB.set(wsAt(n, 'cats/' + g.id + '/' + uid('c')), { name: c.name, col: c.col, ord: c.ord, ts: Date.now() });
+  }
+  await DB.update(ws('meta'), patch);
+  S.meta.round = n; S.meta.rounds = Object.assign({}, S.meta.rounds, { [n]: patch['rounds/' + n] });
+  S.gsCache = {}; syncRound();
+  toast(o.name + ' 을 만들고 전환했어요 (' + from + '차 내용은 그대로 보관됩니다)');
+  renderAdmin();
+}
+async function renameRound(r) {
+  const t = prompt('차수 이름을 입력하세요', roundName(r)); if (t === null) return;
+  const nm = t.trim(); if (!nm) return;
+  await DB.update(ws('meta'), { ['rounds/' + r + '/name']: nm });
+  S.meta.rounds = S.meta.rounds || {}; S.meta.rounds[r] = Object.assign({}, S.meta.rounds[r], { name: nm });
+  renderAdmin(); toast('이름을 바꿨어요');
+}
+async function setRoundTopic(r, tp) {
+  await DB.update(ws('meta'), { ['rounds/' + r + '/topic']: tp });
+  S.meta.rounds = S.meta.rounds || {}; S.meta.rounds[r] = Object.assign({}, S.meta.rounds[r], { topic: tp });
+  const u = {}; glist().forEach(g => { u[g.id + '/topic'] = tp; u[g.id + '/topicBy'] = 'admin'; });
+  if (tp) await DB.update(gsPath(r), u);
+  toast('차수 주제를 저장했어요');
+}
+async function deleteRound(r) {
+  const rs = roundNums();
+  if (r === 1 || r !== rs[rs.length - 1]) return toast('가장 마지막 차수만 삭제할 수 있어요');
+  if (!confirm(`"${roundName(r)}"를 삭제할까요?\n이 차수의 작업실 내용·포스트잇·주제 묶음이 모두 지워집니다.\n(PDF/HWPX로 저장하지 않았다면 복구할 수 없어요)`)) return;
+  const prev = rs[rs.length - 2] || 1;
+  await DB.remove(`ws/${S.code}/r/${r}`);
+  await DB.update(ws('meta'), { ['rounds/' + r]: null, round: prev });
+  if (S.meta.rounds) delete S.meta.rounds[r];
+  S.meta.round = prev; S.gsCache = {}; syncRound();
+  renderAdmin(); toast('차수를 삭제하고 ' + roundName(prev) + '(으)로 돌아왔어요');
+}
+/* 차수별 분임 상태 조회(지난 차수 열람·저장용) */
+function groupsAt(r, map) {
+  const out = {}; Object.keys(S.graw || {}).forEach(id => { const g = gRoundState(id, r, map); if (g) out[id] = g; });
+  return out;
+}
+
 function briefCardHtml(compact) {
-  const b = S.meta && S.meta.brief;
+  const b = briefOf(RN());
   if (!b || (!b.text && !b.link)) return '';
   return `<div class="card brief ${compact ? 'tight' : ''}">
-    <div class="card-h"><h3>전체 공통 과제</h3><span class="chip">전체 배부</span></div>
+    <div class="card-h"><h3>${esc(RN() > 1 ? roundName(RN()) + ' 공통 과제' : '전체 공통 과제')}</h3><span class="chip">전체 배부</span></div>
     ${b.text ? `<div style="margin-top:6px">${nl2(b.text)}</div>` : ''}
     ${b.link ? `<p class="mu" style="margin-top:8px">참고 자료: <a href="${esc(b.link)}" target="_blank" rel="noopener">${esc(b.link)}</a></p>` : ''}
     ${b.at ? `<p class="mu" style="margin:6px 0 0">${esc(fmtAgo(b.at))} 배부</p>` : ''}
@@ -975,6 +1195,7 @@ function renderPick() {
   }) + `<div class="wrap narrow">
     <h2 style="margin-top:14px">어느 분임이신가요?</h2>
     <p class="mu">내 분임을 선택하면 이름 고르기로 넘어갑니다.</p>
+    ${roundNums().length > 1 ? roundBarHtml() : ''}
     ${briefCardHtml(true)}
     <div class="glist" style="margin-top:14px">
       ${gs.length ? gs.map((g, i) => `<button class="gpick" data-g="${g.id}">
@@ -985,7 +1206,7 @@ function renderPick() {
       </button>`).join('') : '<div class="card mu">아직 분임이 만들어지지 않았어요. 진행자의 안내를 기다려 주세요. (자동으로 갱신됩니다)</div>'}
     </div>
   </div>`;
-  renderTimerChip();
+  renderTimerChip(); bindRoundBar();
   $$('[data-g]').forEach(b => b.onclick = () => renderWho(b.dataset.g));
   $('#home').onclick = () => { history.replaceState(null, '', location.pathname); renderHome(); };
 }
@@ -1026,13 +1247,15 @@ function renderRoom() {
   leaveRoom(); S.view = 'room'; S.roomTab = 'mine';
   const g = S.groups[S.gid] || {};
   app.innerHTML = appbar({
-    title: g.name || '분임', sub: `${esc(S.meta.title)} · ${esc((S.me && S.me.name) || '')}`,
+    title: g.name || '분임', sub: `${esc(S.meta.title)} · ${esc(roundName(RN()))} · ${esc((S.me && S.me.name) || '')}`,
     right: `<button class="ghost" id="leave">${isAdmin() ? '관리자 화면' : '분임 변경'}</button>`
   }) + `<div class="wrap">
+    ${(isAdmin() || roundNums().length > 1) ? roundBarHtml() : ''}
     <div class="tabs" role="tablist">
       <button data-t="mine" class="on">📝 우리 분임 작업실</button>
       <button data-t="board" id="tabBoard">🗒 포스트잇 보드</button>
       <button data-t="others" id="tabOthers">다른 분임 의견</button>
+      <button data-t="past" id="tabPast" ${RN() > 1 ? '' : 'hidden'}>📚 지난 차수</button>
     </div>
 
     <section id="sMine">
@@ -1085,6 +1308,7 @@ function renderRoom() {
           <div id="briefSlot"></div>
           <div class="card tight">
             <div class="card-h"><h3>우리 분임 주제</h3><span class="badge" id="rStatus">토론 중</span></div>
+            ${roundNums().length > 1 ? `<div class="mu" style="margin:-2px 0 6px">${esc(roundName(RN()))}</div>` : ''}
             <div class="topicline"><div id="rTopic" style="font-weight:700;color:var(--pri-d)">-</div><button class="sm" id="topicBtn" hidden>변경</button></div>
           </div>
           <div class="card tight">
@@ -1155,20 +1379,55 @@ function renderRoom() {
       <p class="mu">완료 처리한 분임의 내용을 볼 수 있어요. 카드를 누르면 큰 화면으로 열립니다.</p>
       <div class="grid" id="othersGrid"></div>
     </section>
+
+    <section id="sPast" hidden>
+      <div class="card">
+        <div class="card-h"><h3>지난 차수에 우리 분임이 정리한 내용</h3><span class="chip" id="pastCnt"></span></div>
+        <p class="mu" style="margin-top:0">차수가 바뀌어도 이전 내용은 그대로 보관됩니다. 필요하면 아래 내용을 참고해 이번 차수를 이어가세요.</p>
+        <div class="rvlist" id="pastList"><div class="mu">불러오는 중…</div></div>
+      </div>
+    </section>
   </div>`;
 
   $('#leave').onclick = async () => { await flushSave(); leaveRoom(); if (isAdmin()) renderAdmin(); else { localStorage.removeItem('wsMe'); renderPick(); } };
   $$('.tabs [data-t]').forEach(b => b.onclick = () => {
     S.roomTab = b.dataset.t; $$('.tabs button').forEach(x => x.classList.toggle('on', x === b));
-    $('#sMine').hidden = S.roomTab !== 'mine'; $('#sBoard').hidden = S.roomTab !== 'board'; $('#sOthers').hidden = S.roomTab !== 'others';
+    $('#sMine').hidden = S.roomTab !== 'mine'; $('#sBoard').hidden = S.roomTab !== 'board';
+    $('#sOthers').hidden = S.roomTab !== 'others'; $('#sPast').hidden = S.roomTab !== 'past';
     if (S.roomTab === 'others') updateRoom();
     if (S.roomTab === 'board') { renderBoard(); const t = $('#bText'); if (t) t.focus(); }
+    if (S.roomTab === 'past') renderPastRounds();
   });
-  bindEditor(); bindBoard();
+  bindRoundBar(); bindEditor(); bindBoard();
   R = { lastApplied: null, lastTypeAt: 0, saveTimer: null, pending: null, loaded: false, sumLoaded: false };
   R.unsub = DB.watch(ws('docs/' + S.gid), v => { S.docs[S.gid] = v; applyDoc(); });
   R.timer = setInterval(roomTick, 1200);
   updateRoom(); renderTimerChip();
+}
+
+async function renderPastRounds() {
+  const host = $('#pastList'); if (!host) return;
+  const rs = roundNums().filter(r => r < RN());
+  const cnt = $('#pastCnt'); if (cnt) cnt.textContent = rs.length ? rs.length + '개 차수' : '없음';
+  if (!rs.length) { host.innerHTML = '<div class="mu">아직 지난 차수가 없어요.</div>'; return; }
+  const parts = [];
+  for (const r of rs.slice().reverse()) {
+    const map = groupsAt(r, await ensureGs(r)), g = map[S.gid] || {};
+    const d = (await DB.get(wsAt(r, 'docs/' + S.gid))) || {};
+    parts.push(`<div class="rvbox">
+      <div class="rvh"><span class="chip gray">${r}차</span><b>${esc(roundName(r))}</b>
+        ${g.status === 'done' ? '<span class="badge ok">완료</span>' : '<span class="badge">미완료</span>'}
+        <span class="grow" style="flex:1"></span>
+        <button class="sm" data-pp="${r}">발표 화면으로 보기</button>
+        <button class="sm" data-pf="${r}">PDF</button></div>
+      ${g.topic ? `<div class="mu" style="margin-top:6px">주제 · <b>${esc(g.topic)}</b></div>` : ''}
+      ${d.summary ? `<div class="rvsum">${nl2(d.summary)}</div>` : ''}
+      <div class="doc">${clean(d.html) || '<span class="mu">(작성된 내용이 없어요)</span>'}</div>
+    </div>`);
+  }
+  host.innerHTML = parts.join('');
+  $$('[data-pp]', host).forEach(x => x.onclick = () => openPresentRound(+x.dataset.pp, [S.gid]));
+  $$('[data-pf]', host).forEach(x => x.onclick = () => exportPdf([S.gid], +x.dataset.pf));
 }
 
 function roleOptions(ms, cur) {
@@ -1209,6 +1468,12 @@ function updateRoom() {
   db.textContent = done ? '↺ 다시 열어 수정하기' : '✔ 완료하고 공유하기';
   db.className = done ? 'warn' : 'ok';
 
+  const tp = $('#tabPast');
+  if (tp) {
+    const pr = roundNums().filter(r => r < RN()).length;
+    tp.hidden = pr === 0; tp.textContent = `📚 지난 차수 (${pr})`;
+    if (!pr && S.roomTab === 'past') { const t = $('.tabs [data-t="mine"]'); if (t) t.click(); }
+  }
   const bt = $('#tabBoard');
   if (bt) {
     bt.hidden = !boardOn();
@@ -1310,20 +1575,20 @@ function bindEditor() {
   });
   $('#topicBtn').onclick = async () => {
     const g = S.groups[S.gid]; const t = prompt('이 분임의 토론 주제를 입력하세요', g.topic || ''); if (t === null) return;
-    await DB.update(ws('groups/' + S.gid), { topic: t.trim(), topicBy: isAdmin() ? 'admin' : 'leader' }); toast('주제를 저장했어요');
+    await DB.update(gRound(S.gid), { topic: t.trim(), topicBy: isAdmin() ? 'admin' : 'leader' }); toast('주제를 저장했어요');
   };
-  $('#rLead').onchange = e => DB.update(ws('groups/' + S.gid), { leader: e.target.value }).then(() => toast('분임장을 변경했어요'));
-  $('#rNote').onchange = e => DB.update(ws('groups/' + S.gid + '/roles'), { note: e.target.value }).then(() => toast('기록자를 지정했어요'));
-  $('#rPres').onchange = e => DB.update(ws('groups/' + S.gid + '/roles'), { pres: e.target.value }).then(() => toast('발표자를 지정했어요'));
+  $('#rLead').onchange = e => DB.update(`ws/${S.code}/groups/${S.gid}`, { leader: e.target.value }).then(() => toast('분임장을 변경했어요'));
+  $('#rNote').onchange = e => DB.update(gRound(S.gid) + '/roles', { note: e.target.value }).then(() => toast('기록자를 지정했어요'));
+  $('#rPres').onchange = e => DB.update(gRound(S.gid) + '/roles', { pres: e.target.value }).then(() => toast('발표자를 지정했어요'));
   const saveSum = () => DB.update(ws('docs/' + S.gid), { summary: $('#sumBox').value.trim(), summaryTs: Date.now() })
     .then(() => { $('#sumState').textContent = '요약 저장됨 ✓'; }).catch(() => { $('#sumState').textContent = '저장 실패'; });
   $('#sumSave').onclick = saveSum;
   $('#sumBox').oninput = () => { $('#sumState').textContent = '입력 중…'; clearTimeout(R.sumTimer); R.sumTimer = setTimeout(saveSum, 1200); };
   $('#doneBtn').onclick = async () => {
     const g = S.groups[S.gid];
-    if (g.status === 'done') { await DB.update(ws('groups/' + S.gid), { status: 'open' }); return toast('다시 열었어요. 수정 후 완료를 눌러 주세요'); }
+    if (g.status === 'done') { await DB.update(gRound(S.gid), { status: 'open' }); return toast('다시 열었어요. 수정 후 완료를 눌러 주세요'); }
     if (!confirm('토론 내용을 완료하고 다른 분임에 공유할까요?\n(완료 후에도 다시 열어 수정할 수 있어요)')) return;
-    await flushSave(); await DB.update(ws('groups/' + S.gid), { status: 'done', doneAt: Date.now() }); toast('완료! 다른 분임에서 볼 수 있어요');
+    await flushSave(); await DB.update(gRound(S.gid), { status: 'done', doneAt: Date.now() }); toast('완료! 다른 분임에서 볼 수 있어요');
   };
   $('#pdf').onclick = async () => { await flushSave(); exportPdf([S.gid]); };
   $('#hwpx').onclick = async () => { await flushSave(); exportHwpx([S.gid]); };
@@ -1332,11 +1597,11 @@ function bindEditor() {
 /* ---------- 저장·동기화 ---------- */
 function setSaveState(t) { const e = $('#saveState'); if (e) e.textContent = t; }
 function scheduleSave() { if (!R) return; R.lastTypeAt = Date.now(); clearTimeout(R.saveTimer); R.saveTimer = setTimeout(doSave, 700); setSaveState('저장 중…'); }
-function doSave() {
+function doSave(path) {
   clearTimeout(R.saveTimer); R.saveTimer = null; const ed = $('#editor'); if (!ed || !editable()) return Promise.resolve();
-  const html = ed.innerHTML; if (html === R.lastApplied) { setSaveState('저장됨 ✓'); return Promise.resolve(); }
+  const html = ed.innerHTML; if (!path && html === R.lastApplied) { setSaveState('저장됨 ✓'); return Promise.resolve(); }
   R.lastApplied = html; R.pending = null;
-  return DB.update(ws('docs/' + S.gid), { html, editor: S.me.name, editorTs: Date.now() })
+  return DB.update(path || ws('docs/' + S.gid), { html, editor: (S.me && S.me.name) || '', editorTs: Date.now() })
     .then(() => setSaveState('저장됨 ✓')).catch(() => setSaveState('⚠ 저장 실패 — 네트워크 확인'));
 }
 const flushSave = () => (R && R.saveTimer) ? doSave() : Promise.resolve();
@@ -1635,7 +1900,7 @@ function notesToDoc() {
   const buckets = cs.map(c => ({ name: c.name, items: pick.filter(n => (n.cat || '') === c.id) }))
     .concat([{ name: '미분류', items: pick.filter(n => !cs.some(c => c.id === (n.cat || ''))) }]).filter(x => x.items.length);
   const grouped = cs.length > 0 && buckets.length > 0;
-  const html = '<h3>포스트잇 의견 모음 (' + pick.length + '장' + (grouped ? ' · 주제 ' + buckets.length + '묶음' : '') + ')</h3>' +
+  const html = '<h3>' + (roundNums().length > 1 ? roundName(RN()) + ' — ' : '') + '포스트잇 의견 모음 (' + pick.length + '장' + (grouped ? ' · 주제 ' + buckets.length + '묶음' : '') + ')</h3>' +
     (grouped ? buckets.map(bk => '<h4>■ ' + esc(bk.name) + ' (' + bk.items.length + '장)</h4>' + tbl(bk.items)).join('') : tbl(pick)) +
     '<h3>우리 분임이 정리한 의견</h3><ol><li><br></li><li><br></li><li><br></li></ol><p><br></p>';
   const ed = $('#editor'); const t = $('.tabs [data-t="mine"]'); if (t) t.click();
@@ -1692,7 +1957,7 @@ async function adminEnter(code, pin, title, silent) {
   } else if (m.pinHash !== h) { if (!silent) toast('PIN이 맞지 않아요'); return false; }
   sessionStorage.setItem('wsAdmin', JSON.stringify({ code, pin }));
   localStorage.setItem('wsLastCode', code);
-  S.role = 'admin'; S.meta = m || { title, leaderTopic: true }; S.groups = (await DB.get(`ws/${code}/groups`)) || {};
+  S.role = 'admin'; S.meta = m || { title, leaderTopic: true }; S.graw = (await DB.get(`ws/${code}/groups`)) || {}; S.gs = {}; composeGroups();
   S.view = 'loading'; connect(code);
   S.tab = Object.keys(S.groups).length ? 'status' : 'groups';
   if (new URLSearchParams(location.search).get('admin') !== '1') history.replaceState(null, '', adminUrl());
@@ -1732,16 +1997,18 @@ function renderAdmin() {
   const gs = glist(), ppl = gs.reduce((a, g) => a + mlist(g).length, 0);
   app.innerHTML = appbar({
     title: S.meta.title,
-    sub: `관리자 · 코드 <b>${esc(S.code)}</b> · 분임 ${gs.length} · 참여자 ${ppl}`,
+    sub: `관리자 · 코드 <b>${esc(S.code)}</b> · 분임 ${gs.length} · 참여자 ${ppl} · ${esc(roundName(RN()))}`,
     right: `<button class="sm" id="qrQuick">QR 띄우기</button><button class="ghost" id="logout">나가기</button>`
   }) + `<div class="wrap">
+    ${roundBarHtml()}
     <div class="tabs">${ATABS.map(([k, l]) => `<button data-t="${k}" class="${S.tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
     <div id="abody"></div>
   </div>`;
+  bindRoundBar();
   $$('.tabs [data-t]').forEach(b => b.onclick = () => { S.tab = b.dataset.t; renderAdmin(); });
   $('#qrQuick').onclick = () => openStage(S.code, S.meta.title);
   $('#logout').onclick = () => {
-    sessionStorage.removeItem('wsAdmin'); unsubs.forEach(f => f()); unsubs = [];
+    sessionStorage.removeItem('wsAdmin'); killWatch();
     history.replaceState(null, '', location.pathname); renderHome('관리자 화면에서 나왔어요');
   };
   renderAdminBody(); renderTimerChip();
@@ -1766,6 +2033,28 @@ function adminSettings(b) {
     <label>관리자 PIN 변경</label><div class="row"><input id="wPin" type="password" placeholder="새 PIN (4자 이상)" autocomplete="off"><button id="wPinSave">PIN 변경</button></div>
     <div class="hr"></div>
     <label class="chk"><input type="checkbox" id="wLT" ${S.meta.leaderTopic ? 'checked' : ''}><span>분임장이 자기 분임의 주제를 직접 정하거나 바꿀 수 있게 하기<br><span class="mu">끄면 주제는 진행자만 바꿀 수 있어요.</span></span></label>
+  </div>
+
+
+  <div class="card">
+    <div class="card-h"><h3>토의 차수 관리</h3><span class="chip">${roundNums().length}차</span></div>
+    <p class="mu">한 워크숍에서 주제를 바꿔 여러 번 토의할 때 씁니다. 차수를 추가하면 <b>분임 구성은 그대로</b>, 작업실 문서·포스트잇·주제 묶음만 새로 시작합니다. 지난 차수 내용은 그대로 보관되고 언제든 다시 전환해 볼 수 있어요.</p>
+    <div class="rlist">
+      ${roundNums().map(r => {
+        const inf = roundInfo(r), on = r === RN(), last = r === lastRound();
+        return `<div class="rrow ${on ? 'cur' : ''}">
+          <span class="chip ${on ? '' : 'gray'}">${r}차</span>
+          <span class="rn">${esc(roundName(r))}</span>
+          <span class="mu" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(inf.topic || '공통 주제 없음')}</span>
+          <span class="grow" style="flex:1"></span>
+          ${on ? '<span class="badge live">진행 중</span>' : `<button class="sm" data-rgo="${r}">이 차수로 전환</button>`}
+          <button class="sm" data-rnm="${r}">이름</button>
+          <button class="sm" data-rtp="${r}">주제</button>
+          ${r > 1 && last ? `<button class="sm danger" data-rdl="${r}">삭제</button>` : ''}
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="btnrow" style="margin-top:12px"><button class="pri" id="rAdd2">+ 새 토의 차수 만들기</button><span class="grow"></span><span class="mu">현재 진행 중: <b>${esc(roundName(RN()))}</b></span></div>
   </div>
 
   <div class="card">
@@ -1805,6 +2094,14 @@ function adminSettings(b) {
     sessionStorage.setItem('wsAdmin', JSON.stringify({ code: S.code, pin: p })); $('#wPin').value = ''; toast('PIN을 변경했어요');
   };
   $('#wCodeSave').onclick = () => changeCode($('#wCode').value);
+  $('#rAdd2').onclick = openAddRound;
+  $$('[data-rgo]', b).forEach(x => x.onclick = () => switchRound(+x.dataset.rgo));
+  $$('[data-rnm]', b).forEach(x => x.onclick = () => renameRound(+x.dataset.rnm));
+  $$('[data-rtp]', b).forEach(x => x.onclick = async () => {
+    const r = +x.dataset.rtp, t = prompt(roundName(r) + ' 의 공통 주제를 입력하세요 (모든 분임에 적용)', roundTopic(r));
+    if (t === null) return; await setRoundTopic(r, t.trim()); renderAdmin();
+  });
+  $$('[data-rdl]', b).forEach(x => x.onclick = () => deleteRound(+x.dataset.rdl));
   const num = $('#gcNum');
   $('#gcMinus').onclick = () => num.value = Math.max(0, (+num.value || 0) - 1);
   $('#gcPlus').onclick = () => num.value = Math.min(40, (+num.value || 0) + 1);
@@ -1819,7 +2116,7 @@ function adminSettings(b) {
   $('#delWs').onclick = async () => {
     if (!confirm('이 워크숍의 모든 분임과 토론 내용을 삭제할까요?\n(PDF/HWPX로 저장하지 않았다면 복구할 수 없어요)')) return;
     if (prompt('확인을 위해 워크숍 코드를 입력하세요: ' + S.code) !== S.code) return toast('코드가 달라 취소했어요');
-    unsubs.forEach(f => f()); unsubs = []; await DB.remove(`ws/${S.code}`);
+    killWatch(); await DB.remove(`ws/${S.code}`);
     sessionStorage.removeItem('wsAdmin'); history.replaceState(null, '', location.pathname); renderHome('워크숍 데이터를 삭제했어요');
   };
 }
@@ -1838,8 +2135,8 @@ async function changeCode(v) {
   await DB.remove(`ws/${S.code}`);
   sessionStorage.setItem('wsAdmin', JSON.stringify({ code: nc, pin }));
   localStorage.setItem('wsLastCode', nc);
-  unsubs.forEach(f => f()); unsubs = [];
-  S.code = nc; S.meta = all.meta; S.groups = all.groups || {};
+  killWatch();
+  S.code = nc; S.meta = all.meta; S.graw = all.groups || {}; composeGroups();
   connect(nc); renderAdmin(); toast('코드를 변경했어요. QR을 다시 안내해 주세요');
 }
 
@@ -1851,9 +2148,9 @@ async function setGroupCount(n) {
   } else {
     const kill = gs.slice(n);
     if (!confirm(`뒤쪽 ${kill.length}개 분임(${kill.map(g => g.name).join(', ')})을 삭제할까요?\n작성한 내용도 함께 지워집니다.`)) return;
-    for (const g of kill) { await DB.remove(ws('groups/' + g.id)); await DB.remove(ws('docs/' + g.id)); await DB.remove(ws('notes/' + g.id)); await DB.remove(ws('cats/' + g.id)); }
+    for (const g of kill) await removeGroupData(g.id);
   }
-  S.groups = (await DB.get(ws('groups'))) || {};
+  await reloadGroups();
   renderAdmin(); toast(`분임을 ${n}개로 맞췄어요`);
 }
 
@@ -1868,9 +2165,15 @@ async function saveGroup(gid, name, names, topic) {
   names.forEach((n, i) => { const id = byName[n.name] || uid('m'); members[id] = { name: n.name, o: i }; if (n.leader && !leader) leader = id; });
   if (!leader && old.leader && members[old.leader]) leader = old.leader;
   const order = old.order != null ? old.order : (Math.max(0, ...glist().map(g => g.order || 0)) + 1);
-  const upd = { name, members, leader, order, status: old.status || 'open' };
-  if (topic !== undefined && topic !== (old.topic || '')) { upd.topic = topic; upd.topicBy = 'admin'; }
-  await DB.update(ws('groups/' + gid), upd);
+  const r = RN();
+  const upd = { name, members, leader, order };
+  if (r === 1) { upd.status = old.status || 'open'; if (topic !== undefined && topic !== (old.topic || '')) { upd.topic = topic; upd.topicBy = 'admin'; } }
+  await DB.update(`ws/${S.code}/groups/${gid}`, upd);
+  if (r > 1) {
+    const u2 = { status: old.status === 'done' ? 'done' : 'open' };
+    if (topic !== undefined && topic !== (old.topic || '')) { u2.topic = topic; u2.topicBy = 'admin'; }
+    await DB.update(gsPath(r, gid), u2);
+  }
 }
 function groupEditor(g, i, n) {
   const lines = mlist(g).map(m => (m.id === g.leader ? '*' : '') + m.name).join('\n');
@@ -1919,7 +2222,8 @@ function adminGroups(b) {
     <div class="btnrow" style="margin-top:10px"><button class="pri" id="bulkBtn">만들기 / 갱신</button><button id="addG">+ 분임 하나 추가</button></div>
   </div>
 
-  <div class="sect">분임 ${gs.length}개</div>
+  <div class="sect">분임 ${gs.length}개${roundNums().length > 1 ? ' · ' + esc(roundName(RN())) : ''}</div>
+  ${roundNums().length > 1 ? '<p class="mu" style="margin:-6px 0 10px">분임명·구성원·분임장은 모든 차수가 함께 쓰고, <b>주제와 완료 상태는 차수별로 따로</b> 저장됩니다.</p>' : ''}
   <div id="gcards">${gs.map((g, i) => groupEditor(g, i, gs.length)).join('') || '<div class="card mu">아직 분임이 없어요. 위에서 만들어 주세요.</div>'}</div>`;
 
   const prev = () => {
@@ -1941,11 +2245,11 @@ function adminGroups(b) {
       const nm = cur[i] ? cur[i].name : (i + 1) + '분임';
       const list = buckets[i].map((x, j) => ({ name: x, leader: $('#dlead').checked && j === 0 }));
       await saveGroup(gid, nm, list);
-      S.groups = (await DB.get(ws('groups'))) || {};
+      await reloadGroups();
     }
     if (cur.length > n && confirm(`남는 분임 ${cur.length - n}개를 삭제할까요?`)) {
-      for (const g of cur.slice(n)) { await DB.remove(ws('groups/' + g.id)); await DB.remove(ws('docs/' + g.id)); await DB.remove(ws('notes/' + g.id)); await DB.remove(ws('cats/' + g.id)); }
-      S.groups = (await DB.get(ws('groups'))) || {};
+      for (const g of cur.slice(n)) await removeGroupData(g.id);
+      await reloadGroups();
     }
     renderAdmin(); toast('명단을 배부했어요');
   };
@@ -1954,28 +2258,28 @@ function adminGroups(b) {
     for (const ln of lines) {
       const i = ln.search(/[:：]/); const name = (i < 0 ? ln : ln.slice(0, i)).trim(), names = parseNames(i < 0 ? '' : ln.slice(i + 1));
       if (!name) continue; const ex = glist().find(g => g.name === name); await saveGroup(ex ? ex.id : uid('g'), name, names);
-      S.groups = (await DB.get(ws('groups'))) || {};
+      await reloadGroups();
     }
     toast('분임을 만들었어요'); renderAdmin();
   };
-  $('#addG').onclick = async () => { await saveGroup(uid('g'), (glist().length + 1) + '분임', []); S.groups = (await DB.get(ws('groups'))) || {}; renderAdmin(); };
+  $('#addG').onclick = async () => { await saveGroup(uid('g'), (glist().length + 1) + '분임', []); await reloadGroups(); renderAdmin(); };
   $$('[data-save]', b).forEach(btn => btn.onclick = async () => {
     const c = btn.closest('[data-gc]'), gid = btn.dataset.save, name = $('.gn', c).value.trim();
     if (!name) return toast('분임명을 입력하세요');
     await saveGroup(gid, name, parseNames($('.gm', c).value), $('.gt', c).value.trim());
-    S.groups = (await DB.get(ws('groups'))) || {}; toast('저장했어요 ✓');
+    await reloadGroups(); toast('저장했어요 ✓');
   });
   $$('[data-del]', b).forEach(btn => btn.onclick = async () => {
     const g = S.groups[btn.dataset.del]; if (!confirm(`"${g.name}" 분임을 삭제할까요? 작성한 내용도 함께 지워져요.`)) return;
-    await DB.remove(ws('groups/' + btn.dataset.del)); await DB.remove(ws('docs/' + btn.dataset.del)); await DB.remove(ws('notes/' + btn.dataset.del)); await DB.remove(ws('cats/' + btn.dataset.del));
-    S.groups = (await DB.get(ws('groups'))) || {}; renderAdmin();
+    await removeGroupData(btn.dataset.del);
+    await reloadGroups(); renderAdmin();
   });
   const move = async (gid, d) => {
     const gs2 = glist(), i = gs2.findIndex(g => g.id === gid), j = i + d;
     if (i < 0 || j < 0 || j >= gs2.length) return;
     const a = gs2[i], c = gs2[j];
-    await DB.update(ws('groups/' + a.id), { order: j }); await DB.update(ws('groups/' + c.id), { order: i });
-    S.groups = (await DB.get(ws('groups'))) || {}; renderAdminBody();
+    await DB.update(`ws/${S.code}/groups/${a.id}`, { order: j }); await DB.update(`ws/${S.code}/groups/${c.id}`, { order: i });
+    await reloadGroups(); renderAdminBody();
   };
   $$('[data-up]', b).forEach(btn => btn.onclick = () => move(btn.dataset.up, -1));
   $$('[data-dn]', b).forEach(btn => btn.onclick = () => move(btn.dataset.dn, 1));
@@ -1983,11 +2287,11 @@ function adminGroups(b) {
 
 /* ---------- ③ 전체 배부 · 시간 ---------- */
 function adminBrief(b) {
-  const br = S.meta.brief || {}, t = S.meta.timer, r = timerRemain();
+  const br = briefOf(RN()) || {}, t = S.meta.timer, r = timerRemain();
   b.innerHTML = `
   <div class="card">
-    <div class="card-h"><h3>전체 공통 과제 배부</h3>${br.at ? `<span class="chip">${esc(fmtAgo(br.at))} 배부됨</span>` : '<span class="chip gray">미배부</span>'}</div>
-    <p class="mu">여기에 쓴 내용이 모든 분임 작업실 맨 위와 참여자 입장 화면에 표시됩니다.</p>
+    <div class="card-h"><h3>${esc(roundName(RN()))} 공통 과제 배부</h3>${br.at ? `<span class="chip">${esc(fmtAgo(br.at))} 배부됨</span>` : '<span class="chip gray">미배부</span>'}</div>
+    <p class="mu">여기에 쓴 내용이 <b>${esc(roundName(RN()))}</b>의 모든 분임 작업실 맨 위와 참여자 입장 화면에 표시됩니다. 차수마다 따로 배부됩니다.</p>
     <label>공통 과제 / 안내문</label>
     <textarea id="brText" rows="6" placeholder="1. 우리 분임의 핵심 문제 3가지를 적어주세요.&#10;2. 해결 방안을 우선순위대로 정리해 주세요.&#10;3. 발표는 2분 이내로 요약해 주세요.">${esc(br.text || '')}</textarea>
     <label>참고 링크 <span class="mu">(선택)</span></label>
@@ -2043,10 +2347,11 @@ function adminBrief(b) {
   </div>`;
 
   $('#brSave').onclick = async () => {
-    await DB.update(ws('meta'), { brief: { text: $('#brText').value.trim(), link: $('#brLink').value.trim(), at: Date.now() } });
-    toast('모든 분임에 배부했어요'); renderAdminBody();
+    const v = { text: $('#brText').value.trim(), link: $('#brLink').value.trim(), at: Date.now() };
+    await DB.update(ws('meta'), briefPatch(RN(), v)); briefLocal(RN(), v);
+    toast(roundName(RN()) + ' 과제를 모든 분임에 배부했어요'); renderAdminBody();
   };
-  $('#brClear').onclick = async () => { await DB.update(ws('meta'), { brief: null }); toast('배부를 해제했어요'); renderAdminBody(); };
+  $('#brClear').onclick = async () => { await DB.update(ws('meta'), briefPatch(RN(), null)); briefLocal(RN(), null); toast('배부를 해제했어요'); renderAdminBody(); };
   $('#tmStart').onclick = async () => {
     const m = +$('#tmMin').value || 20;
     await DB.update(ws('meta'), { timer: { mins: m, endsAt: Date.now() + m * 60000, paused: false } });
@@ -2062,7 +2367,7 @@ function adminBrief(b) {
   $('#allTopicBtn').onclick = async () => {
     const t2 = $('#allTopic').value.trim(); if (!t2) return toast('주제를 입력하세요');
     const u = {}; glist().forEach(g => { u[g.id + '/topic'] = t2; u[g.id + '/topicBy'] = 'admin'; });
-    await DB.update(ws('groups'), u); toast('모든 분임에 적용했어요'); renderAdminBody();
+    await DB.update(gsPath(RN()), u); toast('모든 분임에 적용했어요'); renderAdminBody();
   };
   $('#eachBtn').onclick = async () => {
     const lines = $('#eachTopic').value.split('\n').map(s => s.trim()).filter(Boolean);
@@ -2071,7 +2376,7 @@ function adminBrief(b) {
       const i = ln.search(/[:：]/); if (i < 0) continue;
       const nm = ln.slice(0, i).trim(), tp = ln.slice(i + 1).trim();
       const g = glist().find(x => x.name === nm); if (!g) continue;
-      await DB.update(ws('groups/' + g.id), { topic: tp, topicBy: 'admin' }); n++;
+      await DB.update(gRound(g.id), { topic: tp, topicBy: 'admin' }); n++;
     }
     toast(n ? `${n}개 분임의 주제를 적용했어요` : '일치하는 분임명이 없어요');
   };
@@ -2171,6 +2476,7 @@ function adminStatus(b) {
     <div class="kpi"><div class="lab">포스트잇</div><div class="val">${gs.reduce((a, g) => a + noteList(g.id).length, 0)}<small>장</small></div></div>
   </div>
   <div class="card">
+    <div class="card-h"><h3>${esc(roundName(RN()))} 발표 · 저장</h3>${roundNums().length > 1 ? `<span class="chip">전체 ${roundNums().length}차</span>` : ''}</div>
     <div class="btnrow">
       <button class="pri" id="pAll">전체 발표 시작</button>
       <button id="pDone">완료된 분임만 발표</button>
@@ -2180,6 +2486,15 @@ function adminStatus(b) {
       <button id="hwpxAll">전체 HWPX 저장</button>
     </div>
     <p class="mu" style="margin:10px 0 0">발표 화면에서는 ← → 로 이동, <b>Space</b> 타이머, <b>S</b> 요약만 보기, <b>F</b> 전체화면, <b>Esc</b> 닫기입니다.</p>
+    ${roundNums().length > 1 ? `<div class="hr"></div>
+    <label>차수별로 한 번에 저장 <span class="mu">(지난 차수도 그대로 보관되어 있습니다)</span></label>
+    <div class="row wrap">
+      <select id="rExp" style="flex:1;min-width:170px">${roundNums().map(r => `<option value="${r}" ${r === RN() ? 'selected' : ''}>${esc(roundName(r))}</option>`).join('')}</select>
+      <button id="rExpPdf">이 차수 전체 PDF</button>
+      <button id="rExpHwpx">이 차수 전체 HWPX</button>
+      <button id="rExpPre">이 차수 발표 보기</button>
+    </div>
+    <div class="btnrow" style="margin-top:10px"><button class="pri" id="rExpAllPdf">모든 차수 한 파일로 PDF</button><span class="mu">차수 순서대로 이어서 인쇄됩니다</span></div>` : ''}
   </div>
   ${gs.length ? gs.map((g, i) => {
     const done = g.status === 'done', roles = g.roles || {}, ms = mlist(g);
@@ -2215,14 +2530,21 @@ function adminStatus(b) {
   $('#pSel').onclick = () => { const s = selected(); if (!s.length) return toast('발표할 분임을 선택하세요'); openPresent(s, 0); };
   $('#pdfAll').onclick = () => exportPdf(selected().length ? selected() : ids);
   $('#hwpxAll').onclick = () => exportHwpx(selected().length ? selected() : ids);
+  if ($('#rExp')) {
+    const rv = () => +$('#rExp').value || RN();
+    $('#rExpPdf').onclick = () => exportPdf(ids, rv());
+    $('#rExpHwpx').onclick = () => exportHwpx(ids, rv());
+    $('#rExpPre').onclick = async () => { const r = rv(); if (r === RN()) return openPresent(ids, 0); await openPresentRound(r, ids); };
+    $('#rExpAllPdf').onclick = () => exportPdfAllRounds(ids);
+  }
   $$('[data-a]', b).forEach(btn => btn.onclick = async () => {
     const gid = btn.parentElement.dataset.g, a = btn.dataset.a;
     if (a === 'enter') { S.gid = gid; S.me = { id: 'admin', name: '관리자' }; renderRoom(); }
     if (a === 'present') openPresent(ids, ids.indexOf(gid));
     if (a === 'pdf') exportPdf([gid]);
     if (a === 'hwpx') exportHwpx([gid]);
-    if (a === 'reopen') DB.update(ws('groups/' + gid), { status: 'open' });
-    if (a === 'done') DB.update(ws('groups/' + gid), { status: 'done', doneAt: Date.now() });
+    if (a === 'reopen') DB.update(gRound(gid), { status: 'open' });
+    if (a === 'done') DB.update(gRound(gid), { status: 'done', doneAt: Date.now() });
   });
   if (ids.length) fetchDocs(ids).then(docs => {
     if (S.view !== 'admin' || S.tab !== 'status') return;
@@ -2240,12 +2562,20 @@ function adminStatus(b) {
 
 /* ===================== 발표 스테이지 ===================== */
 const P = {
-  open: false, ids: [], i: 0, size: parseInt(localStorage.getItem('wsPs')) || 30, unsub: null, doc: null,
+  open: false, ids: [], i: 0, r: 0, gmap: null, size: parseInt(localStorage.getItem('wsPs')) || 30, unsub: null, doc: null,
   sumOnly: false, theme: localStorage.getItem('wsPtheme') || 'dark',
   t: { mins: parseInt(localStorage.getItem('wsPmin')) || 3, endsAt: null, paused: true, remain: 0 }
 };
-function openPresent(ids, i) {
+async function openPresentRound(r, ids) {
+  const map = groupsAt(r, await ensureGs(r));
+  const list = (ids || Object.keys(map)).filter(id => map[id]);
+  if (!list.length) return toast('이 차수에 발표할 분임이 없어요');
+  openPresent(list, 0, { r, gmap: map });
+}
+function openPresent(ids, i, o) {
   if (!ids || !ids.length) return toast('발표할 분임이 없어요');
+  o = o || {};
+  P.r = o.r || RN(); P.gmap = o.gmap || null;
   P.ids = ids; P.i = Math.max(0, i || 0); P.open = true; P.sumOnly = false;
   document.body.classList.add('noscroll');
   const el = $('#present'); el.hidden = false;
@@ -2278,17 +2608,18 @@ function openPresent(ids, i) {
   $('#ps').onclick = toggleSumOnly;
   $('#pth').onclick = togglePTheme;
   $('#ff').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else el.requestFullscreen && el.requestFullscreen(); };
-  $('#pf').onclick = () => exportPdf([P.ids[P.i]]);
-  $('#ph').onclick = () => exportHwpx([P.ids[P.i]]);
+  $('#pf').onclick = () => exportPdf([P.ids[P.i]], P.r);
+  $('#ph').onclick = () => exportHwpx([P.ids[P.i]], P.r);
   $('#px').onclick = closePresent;
   $('#tgo').onclick = togglePresentTimer;
   $('#trs').onclick = resetPresentTimer;
   $('#tmin').onchange = e => { P.t.mins = +e.target.value; localStorage.setItem('wsPmin', P.t.mins); resetPresentTimer(); };
   resetPresentTimer(); watchP();
 }
+const pG = id => (P.gmap ? P.gmap[id] : S.groups[id]);
 function watchP() {
   if (P.unsub) P.unsub(); P.doc = null;
-  P.unsub = DB.watch(ws('docs/' + P.ids[P.i]), v => { P.doc = v; paintPresent(); });
+  P.unsub = DB.watch(wsAt(P.r || RN(), 'docs/' + P.ids[P.i]), v => { P.doc = v; paintPresent(); });
   paintPresent();
 }
 function goP(d) {
@@ -2320,24 +2651,25 @@ function tickPresentTimer() {
 }
 function paintPresent() {
   if (!P.open) return;
-  const g = S.groups[P.ids[P.i]], b = $('#pbody'); if (!b) return;
+  const g = pG(P.ids[P.i]), b = $('#pbody'); if (!b) return;
   if (!g) return closePresent();
   b.style.setProperty('--ps', P.size + 'px');
   b.classList.toggle('sumonly', P.sumOnly);
   $('#pc').textContent = `${P.i + 1} / ${P.ids.length}`;
   $('#pp').disabled = P.i === 0; $('#pn').disabled = P.i === P.ids.length - 1;
-  $('#pdots').innerHTML = P.ids.map((id, k) => `<i class="${k === P.i ? 'on' : ((S.groups[id] || {}).status === 'done' ? 'done' : '')}"></i>`).join('');
-  const nx = S.groups[P.ids[P.i + 1]];
+  $('#pdots').innerHTML = P.ids.map((id, k) => `<i class="${k === P.i ? 'on' : ((pG(id) || {}).status === 'done' ? 'done' : '')}"></i>`).join('');
+  const nx = pG(P.ids[P.i + 1]);
   $('#fnow').textContent = g.name; $('#fnext').textContent = nx ? nx.name : '마지막 발표';
   const roles = g.roles || {}, ms = mlist(g), pres = ms.find(m => m.id === roles.pres);
   const sum = (P.doc && P.doc.summary) || '';
   const top = b.scrollTop;
   b.innerHTML = `
     <div class="pname"><h1>${esc(g.name)}</h1>
+      ${roundNums().length > 1 ? `<span class="badge">${esc(roundName(P.r || RN()))}</span>` : ''}
       ${g.status === 'done' ? '<span class="badge ok">완료</span>' : '<span class="badge live">토론 중</span>'}
       ${pres ? `<span class="badge">발표 ${esc(pres.name)}</span>` : ''}
     </div>
-    <div class="pm">${esc(membersText(g) || '구성원 없음')} · ${esc(S.meta.title)}</div>
+    <div class="pm">${esc(membersText(g) || '구성원 없음')} · ${esc(S.meta.title)}${roundNums().length > 1 ? ' · ' + esc(roundName(P.r || RN())) : ''}</div>
     ${g.topic ? `<div class="pt">주제 · ${esc(g.topic)}</div>` : ''}
     ${sum ? `<div class="psum">${nl2(sum)}</div>` : (P.sumOnly ? '<div class="psum">작성된 발표 요약이 없어요. (작업실의 “발표 요약”에 입력하면 여기 크게 표시됩니다)</div>' : '')}
     <div class="doc">${clean(P.doc && P.doc.html) || '<span class="nodoc">(작성된 내용이 없어요)</span>'}</div>`;
@@ -2363,16 +2695,22 @@ document.addEventListener('keydown', e => {
 });
 
 /* ===================== 저장: PDF(인쇄) / HWPX ===================== */
-async function fetchDocs(ids) {
-  const out = {}; await Promise.all(ids.map(async id => { out[id] = await DB.get(ws('docs/' + id)); })); return out;
+async function fetchDocs(ids, r) {
+  const rr = r || RN(), out = {};
+  await Promise.all(ids.map(async id => { out[id] = await DB.get(wsAt(rr, 'docs/' + id)); })); return out;
 }
-async function exportPdf(ids) {
-  const docs = await fetchDocs(ids);
+async function groupsForRound(r) {
+  if (r === RN()) return S.groups;
+  return groupsAt(r, await ensureGs(r));
+}
+async function exportPdf(ids, r) {
+  const rr = r || RN(), docs = await fetchDocs(ids, rr), gmap = await groupsForRound(rr);
+  const rtag = roundNums().length > 1 ? ' · ' + roundName(rr) : '';
   $('#printArea').innerHTML = ids.map((id, i) => {
-    const g = S.groups[id] || {}, d = docs[id] || {};
+    const g = gmap[id] || {}, d = docs[id] || {};
     return `<section class="pr">
-      <div class="hd"><span>${BRAND} · ${esc(S.meta.title)}</span><span>${esc(g.name)} · ${ids.length > 1 ? (i + 1) + ' / ' + ids.length : fmtT(Date.now())}</span></div>
-      <h2>${esc(g.name)}</h2>
+      <div class="hd"><span>${BRAND} · ${esc(S.meta.title)}${esc(rtag)}</span><span>${esc(g.name)} · ${ids.length > 1 ? (i + 1) + ' / ' + ids.length : fmtT(Date.now())}</span></div>
+      <h2>${esc(g.name)}${roundNums().length > 1 ? ` <span style="font-size:.7em;font-weight:600">· ${esc(roundName(rr))}</span>` : ''}</h2>
       <div class="pr-mem">${esc(membersText(g) || '')}</div>
       ${g.topic ? `<div class="pr-topic">주제 · ${esc(g.topic)}</div>` : ''}
       ${d.summary ? `<div class="pr-sum"><b>발표 요약</b>\n${esc(d.summary)}</div>` : ''}
@@ -2380,11 +2718,39 @@ async function exportPdf(ids) {
     </section>`;
   }).join('');
   const old = document.title;
-  document.title = `${S.meta.title}_${ids.length === 1 ? (S.groups[ids[0]] || {}).name : '전체'}`;
+  document.title = `${S.meta.title}${roundNums().length > 1 ? '_' + roundName(rr) : ''}_${ids.length === 1 ? (gmap[ids[0]] || {}).name : '전체'}`;
   document.body.classList.add('printing');
   toast('인쇄 창에서 "PDF로 저장"을 선택하면 파일로 저장돼요');
   setTimeout(() => { window.print(); document.title = old; }, 500);
 }
+
+async function exportPdfAllRounds(ids) {
+  const rs = roundNums(); let html = '';
+  for (const r of rs) {
+    const map = r === RN() ? S.groups : groupsAt(r, await ensureGs(r));
+    const list = (ids || Object.keys(map)).filter(id => map[id]);
+    const docs = await fetchDocs(list, r);
+    html += list.map((id, i) => {
+      const g = map[id] || {}, d = docs[id] || {};
+      return `<section class="pr">
+        <div class="hd"><span>${BRAND} · ${esc(S.meta.title)} · ${esc(roundName(r))}</span><span>${esc(g.name)} · ${i + 1} / ${list.length}</span></div>
+        <h2>${esc(g.name)} <span style="font-size:.7em;font-weight:600">· ${esc(roundName(r))}</span></h2>
+        <div class="pr-mem">${esc(membersText(g) || '')}</div>
+        ${g.topic ? `<div class="pr-topic">주제 · ${esc(g.topic)}</div>` : ''}
+        ${d.summary ? `<div class="pr-sum"><b>발표 요약</b>\n${esc(d.summary)}</div>` : ''}
+        <div class="doc">${clean(d.html) || '(작성된 내용이 없습니다)'}</div>
+      </section>`;
+    }).join('');
+  }
+  if (!html) return toast('저장할 내용이 없어요');
+  $('#printArea').innerHTML = html;
+  const old = document.title;
+  document.title = `${S.meta.title}_전체차수`;
+  document.body.classList.add('printing');
+  toast('모든 차수를 이어서 인쇄합니다 — "PDF로 저장"을 선택하세요');
+  setTimeout(() => { window.print(); document.title = old; }, 500);
+}
+
 window.addEventListener('afterprint', () => { document.body.classList.remove('printing'); $('#printArea').innerHTML = ''; });
 
 function blocksFromHtml(html) {
@@ -2409,14 +2775,15 @@ function blocksFromHtml(html) {
   })(root, false); flush();
   return blocks;
 }
-async function exportHwpx(ids) {
+async function exportHwpx(ids, r) {
   if (!window.JSZip || !window.HWPX) return toast('저장 라이브러리를 불러오지 못했어요 (인터넷 확인)');
   try {
-    const docs = await fetchDocs(ids);
+    const rr = r || RN(), docs = await fetchDocs(ids, rr), gmap = await groupsForRound(rr);
+    const multi = roundNums().length > 1;
     const data = {
-      title: S.meta.title,
+      title: S.meta.title + (multi ? ' · ' + roundName(rr) : ''),
       groups: ids.map(id => {
-        const g = S.groups[id] || {}, d = docs[id] || {};
+        const g = gmap[id] || {}, d = docs[id] || {};
         let blocks = [];
         if (d.summary) {
           blocks.push({ type: 'p', runs: [{ t: '[발표 요약]', b: true }] });
@@ -2424,13 +2791,13 @@ async function exportHwpx(ids) {
           blocks.push({ type: 'p', runs: [{ t: ' ', b: false }] });
         }
         blocks = blocks.concat(blocksFromHtml(d.html));
-        return { name: g.name, members: membersText(g), topic: g.topic || '', blocks };
+        return { name: g.name + (multi ? ' (' + roundName(rr) + ')' : ''), members: membersText(g), topic: g.topic || '', blocks };
       })
     };
     const zip = await HWPX.buildHwpx(JSZip, window.HWPX_TEMPLATE_B64, data);
     const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/hwp+zip', compression: 'DEFLATE' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = `${S.meta.title}_${ids.length === 1 ? (S.groups[ids[0]] || {}).name : '전체'}.hwpx`.replace(/[\\/:*?"<>|]/g, '_');
+    a.download = `${S.meta.title}${multi ? '_' + roundName(rr) : ''}_${ids.length === 1 ? (gmap[ids[0]] || {}).name : '전체'}.hwpx`.replace(/[\\/:*?"<>|]/g, '_');
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
     toast('HWPX 파일을 저장했어요 (그림은 PDF로 확인)');
   } catch (e) { console.error(e); toast('HWPX 저장 중 오류가 났어요'); }
