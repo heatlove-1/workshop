@@ -190,6 +190,40 @@ button.person:hover{border-color:var(--pri);background:var(--pri-s)}
 /* ---------- 토스트/모달 ---------- */
 #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(8px);background:#101828;color:#fff;padding:11px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:.2s;z-index:99;max-width:92vw;font-weight:600;box-shadow:0 8px 24px rgba(16,24,40,.25)}
 #toast.on{opacity:.97;transform:translateX(-50%)}
+
+/* ---- 양식 갤러리 ---- */
+.tgal{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:12px}
+.tcard{border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:#fff;cursor:pointer;display:flex;flex-direction:column;padding:0;text-align:left;min-height:0}
+.tcard:hover{border-color:var(--pri);box-shadow:var(--sh);transform:translateY(-2px)}
+.tcard.on{border-color:var(--pri);box-shadow:0 0 0 3px var(--pri-s)}
+.tthumb{height:100px;padding:11px;display:flex;flex-direction:column;gap:5px;justify-content:center}
+.tthumb .r{display:flex;gap:5px;align-items:stretch}
+.tthumb .b{background:rgba(255,255,255,.95);border-radius:3px;height:9px;flex:1}
+.tthumb .b.h{height:13px}
+.tthumb .b.d{background:rgba(255,255,255,.55)}
+.tthumb .g{display:grid;gap:4px;flex:1}
+.tthumb .g .b{height:auto}
+.tbody{padding:9px 11px;border-top:1px solid var(--bd-s)}
+.tbody b{display:block;font-size:.95em;line-height:1.3}
+.tbody .ds{color:var(--mu);font-size:.82em;display:block;margin-top:3px;line-height:1.35}
+.tbody .ct{display:inline-block;margin-top:6px;font-size:.74em;font-weight:700;color:var(--pri-d);background:var(--pri-s);border-radius:999px;padding:1px 8px}
+/* ---- 포스트잇 보드 ---- */
+.bhead{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.bcompose{display:flex;flex-direction:column;gap:8px}
+.cols{display:flex;gap:6px;flex-wrap:wrap}
+.cols button{width:28px;height:28px;border-radius:50%;padding:0;min-height:0;border:2px solid #fff;box-shadow:0 0 0 1px var(--bd)}
+.cols button.on{box-shadow:0 0 0 3px var(--pri)}
+.bwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(166px,1fr));gap:14px;margin-top:12px}
+.pnote{position:relative;border-radius:3px;padding:13px 12px 10px;min-height:152px;display:flex;flex-direction:column;gap:7px;cursor:pointer;box-shadow:2px 4px 10px rgba(16,24,40,.18);transition:transform .12s,box-shadow .12s;color:#1a1a1a}
+.pnote:hover{transform:translateY(-4px) rotate(0deg) !important;box-shadow:3px 8px 18px rgba(16,24,40,.24)}
+.pnote.sel{outline:3px solid var(--pri);outline-offset:1px}
+.pnote .tx{flex:1;white-space:pre-wrap;word-break:break-word;font-weight:600;line-height:1.45;max-height:7.6em;overflow:hidden;margin-top:14px}
+.pnote .mt2{font-size:.78em;color:rgba(26,26,26,.62);display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.pnote .vt{position:absolute;right:7px;top:7px;background:rgba(255,255,255,.8);border-radius:999px;padding:1px 8px;font-size:.76em;font-weight:800;color:#c2185b}
+.pnote .pick{position:absolute;left:7px;top:6px;margin:0}
+.pnote .pick input{width:17px;height:17px}
+.bigNote{border-radius:6px;padding:26px 22px;min-height:230px;font-size:1.5em;font-weight:700;white-space:pre-wrap;word-break:break-word;line-height:1.5;color:#1a1a1a;box-shadow:2px 5px 14px rgba(16,24,40,.18)}
+.bempty{grid-column:1/-1;border:2px dashed var(--bd);border-radius:var(--r);padding:26px;text-align:center;color:var(--mu);background:var(--panel-2)}
 .modal{position:fixed;inset:0;background:rgba(16,24,40,.6);z-index:70;display:flex;align-items:center;justify-content:center;padding:14px}
 .mbox{background:#fff;border-radius:16px;padding:16px;width:min(980px,100%);max-height:100%;overflow:auto}
 .mt{display:flex;justify-content:space-between;align-items:center;font-weight:800;margin-bottom:10px}
@@ -351,7 +385,8 @@ const DB = (() => {
 })();
 
 /* ---------- 상태 ---------- */
-const S = { code: null, meta: null, groups: {}, docs: {}, role: null, gid: null, me: null, view: 'home', tab: 'status', roomTab: 'mine', sel: {} };
+const S = { code: null, meta: null, groups: {}, docs: {}, notes: {}, role: null, gid: null, me: null, view: 'home', tab: 'status', roomTab: 'mine', sel: {}, tplKey: 'basic' };
+let B = { col: 0, sort: 'new', mine: false, sel: {} };
 const app = $('#app');
 const ws = p => `ws/${S.code}/${p}`;
 let unsubs = [];
@@ -359,6 +394,7 @@ function connect(code) {
   S.code = code; unsubs.forEach(f => f()); unsubs = [];
   unsubs.push(DB.watch(`ws/${code}/meta`, v => { S.meta = v || S.meta; onData(); }));
   unsubs.push(DB.watch(`ws/${code}/groups`, v => { S.groups = v || {}; onData(); }));
+  unsubs.push(DB.watch(`ws/${code}/notes`, v => { S.notes = v || {}; onData(); }));
 }
 const glist = () => Object.entries(S.groups).map(([id, g]) => ({ id, ...g })).sort((a, b) => (a.order || 0) - (b.order || 0));
 const mlist = g => Object.entries((g && g.members) || {}).map(([id, m]) => ({ id, ...m })).sort((a, b) => (a.o || 0) - (b.o || 0));
@@ -376,6 +412,11 @@ function periodInfo(m) {
 const closedForMe = () => !isAdmin() && periodState(S.meta) !== 'open';
 const isLeader = () => { const g = S.groups[S.gid]; return !!(g && S.me && g.leader === S.me.id); };
 const canTopic = () => isAdmin() || (S.meta && S.meta.leaderTopic && isLeader());
+const NCOLS = ['#fff59a', '#ffd59e', '#c6f2d5', '#cfe2ff', '#f3d1fa', '#ffd2d8', '#e3e6ec'];
+const boardOn = () => !(S.meta && S.meta.board === 'off');
+const noteList = gid => Object.entries((S.notes && S.notes[gid]) || {}).map(([id, n]) => ({ id, ...n })).filter(n => n && n.t);
+const noteVotes = n => Object.keys((n && n.votes) || {}).length;
+const myId = () => (S.me && S.me.id) || 'anon';
 const joinUrl = (code) => `${location.origin}${location.pathname}?w=${encodeURIComponent(code || S.code)}`;
 const adminUrl = () => `${location.pathname}?admin=1`;
 
@@ -429,22 +470,213 @@ function clean(html) {
 }
 const textOf = html => { const d = document.createElement('div'); d.innerHTML = clean(html); return (d.textContent || '').replace(/\s+/g, ' ').trim(); };
 
-/* ---------- 양식 템플릿 ---------- */
+/* ---------- 토의·토론 양식 라이브러리 ---------- */
+const CATCOL = { '기본': '#e4568a', '아이디어 발산': '#34a86b', '분석': '#7154cf', '의사결정': '#df7f2e', '토론·설득': '#2f84cc', '성찰·정리': '#bf9a22', '실행 계획': '#14939b' };
+const _h = t => '<h3>' + t + '</h3>';
+const _pp = t => '<p>' + t + '</p>';
+const _br = (n) => '<p><br></p>'.repeat(n || 1);
+const _ol = (n) => '<ol>' + '<li><br></li>'.repeat(n || 3) + '</ol>';
+const _ul = (n) => '<ul>' + '<li><br></li>'.repeat(n || 3) + '</ul>';
+const _trh = cs => '<tr>' + cs.map(c => '<th>' + c + '</th>').join('') + '</tr>';
+const _tr = cs => '<tr>' + cs.map(c => '<td>' + (c || '<br>') + '</td>').join('') + '</tr>';
+const _rows = (n, c) => Array.from({ length: n }, () => _tr(Array(c).fill(''))).join('');
+const _tbl = r => '<table><tbody>' + r + '</tbody></table>' + _br();
+
 const TPL = {
-  basic: { name: '기본형 · 현황 / 문제 / 해결', html: '<h3>1. 현황</h3><p><br></p><h3>2. 문제점</h3><p><br></p><h3>3. 개선 방안</h3><p><br></p><h3>4. 건의 사항</h3><p><br></p>' },
+  basic: {
+    name: '기본형 · 현황 / 문제 / 해결', cat: '기본', pv: 'doc', desc: '가장 많이 쓰는 기본 보고 틀',
+    html: _h('1. 현황') + _br() + _h('2. 문제점') + _br() + _h('3. 개선 방안') + _br() + _h('4. 건의 사항') + _br()
+  },
   table: {
-    name: '표형 · 의견 모으기', html: '<h3>분임 의견 정리</h3><table><tbody>' +
-      '<tr><th>구분</th><th>의견</th><th>이유 / 근거</th></tr>' +
-      '<tr><td>현황</td><td><br></td><td><br></td></tr><tr><td>문제</td><td><br></td><td><br></td></tr>' +
-      '<tr><td>개선안</td><td><br></td><td><br></td></tr></tbody></table><p><br></p>'
+    name: '표형 · 의견 모으기', cat: '기본', pv: 'tbl3', desc: '구분별로 의견과 근거를 나란히 정리',
+    html: _h('분임 의견 정리') + _tbl(_trh(['구분', '의견', '이유 · 근거']) + _tr(['현황', '', '']) + _tr(['문제', '', '']) + _tr(['개선안', '', '']) + _tr(['기대 효과', '', '']))
+  },
+  top3: {
+    name: '핵심 제안 3가지', cat: '기본', pv: 'list', desc: '짧은 발표에 가장 잘 맞는 형식',
+    html: _h('우리 분임의 핵심 제안 3가지') + _ol(3) + _h('실행에 필요한 지원') + _br()
+  },
+  qa: {
+    name: '질문 응답형', cat: '기본', pv: 'doc', desc: '진행자가 준 질문에 차례로 답하기',
+    html: _h('질문 1.') + _br() + _h('질문 2.') + _br() + _h('질문 3.') + _br() + _h('그 밖의 의견') + _br()
+  },
+  postit: {
+    name: '포스트잇 정리형', cat: '기본', pv: 'notes', desc: '보드에 모인 의견을 묶어 결론으로',
+    html: _h('포스트잇 의견 모음') + _tbl(_trh(['번호', '의견', '작성자', '공감']) + _rows(5, 4)) +
+      _h('비슷한 의견 묶기') + _tbl(_trh(['묶음 이름', '포함된 의견', '핵심 메시지']) + _rows(3, 3)) +
+      _h('우리 분임이 정리한 의견') + _ol(3)
+  },
+  brain: {
+    name: '브레인스토밍', cat: '아이디어 발산', pv: 'notes', desc: '비판 없이 양을 먼저 모은 뒤 묶기',
+    html: '<blockquote>규칙 ① 비판하지 않기 ② 많이 내기 ③ 자유롭게 ④ 남의 의견에 얹기</blockquote>' +
+      _h('떠오른 아이디어 (양 먼저)') + _ol(10) + _h('비슷한 것끼리 묶기') + _tbl(_trh(['묶음', '아이디어']) + _rows(3, 2)) + _h('해볼 만한 3가지') + _ol(3)
+  },
+  round: {
+    name: '라운드로빈 · 돌아가며 말하기', cat: '아이디어 발산', pv: 'tbl3', desc: '한 사람도 빠지지 않게 순서대로',
+    html: _h('돌아가며 말하기') + _pp('한 번에 하나씩, 순서대로 의견을 말하고 그대로 기록합니다.') +
+      _tbl(_trh(['이름', '1차 의견', '2차 의견(보완)']) + _rows(6, 3)) + _h('공통으로 나온 이야기') + _br()
+  },
+  lotus: {
+    name: '연꽃기법 (로터스)', cat: '아이디어 발산', pv: 'g9', desc: '중심 주제에서 8방향으로 펼치기',
+    html: _h('연꽃기법 · 중심 주제에서 펼치기') + _tbl(_tr(['①', '②', '③']) + _tr(['⑧', '<b>중심 주제</b>', '④']) + _tr(['⑦', '⑥', '⑤'])) +
+      _pp('위에서 고른 한 칸을 다시 중심에 놓고 더 깊게 펼쳐 봅니다.') + _tbl(_rows(3, 3))
+  },
+  mandal: {
+    name: '만다라트 9칸', cat: '아이디어 발산', pv: 'g9', desc: '핵심 목표와 8가지 실행 요소',
+    html: _h('만다라트') + _tbl(_tr(['', '', '']) + _tr(['', '<b>핵심 목표</b>', '']) + _tr(['', '', ''])) + _h('가장 먼저 할 일') + _ol(3)
+  },
+  scamper: {
+    name: 'SCAMPER 아이디어 변형', cat: '아이디어 발산', pv: 'tbl3', desc: '7가지 질문으로 기존 방식 바꾸기',
+    html: _h('SCAMPER') + _tbl(_trh(['관점', '질문', '우리 아이디어']) +
+      _tr(['S 대체', '무엇을 다른 것으로 바꿀까?', '']) + _tr(['C 결합', '무엇과 합칠까?', '']) + _tr(['A 응용', '다른 사례를 가져올까?', '']) +
+      _tr(['M 수정', '크게·작게·자주 바꾸면?', '']) + _tr(['P 용도', '다른 용도로 쓰면?', '']) + _tr(['E 제거', '무엇을 없앨까?', '']) + _tr(['R 재배열', '순서를 바꾸면?', '']))
+  },
+  worldcafe: {
+    name: '월드카페', cat: '아이디어 발산', pv: 'step', desc: '라운드를 옮겨가며 이야기 모으기',
+    html: _h('월드카페 대화 기록') + _tbl(_trh(['라운드', '이야기 주제', '나온 이야기']) + _tr(['1', '', '']) + _tr(['2', '', '']) + _tr(['3', '', ''])) +
+      _h('수확 (하비스트) · 꼭 남길 이야기 3가지') + _ol(3)
   },
   swot: {
-    name: 'SWOT 분석', html: '<h3>SWOT 분석</h3><table><tbody>' +
-      '<tr><th>강점(S)</th><th>약점(W)</th></tr><tr><td><br></td><td><br></td></tr>' +
-      '<tr><th>기회(O)</th><th>위협(T)</th></tr><tr><td><br></td><td><br></td></tr></tbody></table><p><br></p>'
+    name: 'SWOT 분석', cat: '분석', pv: 'q4', desc: '강점·약점·기회·위협 + 교차 전략',
+    html: _h('SWOT 분석') + _tbl(_trh(['강점 (S)', '약점 (W)']) + _tr(['', '']) + _trh(['기회 (O)', '위협 (T)']) + _tr(['', ''])) +
+      _h('교차 전략') + _tbl(_trh(['구분', '전략']) + _tr(['SO · 강점으로 기회 살리기', '']) + _tr(['WO · 약점 보완해 기회 잡기', '']) + _tr(['ST · 강점으로 위협 줄이기', '']) + _tr(['WT · 약점과 위협 모두 줄이기', '']))
   },
-  top3: { name: '제안 3가지', html: '<h3>우리 분임의 핵심 제안 3가지</h3><ol><li><br></li><li><br></li><li><br></li></ol><h3>실행에 필요한 지원</h3><p><br></p>' }
+  pmi: {
+    name: 'PMI · 좋은 점 / 아쉬운 점 / 흥미로운 점', cat: '분석', pv: 'col3', desc: '하나의 안을 세 눈으로 보기',
+    html: _h('PMI 분석') + _pp('검토 대상 : ') + _tbl(_trh(['P 좋은 점', 'M 아쉬운 점', 'I 흥미로운 점']) + _rows(3, 3)) + _h('그래서 우리 결론은') + _br()
+  },
+  fish: {
+    name: '피시본 · 원인 분석', cat: '분석', pv: 'step', desc: '사람·방법·환경·자원으로 원인 찾기',
+    html: _h('문제의 원인 찾기') + _pp('문제 현상 : ') +
+      _tbl(_trh(['원인 영역', '구체적 원인', '근거 · 사례']) + _tr(['사람 (역량·인식)', '', '']) + _tr(['방법 (절차·지침)', '', '']) + _tr(['환경 (여건·문화)', '', '']) + _tr(['자원 (예산·시설)', '', ''])) +
+      _h('가장 핵심적인 원인 2가지') + _ol(2)
+  },
+  why5: {
+    name: '5 Why · 왜를 다섯 번', cat: '분석', pv: 'list', desc: '표면 현상에서 근본 원인까지',
+    html: _h('왜(Why)를 다섯 번 묻기') + _pp('문제 현상 : ') +
+      '<ol>' + ['1차 왜?', '2차 왜?', '3차 왜?', '4차 왜?', '5차 왜?'].map(x => '<li>' + x + ' <br></li>').join('') + '</ol>' +
+      _h('근본 원인') + _br() + _h('근본 원인에 맞는 대책') + _br()
+  },
+  gap: {
+    name: '현재 - 목표 차이 분석', cat: '분석', pv: 'col2', desc: '지금 모습과 바라는 모습 비교',
+    html: _h('현재와 목표의 차이') + _tbl(_trh(['지금 모습', '바라는 모습']) + _tr(['', ''])) +
+      _h('차이가 생긴 이유') + _ul(3) + _h('차이를 메울 방법') + _ol(3)
+  },
+  ngt: {
+    name: '명목집단법 NGT · 점수 투표', cat: '의사결정', pv: 'tbl3', desc: '각자 점수를 주고 합계로 순위 결정',
+    html: _h('명목집단법 (NGT)') + _pp('아이디어마다 1~5점을 주고 합계로 우선순위를 정합니다.') +
+      _tbl(_trh(['아이디어', '구성원별 점수', '합계', '순위']) + _rows(6, 4)) + _h('최종 선정안과 이유') + _br()
+  },
+  matrix: {
+    name: '의사결정 매트릭스', cat: '의사결정', pv: 'mtx', desc: '대안을 기준별 점수로 비교',
+    html: _h('의사결정 매트릭스') + _tbl(_trh(['대안', '효과', '실현 가능성', '비용', '시급성', '합계']) + _rows(4, 6)) + _h('우리가 고른 대안') + _br()
+  },
+  diamond: {
+    name: '다이아몬드 랭킹 9', cat: '의사결정', pv: 'pyr', desc: '9개 항목을 중요도 순으로 배열',
+    html: _h('다이아몬드 랭킹') + _tbl(_tr(['', '1순위', '']) + _tr(['2순위', '', '3순위']) + _tr(['4순위', '5순위', '6순위']) + _tr(['7순위', '', '8순위']) + _tr(['', '9순위', ''])) +
+      _h('1순위로 올린 이유') + _br()
+  },
+  eisen: {
+    name: '중요도 - 긴급도 매트릭스', cat: '의사결정', pv: 'q4', desc: '먼저 할 일과 나중 할 일 구분',
+    html: _h('중요도 · 긴급도로 나누기') + _tbl(_trh(['중요 + 긴급 (바로)', '중요 + 안 긴급 (계획)']) + _tr(['', '']) + _trh(['안 중요 + 긴급 (위임)', '안 중요 + 안 긴급 (보류)']) + _tr(['', ''])) +
+      _h('이번에 꼭 하기로 한 일') + _ol(3)
+  },
+  debate: {
+    name: '찬반 토론 정리', cat: '토론·설득', pv: 'col2', desc: '찬성·반대 근거와 최종 입장',
+    html: _h('논제') + _br() + _tbl(_trh(['찬성 근거', '반대 근거']) + _rows(3, 2)) +
+      _h('상대 주장에 대한 반론') + _ul(2) + _h('우리 분임의 최종 입장') + _br()
+  },
+  ceda: {
+    name: '토론 절차표 (입론 - 반박 - 정리)', cat: '토론·설득', pv: 'tbl3', desc: '순서와 시간을 정해 진행',
+    html: _h('토론 진행표') + _tbl(_trh(['순서', '시간', '발언 요지']) +
+      _tr(['찬성 입론', '2분', '']) + _tr(['반대 입론', '2분', '']) + _tr(['교차 질의', '3분', '']) +
+      _tr(['찬성 반박', '2분', '']) + _tr(['반대 반박', '2분', '']) + _tr(['최종 정리', '2분', '']))
+  },
+  hat: {
+    name: '여섯 색깔 사고모자', cat: '토론·설득', pv: 'bars', desc: '같은 주제를 여섯 관점으로',
+    html: _h('여섯 색깔 사고모자') + _tbl(_trh(['모자', '관점', '우리 생각']) +
+      _tr(['흰색', '사실 · 자료', '']) + _tr(['빨강', '감정 · 직관', '']) + _tr(['검정', '위험 · 문제', '']) +
+      _tr(['노랑', '이익 · 기대', '']) + _tr(['초록', '새 아이디어', '']) + _tr(['파랑', '정리 · 결론', '']))
+  },
+  pyramid: {
+    name: '피라미드 토론', cat: '토론·설득', pv: 'pyr', desc: '개인 → 짝 → 모둠 → 전체 합의',
+    html: _h('피라미드 토론') + _tbl(_trh(['단계', '정리된 의견']) +
+      _tr(['1단계 · 혼자 생각', '']) + _tr(['2단계 · 짝과 합의', '']) + _tr(['3단계 · 모둠 합의', '']) + _tr(['4단계 · 전체 발표안', '']))
+  },
+  kpt: {
+    name: 'KPT 회고', cat: '성찰·정리', pv: 'col3', desc: '계속할 것 / 문제 / 시도할 것',
+    html: _h('KPT 회고') + _tbl(_trh(['Keep · 계속할 것', 'Problem · 문제', 'Try · 시도할 것']) + _rows(3, 3)) + _h('다음 모임까지 할 일') + _ol(2)
+  },
+  f4: {
+    name: '4F 성찰', cat: '성찰·정리', pv: 'q4', desc: '사실 · 느낌 · 배운 점 · 적용',
+    html: _h('4F 성찰') + _tbl(_trh(['Fact · 사실', 'Feeling · 느낌']) + _tr(['', '']) + _trh(['Finding · 배운 점', 'Future · 적용할 것']) + _tr(['', '']))
+  },
+  action: {
+    name: '실행 계획 (액션플랜)', cat: '실행 계획', pv: 'tbl3', desc: '누가, 언제까지, 무엇을',
+    html: _h('실행 계획') + _tbl(_trh(['할 일', '담당', '기한', '필요한 지원', '점검 방법']) + _rows(4, 5)) + _h('가장 먼저 시작할 한 가지') + _br()
+  },
+  role: {
+    name: '역할 · 분담표', cat: '실행 계획', pv: 'tbl3', desc: '분임 안에서 역할 정리',
+    html: _h('우리 분임 역할 분담') + _tbl(_trh(['역할', '이름', '할 일']) +
+      _tr(['사회 (진행)', '', '']) + _tr(['기록', '', '']) + _tr(['발표', '', '']) + _tr(['시간 관리', '', '']) + _tr(['자료 정리', '', '']))
+  },
+  propose: {
+    name: '정책 제안서형', cat: '실행 계획', pv: 'doc', desc: '보고서로 바로 쓸 수 있는 긴 틀',
+    html: _h('제안 제목') + _br() + _h('1. 추진 배경') + _br() + _h('2. 현황 및 문제점') + _br() +
+      _h('3. 제안 내용') + _ol(3) + _h('4. 기대 효과') + _br() + _h('5. 필요 예산 · 지원') + _br() + _h('6. 추진 일정') +
+      _tbl(_trh(['시기', '내용', '담당']) + _rows(3, 3))
+  }
 };
+
+/* 양식 미리보기 썸네일 */
+function thumbHtml(key) {
+  const t = TPL[key] || {}, col = CATCOL[t.cat] || '#64748b';
+  const row = (n, cls) => '<div class="r">' + Array.from({ length: n }, () => '<div class="b ' + (cls || '') + '"></div>').join('') + '</div>';
+  const grid = (c, n, dark) => '<div class="g" style="grid-template-columns:repeat(' + c + ',1fr)">' +
+    Array.from({ length: n }, (x, i) => '<div class="b' + (dark && i % 2 ? ' d' : '') + '"></div>').join('') + '</div>';
+  const mid = w => '<div class="r" style="justify-content:center"><div class="b" style="flex:0 0 ' + w + '%"></div></div>';
+  let inner;
+  switch (t.pv) {
+    case 'tbl3': inner = row(3, 'h') + row(3) + row(3, 'd') + row(3); break;
+    case 'col3': inner = row(3, 'h') + grid(3, 3); break;
+    case 'col2': inner = row(2, 'h') + grid(2, 2); break;
+    case 'q4': inner = grid(2, 4, true); break;
+    case 'g9': inner = grid(3, 9, true); break;
+    case 'list': inner = row(1, 'h') + row(1) + row(1, 'd') + row(1); break;
+    case 'notes': inner = grid(3, 6, true); break;
+    case 'pyr': inner = mid(26) + mid(54) + mid(82) + mid(100); break;
+    case 'step': inner = row(4, 'h') + row(1) + row(1, 'd'); break;
+    case 'mtx': inner = row(4, 'h') + grid(4, 8, true); break;
+    case 'bars': inner = row(1) + row(1, 'd') + row(1) + row(1, 'd') + row(1); break;
+    default: inner = row(1, 'h') + row(1) + row(1, 'd') + row(2);
+  }
+  return '<div class="tthumb" style="background:' + col + '">' + inner + '</div>';
+}
+
+/* 양식 갤러리 모달 */
+function openTplGallery(onPick, opt) {
+  opt = opt || {};
+  const cats = ['전체'].concat(Object.keys(CATCOL));
+  let cur = '전체';
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = '<div class="mbox"><div class="mt"><span>' + esc(opt.title || '토의 · 토론 양식 갤러리') + '</span><button class="sm" id="gx">✕ 닫기</button></div>' +
+    '<p class="mu" style="margin-top:0">' + esc(opt.hint || '양식을 누르면 작업실 문서에 바로 들어갑니다. 모두 ' + Object.keys(TPL).length + '종.') + '</p>' +
+    '<div class="tabs" id="gcat"></div><div class="tgal" id="ggal"></div></div>';
+  document.body.appendChild(m); document.body.classList.add('noscroll');
+  const close = () => { m.remove(); document.body.classList.remove('noscroll'); document.removeEventListener('keydown', key); };
+  const key = e => { if (e.key === 'Escape') close(); };
+  const paint = () => {
+    $('#gcat', m).innerHTML = cats.map(c => '<button data-c="' + esc(c) + '" class="' + (c === cur ? 'on' : '') + '">' + esc(c) + '</button>').join('');
+    $$('#gcat [data-c]', m).forEach(b => b.onclick = () => { cur = b.dataset.c; paint(); });
+    const ks = Object.keys(TPL).filter(k => cur === '전체' || TPL[k].cat === cur);
+    $('#ggal', m).innerHTML = ks.map(k => '<div class="tcard' + (opt.sel === k ? ' on' : '') + '" data-k="' + k + '">' + thumbHtml(k) +
+      '<div class="tbody"><b>' + esc(TPL[k].name) + '</b><span class="ds">' + esc(TPL[k].desc || '') + '</span><span class="ct">' + esc(TPL[k].cat) + '</span></div></div>').join('');
+    $$('#ggal [data-k]', m).forEach(c => c.onclick = () => { close(); onPick(c.dataset.k); });
+  };
+  paint();
+  $('#gx', m).onclick = close;
+  m.onclick = e => { if (e.target === m) close(); };
+  document.addEventListener('keydown', key);
+}
 
 /* ---------- 화면 틀 ---------- */
 function noticeBar() { return DB.mode === 'local' ? '<div class="notice">연습(로컬) 모드입니다 — firebase-config.js 를 채우기 전에는 같은 브라우저의 다른 탭끼리만 연결됩니다.</div>' : ''; }
@@ -660,7 +892,8 @@ function renderRoom() {
     right: `<button class="ghost" id="leave">${isAdmin() ? '관리자 화면' : '분임 변경'}</button>`
   }) + `<div class="wrap">
     <div class="tabs" role="tablist">
-      <button data-t="mine" class="on">우리 분임 작업실</button>
+      <button data-t="mine" class="on">📝 우리 분임 작업실</button>
+      <button data-t="board" id="tabBoard">🗒 포스트잇 보드</button>
       <button data-t="others" id="tabOthers">다른 분임 의견</button>
     </div>
 
@@ -689,7 +922,7 @@ function renderRoom() {
             <button id="addTbl">넣기</button>
             <button data-t="ar">행+</button><button data-t="dr">행−</button><button data-t="ac">열+</button><button data-t="dc">열−</button><button data-t="dt">표삭제</button>
             <span class="sep"></span>
-            <select id="tpl" title="양식 넣기"><option value="">양식 넣기…</option>${Object.entries(TPL).map(([k, v]) => `<option value="${k}">${esc(v.name)}</option>`).join('')}</select>
+            <button id="tplBtn" title="토의·토론 양식 갤러리">🗂 양식 갤러리</button>
             <button id="draw">✏️ 그리기</button>
             <span class="sep"></span>
             <button data-c="undo" title="되돌리기">↶</button><button data-c="redo" title="다시">↷</button>
@@ -736,6 +969,38 @@ function renderRoom() {
       </div>
     </section>
 
+    <section id="sBoard" hidden>
+      <div class="card">
+        <div class="card-h"><h3>의견 포스트잇</h3><span class="chip" id="bCnt">0장</span></div>
+        <p class="mu" style="margin-top:0">생각나는 의견을 짧게 적어 붙이세요. 포스트잇을 누르면 크게 볼 수 있고, 공감(♥)이 많은 의견부터 모아 본문으로 정리할 수 있어요.</p>
+        <div class="bcompose">
+          <textarea id="bText" rows="3" placeholder="예) 신청 절차를 온라인 한 번으로 통합하면 좋겠다"></textarea>
+          <div class="row wrap">
+            <span class="mu">색</span><div class="cols" id="bCols"></div>
+            <span class="grow"></span>
+            <button class="pri" id="bAdd">붙이기 (Ctrl+Enter)</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="bhead">
+          <span class="mu">정렬</span>
+          <select id="bSort" style="flex:none;width:150px"><option value="new">최신순</option><option value="vote">공감 많은 순</option><option value="old">붙인 순서</option></select>
+          <label class="chk" style="margin:0"><input type="checkbox" id="bMine"> 내가 쓴 것만</label>
+          <span class="grow"></span>
+          <button class="sm" id="bPickAll">전체 선택</button>
+          <button class="sm" id="bPickNone">선택 해제</button>
+        </div>
+        <div class="bwall" id="bWall"></div>
+        <div class="btnrow" style="margin-top:14px">
+          <button class="pri" id="bToDoc">선택 의견 본문으로 정리</button>
+          <span class="grow"></span>
+          <button class="warn sm" id="bClear">보드 비우기</button>
+        </div>
+        <p class="mu" style="margin:8px 0 0">정리하면 공감 순으로 표가 만들어지고, 아래에 <b>우리 분임이 정리한 의견</b> 칸이 생깁니다. 그대로 발표하면 됩니다.</p>
+      </div>
+    </section>
+
     <section id="sOthers" hidden>
       <p class="mu">완료 처리한 분임의 내용을 볼 수 있어요. 카드를 누르면 큰 화면으로 열립니다.</p>
       <div class="grid" id="othersGrid"></div>
@@ -745,10 +1010,11 @@ function renderRoom() {
   $('#leave').onclick = async () => { await flushSave(); leaveRoom(); if (isAdmin()) renderAdmin(); else { localStorage.removeItem('wsMe'); renderPick(); } };
   $$('.tabs [data-t]').forEach(b => b.onclick = () => {
     S.roomTab = b.dataset.t; $$('.tabs button').forEach(x => x.classList.toggle('on', x === b));
-    $('#sMine').hidden = S.roomTab !== 'mine'; $('#sOthers').hidden = S.roomTab !== 'others';
+    $('#sMine').hidden = S.roomTab !== 'mine'; $('#sBoard').hidden = S.roomTab !== 'board'; $('#sOthers').hidden = S.roomTab !== 'others';
     if (S.roomTab === 'others') updateRoom();
+    if (S.roomTab === 'board') { renderBoard(); const t = $('#bText'); if (t) t.focus(); }
   });
-  bindEditor();
+  bindEditor(); bindBoard();
   R = { lastApplied: null, lastTypeAt: 0, saveTimer: null, pending: null, loaded: false, sumLoaded: false };
   R.unsub = DB.watch(ws('docs/' + S.gid), v => { S.docs[S.gid] = v; applyDoc(); });
   R.timer = setInterval(roomTick, 1200);
@@ -792,6 +1058,16 @@ function updateRoom() {
   const db = $('#doneBtn'); db.disabled = closed;
   db.textContent = done ? '↺ 다시 열어 수정하기' : '✔ 완료하고 공유하기';
   db.className = done ? 'warn' : 'ok';
+
+  const bt = $('#tabBoard');
+  if (bt) {
+    bt.hidden = !boardOn();
+    bt.textContent = `🗒 포스트잇 보드 (${noteList(S.gid).length})`;
+    if (!boardOn() && S.roomTab === 'board') { const t = $('.tabs [data-t="mine"]'); if (t) t.click(); }
+  }
+  const bc = $('#bClear'); if (bc) bc.hidden = !(isAdmin() || isLeader());
+  const ba = $('#bAdd'); if (ba) ba.disabled = closed;
+  if (S.roomTab === 'board') renderBoard();
 
   const others = glist().filter(x => x.id !== S.gid && x.status === 'done');
   $('#tabOthers').textContent = `다른 분임 의견 (${others.length})`;
@@ -867,10 +1143,12 @@ function bindEditor() {
   $$('[data-t]', tb).forEach(b => b.onclick = () => tblOp(b.dataset.t));
   $('#fs').onchange = e => { if (e.target.value) cmd('fontSize', e.target.value); e.target.value = ''; };
   $('#addTbl').onclick = () => insertTable(+$('#tr').value, +$('#tc').value);
-  $('#tpl').onchange = e => {
-    const k = e.target.value; e.target.value = '';
-    if (!k || !editable()) return;
-    restoreSel(); document.execCommand('insertHTML', false, TPL[k].html); afterEdit(); toast('양식을 넣었어요');
+  $('#tplBtn').onclick = () => {
+    if (!editable()) return toast('완료 처리된 방은 수정할 수 없어요. 먼저 다시 열어 주세요');
+    openTplGallery(k => {
+      restoreSel(); document.execCommand('insertHTML', false, TPL[k].html); afterEdit();
+      toast(TPL[k].name + ' 양식을 넣었어요');
+    }, { hint: '커서 위치에 양식이 들어갑니다. 모두 ' + Object.keys(TPL).length + '종.' });
   };
   $('#draw').onclick = openDraw;
   ed.addEventListener('input', () => { scheduleSave(); updateStats(); });
@@ -933,6 +1211,138 @@ function roomTick() {
 function updateBadge() {
   const d = S.docs[S.gid], b = $('#badge'); if (!b) return;
   b.textContent = (d && d.editor && d.editor !== S.me.name && Date.now() - (d.editorTs || 0) < 6000) ? `✏️ ${d.editor} 님이 입력 중…` : '';
+}
+
+/* ---------- 포스트잇 의견 보드 ---------- */
+function bindBoard() {
+  const cols = $('#bCols'); if (!cols) return;
+  cols.innerHTML = NCOLS.map((c, i) => '<button data-ci="' + i + '" class="' + (i === B.col ? 'on' : '') + '" style="background:' + c + '" title="색 선택"></button>').join('');
+  $$('[data-ci]', cols).forEach(b => b.onclick = () => { B.col = +b.dataset.ci; $$('[data-ci]', cols).forEach(x => x.classList.toggle('on', x === b)); });
+  $('#bAdd').onclick = addNote;
+  $('#bText').addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); addNote(); } });
+  $('#bSort').onchange = e => { B.sort = e.target.value; renderBoard(); };
+  $('#bMine').onchange = e => { B.mine = e.target.checked; renderBoard(); };
+  $('#bPickAll').onclick = () => { noteList(S.gid).forEach(n => { B.sel[n.id] = true; }); renderBoard(); };
+  $('#bPickNone').onclick = () => { B.sel = {}; renderBoard(); };
+  $('#bToDoc').onclick = notesToDoc;
+  $('#bClear').onclick = clearBoard;
+  B.sel = {};
+}
+async function addNote() {
+  const ta = $('#bText'); if (!ta) return;
+  const t = ta.value.trim();
+  if (!t) return toast('의견을 입력하세요');
+  if (closedForMe()) return toast('접속 기간이 끝나 보기 전용이에요');
+  const id = uid('n');
+  await DB.set(ws('notes/' + S.gid + '/' + id), { t, by: (S.me && S.me.name) || '익명', byId: myId(), col: B.col, ts: Date.now() });
+  ta.value = ''; ta.focus(); B.sel[id] = true; renderBoard(); toast('포스트잇을 붙였어요');
+}
+function renderBoard() {
+  const wall = $('#bWall'); if (!wall) return;
+  const all = noteList(S.gid);
+  let ns = B.mine ? all.filter(n => n.byId === myId()) : all.slice();
+  ns.sort((a, b) => B.sort === 'vote' ? (noteVotes(b) - noteVotes(a) || b.ts - a.ts) : B.sort === 'old' ? a.ts - b.ts : b.ts - a.ts);
+  const cnt = $('#bCnt'); if (cnt) cnt.textContent = all.length + '장';
+  const ord = ns.map(n => n.id);
+  wall.innerHTML = ns.length ? ns.map(n => {
+    const v = noteVotes(n), rot = (((n.ts || 0) % 5) - 2) * 0.7, mine = n.byId === myId();
+    return '<div class="pnote' + (B.sel[n.id] ? ' sel' : '') + '" data-n="' + n.id + '" style="background:' + (NCOLS[n.col || 0] || NCOLS[0]) + ';transform:rotate(' + rot + 'deg)">' +
+      '<label class="pick" title="정리에 포함"><input type="checkbox" class="npick" data-n="' + n.id + '" ' + (B.sel[n.id] ? 'checked' : '') + '></label>' +
+      (v ? '<span class="vt">♥ ' + v + '</span>' : '') +
+      '<div class="tx">' + esc(n.t) + '</div>' +
+      '<div class="mt2">' + esc(n.by || '') + (mine ? ' (나)' : '') + ' · ' + esc(fmtAgo(n.ts)) + '</div></div>';
+  }).join('') : '<div class="bempty">아직 붙은 포스트잇이 없어요.<br>위에 의견을 적고 <b>붙이기</b>를 눌러 보세요.</div>';
+  $$('.npick', wall).forEach(c => c.onclick = e => {
+    e.stopPropagation(); B.sel[c.dataset.n] = c.checked;
+    const box = c.closest('.pnote'); if (box) box.classList.toggle('sel', c.checked); updatePickCnt();
+  });
+  $$('.pnote', wall).forEach(el => el.onclick = () => openNote(el.dataset.n, ord));
+  updatePickCnt();
+}
+function pickedIds() { return Object.keys(B.sel).filter(k => B.sel[k] && noteList(S.gid).some(n => n.id === k)); }
+function updatePickCnt() {
+  const b = $('#bToDoc'); if (!b) return;
+  const n = pickedIds().length;
+  b.textContent = n ? '선택한 ' + n + '장 본문으로 정리' : '전체 의견 본문으로 정리';
+}
+function openNote(id, ord) {
+  let n = noteList(S.gid).find(x => x.id === id); if (!n) return;
+  const order = (ord && ord.length) ? ord : noteList(S.gid).map(x => x.id);
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = '<div class="mbox" style="width:min(640px,100%)"><div class="mt"><span>포스트잇 크게 보기</span><button class="sm" id="nx">✕ 닫기</button></div><div id="nBody"></div>' +
+    '<p class="mu" style="margin:10px 0 0">← → 로 다른 포스트잇을 볼 수 있어요.</p></div>';
+  document.body.appendChild(m); document.body.classList.add('noscroll');
+  const close = () => { m.remove(); document.body.classList.remove('noscroll'); document.removeEventListener('keydown', key); renderBoard(); };
+  const go = d => {
+    const list = noteList(S.gid), i = order.indexOf(n.id);
+    for (let k = 1; k <= order.length; k++) {
+      const f = list.find(x => x.id === order[(i + d * k + order.length * k) % order.length]);
+      if (f) { n = f; paint(); return; }
+    }
+  };
+  const key = e => {
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowRight') go(1);
+    else if (e.key === 'ArrowLeft') go(-1);
+  };
+  function paint() {
+    const can = (n.byId && n.byId === myId()) || isAdmin() || isLeader();
+    const voted = !!(n.votes && n.votes[myId()]), v = noteVotes(n);
+    $('#nBody', m).innerHTML = '<div class="bigNote" style="background:' + (NCOLS[n.col || 0] || NCOLS[0]) + '">' + esc(n.t) + '</div>' +
+      '<p class="mu" style="margin:12px 0 0">' + esc(n.by || '') + ' · ' + esc(fmtT(n.ts)) + '</p>' +
+      '<div class="btnrow" style="margin-top:12px"><button id="nPrev">← 이전</button><button id="nNext">다음 →</button>' +
+      '<span class="grow"></span><button id="nVote" class="' + (voted ? 'pri' : '') + '">♥ 공감 ' + v + '</button>' +
+      (can ? '<button id="nEdit">수정</button><button class="warn" id="nDel">삭제</button>' : '') + '</div>';
+    $('#nPrev', m).onclick = () => go(-1);
+    $('#nNext', m).onclick = () => go(1);
+    $('#nVote', m).onclick = async () => {
+      const vs = Object.assign({}, n.votes || {});
+      if (voted) delete vs[myId()]; else vs[myId()] = true;
+      n.votes = vs; paint();
+      await DB.set(ws('notes/' + S.gid + '/' + n.id + '/votes/' + myId()), voted ? null : true);
+    };
+    if (can) {
+      $('#nEdit', m).onclick = async () => {
+        const t = prompt('의견을 수정하세요', n.t); if (t === null) return;
+        if (!t.trim()) return toast('내용을 비울 수 없어요');
+        n.t = t.trim(); paint();
+        await DB.update(ws('notes/' + S.gid + '/' + n.id), { t: t.trim(), editTs: Date.now() });
+        toast('수정했어요');
+      };
+      $('#nDel', m).onclick = async () => {
+        if (!confirm('이 포스트잇을 지울까요?')) return;
+        await DB.remove(ws('notes/' + S.gid + '/' + n.id));
+        delete B.sel[n.id]; toast('지웠어요'); close();
+      };
+    }
+  }
+  paint();
+  $('#nx', m).onclick = close;
+  m.onclick = e => { if (e.target === m) close(); };
+  document.addEventListener('keydown', key);
+}
+function notesToDoc() {
+  const all = noteList(S.gid), ids = pickedIds();
+  const pick = ids.length ? all.filter(n => ids.includes(n.id)) : all;
+  if (!pick.length) return toast('정리할 포스트잇이 없어요');
+  if (!editable()) return toast('완료 처리된 방은 수정할 수 없어요. 먼저 다시 열어 주세요');
+  pick.sort((a, b) => noteVotes(b) - noteVotes(a) || a.ts - b.ts);
+  const rows = pick.map((n, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(n.t).replace(/\n/g, '<br>') + '</td><td>' + esc(n.by || '') + '</td><td>' + noteVotes(n) + '</td></tr>').join('');
+  const html = '<h3>포스트잇 의견 모음 (' + pick.length + '장)</h3>' +
+    '<table><tbody><tr><th>번호</th><th>의견</th><th>작성자</th><th>공감</th></tr>' + rows + '</tbody></table>' +
+    '<h3>우리 분임이 정리한 의견</h3><ol><li><br></li><li><br></li><li><br></li></ol><p><br></p>';
+  const ed = $('#editor'); const t = $('.tabs [data-t="mine"]'); if (t) t.click();
+  ed.focus();
+  const r = document.createRange(); r.selectNodeContents(ed); r.collapse(false);
+  const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); savedRange = r.cloneRange();
+  document.execCommand('insertHTML', false, html);
+  afterEdit(); ed.scrollIntoView({ block: 'end' });
+  toast(pick.length + '장을 본문에 정리해 넣었어요');
+}
+async function clearBoard() {
+  if (!(isAdmin() || isLeader())) return toast('보드 비우기는 분임장 또는 진행자만 할 수 있어요');
+  if (!confirm('이 분임의 포스트잇을 모두 지울까요?\n되돌릴 수 없습니다.')) return;
+  await DB.remove(ws('notes/' + S.gid)); B.sel = {}; renderBoard(); toast('보드를 비웠어요');
 }
 
 /* ---------- 그리기 ---------- */
@@ -1297,13 +1707,22 @@ function adminBrief(b) {
   </div>
 
   <div class="card">
-    <h3>작성 양식 배부</h3>
-    <p class="mu">모든 분임 작업실 문서에 같은 양식을 넣어 줍니다.</p>
+    <div class="card-h"><h3>작성 양식 배부</h3><span class="chip">${Object.keys(TPL).length}종</span></div>
+    <p class="mu">토의·토론 양식을 골라 모든 분임 작업실 문서에 넣어 줍니다. 브레인스토밍, SWOT, PMI, NGT, 피시본, 찬반 토론, 사고모자, 피라미드 토론, KPT 등.</p>
     <div class="row wrap" style="margin-top:10px">
-      <select id="tplSel" style="flex:1;min-width:200px">${Object.entries(TPL).map(([k, v]) => `<option value="${k}">${esc(v.name)}</option>`).join('')}</select>
+      <button id="tplPick" style="flex:1;min-width:220px;justify-content:flex-start">🗂 양식 갤러리에서 고르기 — <b id="tplNow">${esc((TPL[S.tplKey] || TPL.basic).name)}</b></button>
       <select id="tplMode" style="flex:none;width:200px"><option value="empty">빈 분임에만 넣기</option><option value="all">모든 분임 덮어쓰기</option></select>
       <button class="pri" id="tplGo">양식 배부</button>
     </div>
+    <div class="tgal" style="margin-top:12px">${Object.keys(TPL).slice(0, 8).map(k => `<div class="tcard ${S.tplKey === k ? 'on' : ''}" data-qk="${k}">${thumbHtml(k)}<div class="tbody"><b>${esc(TPL[k].name)}</b><span class="ct">${esc(TPL[k].cat)}</span></div></div>`).join('')}</div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><h3>포스트잇 의견 보드</h3><span class="chip ${boardOn() ? 'ok' : 'gray'}">${boardOn() ? '사용 중' : '사용 안 함'}</span></div>
+    <p class="mu">분임원이 포스트잇으로 의견을 주고받고, 공감이 많은 의견을 본문으로 정리해 그대로 발표할 수 있습니다.</p>
+    <label class="chk"><input type="checkbox" id="bdOn" ${boardOn() ? 'checked' : ''}> 분임 작업실에 포스트잇 보드 사용</label>
+    <div class="row wrap" style="margin-top:10px">${glist().length ? glist().map(g => `<span class="chip">${esc(g.name)} · ${noteList(g.id).length}장</span>`).join('') : '<span class="mu">아직 분임이 없습니다.</span>'}</div>
+    <div class="btnrow" style="margin-top:12px"><button class="warn" id="bdClear">모든 분임 보드 비우기</button></div>
   </div>`;
 
   $('#brSave').onclick = async () => {
@@ -1339,8 +1758,17 @@ function adminBrief(b) {
     }
     toast(n ? `${n}개 분임의 주제를 적용했어요` : '일치하는 분임명이 없어요');
   };
+  const setTpl = k => { S.tplKey = k; const el = $('#tplNow'); if (el) el.textContent = TPL[k].name; $$('[data-qk]', b).forEach(c => c.classList.toggle('on', c.dataset.qk === k)); toast(TPL[k].name + ' 을 골랐어요'); };
+  $('#tplPick').onclick = () => openTplGallery(setTpl, { title: '배부할 양식 고르기', hint: '고른 양식을 분임 작업실 문서에 배부합니다.', sel: S.tplKey });
+  $$('[data-qk]', b).forEach(c => c.onclick = () => setTpl(c.dataset.qk));
+  $('#bdOn').onchange = async e => { await DB.update(ws('meta'), { board: e.target.checked ? 'on' : 'off' }); toast(e.target.checked ? '포스트잇 보드를 켰어요' : '포스트잇 보드를 껐어요'); renderAdminBody(); };
+  $('#bdClear').onclick = async () => {
+    if (!confirm('모든 분임의 포스트잇을 지울까요?\n되돌릴 수 없습니다.')) return;
+    for (const g of glist()) await DB.remove(ws('notes/' + g.id));
+    toast('모든 보드를 비웠어요'); renderAdminBody();
+  };
   $('#tplGo').onclick = async () => {
-    const k = $('#tplSel').value, mode = $('#tplMode').value, gs = glist();
+    const k = S.tplKey || 'basic', mode = $('#tplMode').value, gs = glist();
     if (!gs.length) return toast('먼저 분임을 만들어 주세요');
     if (mode === 'all' && !confirm('모든 분임의 작성 내용을 양식으로 덮어쓸까요?\n기존 내용은 사라집니다.')) return;
     const docs = await fetchDocs(gs.map(g => g.id));
@@ -1398,6 +1826,7 @@ function adminStatus(b) {
     <div class="kpi"><div class="lab">완료</div><div class="val">${doneN}<small> / ${gs.length}</small></div></div>
     <div class="kpi"><div class="lab">참여자</div><div class="val">${ppl}<small>명</small></div></div>
     <div class="kpi"><div class="lab">작성 분량 합계</div><div class="val" id="kChars">-<small>자</small></div></div>
+    <div class="kpi"><div class="lab">포스트잇</div><div class="val">${gs.reduce((a, g) => a + noteList(g.id).length, 0)}<small>장</small></div></div>
   </div>
   <div class="card">
     <div class="btnrow">
@@ -1423,7 +1852,7 @@ function adminStatus(b) {
         </div>
         <div class="mu">${esc(membersText(g) || '구성원 없음')}</div>
         <div style="font-size:.95em;margin-top:2px">주제 · <b>${esc(g.topic || '미정')}</b></div>
-        <div class="mu">기록 ${esc(rn(roles.note))} · 발표 ${esc(rn(roles.pres))} · <span id="ag-${g.id}">-</span></div>
+        <div class="mu">기록 ${esc(rn(roles.note))} · 발표 ${esc(rn(roles.pres))} · 포스트잇 ${noteList(g.id).length}장 · <span id="ag-${g.id}">-</span></div>
         <div class="bar"><i id="bar-${g.id}" class="${done ? 'ok' : ''}" style="width:${done ? 100 : 4}%"></i></div>
       </div>
       <div class="btnrow" data-g="${g.id}">
