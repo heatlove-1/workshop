@@ -270,9 +270,39 @@ canvas#cv{width:100%;border:1px solid var(--bd);border-radius:10px;touch-action:
 .pbody .doc td,.pbody .doc th{border:1px solid #39456a;padding:9px 15px}
 .pbody .doc img{background:#fff}
 .pbody.sumonly .doc{display:none}
+.pbody .nodoc{color:#8c9ab9}
 .pfoot{display:flex;gap:12px;align-items:center;padding:9px 16px;background:#141b2e;border-top:1px solid #222c47;color:#8c9ab9;font-size:.85em;flex-wrap:wrap}
 .pfoot .sp{flex:1}
 .pfoot b{color:#cfdcff}
+
+/* ---------- 발표 화면: 라이트 테마 ---------- */
+.present.light{background:#fff;color:var(--tx)}
+.present.light .pbar{background:#f6f8fd;border-bottom:1px solid var(--bd)}
+.present.light .pbar button{background:#fff;border-color:var(--bd);color:var(--tx)}
+.present.light .pbar button:hover{background:#eef2fc;border-color:#b9c5e4}
+.present.light .pbar button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.present.light .pbar button:disabled{opacity:.45}
+.present.light .pbar .sep{background:var(--bd)}
+.present.light .pbar .cnt{color:#46506b}
+.present.light .pbar select{background:#fff;border:1px solid var(--bd);color:var(--tx)}
+.present.light .ptimer{background:#fff;border-color:var(--bd);color:var(--pri-d)}
+.present.light .ptimer.run{background:#e7f0ff;border-color:#9dbcf5;color:#1b4ea8}
+.present.light .ptimer.end{background:#ffe9e6;border-color:#f0a99f;color:#b42318}
+.present.light .pdots{background:#eef1f8;border-bottom:1px solid var(--bd)}
+.present.light .pdots i{background:#ced7ea}
+.present.light .pdots i.on{background:var(--pri)}
+.present.light .pdots i.done{background:var(--ok)}
+.present.light .pbody .pm{color:var(--mu)}
+.present.light .pbody .pt{background:#eef3ff;border-color:#c6d5f7;color:var(--pri-d)}
+.present.light .pbody .psum{background:#f4f8ff;border-color:#c9dcf8;border-left-color:var(--pri);color:#17284a}
+.present.light .pbody .doc{color:var(--tx)}
+.present.light .pbody .doc h3{color:var(--pri-d)}
+.present.light .pbody .doc th{background:#f0f3fa}
+.present.light .pbody .doc td,.present.light .pbody .doc th{border-color:#b6c0d8}
+.present.light .pbody .doc img{background:#fff}
+.present.light .pbody .nodoc{color:#9aa3b8}
+.present.light .pfoot{background:#f6f8fd;border-top:1px solid var(--bd);color:var(--mu)}
+.present.light .pfoot b{color:var(--pri-d)}
 
 /* ---------- 인쇄 ---------- */
 #printArea{display:none}
@@ -1899,13 +1929,15 @@ function adminStatus(b) {
 /* ===================== 발표 스테이지 ===================== */
 const P = {
   open: false, ids: [], i: 0, size: parseInt(localStorage.getItem('wsPs')) || 30, unsub: null, doc: null,
-  sumOnly: false, t: { mins: parseInt(localStorage.getItem('wsPmin')) || 3, endsAt: null, paused: true, remain: 0 }
+  sumOnly: false, theme: localStorage.getItem('wsPtheme') || 'dark',
+  t: { mins: parseInt(localStorage.getItem('wsPmin')) || 3, endsAt: null, paused: true, remain: 0 }
 };
 function openPresent(ids, i) {
   if (!ids || !ids.length) return toast('발표할 분임이 없어요');
   P.ids = ids; P.i = Math.max(0, i || 0); P.open = true; P.sumOnly = false;
   document.body.classList.add('noscroll');
   const el = $('#present'); el.hidden = false;
+  el.classList.toggle('light', P.theme === 'light');
   el.innerHTML = `
   <div class="pbar">
     <button id="pp">◀ 이전</button><span class="cnt" id="pc"></span><button id="pn">다음 ▶</button>
@@ -1915,6 +1947,7 @@ function openPresent(ids, i) {
     <select id="tmin" title="발표 제한 시간">${[1, 2, 3, 5, 7, 10, 15].map(n => `<option value="${n}" ${n === P.t.mins ? 'selected' : ''}>${n}분</option>`).join('')}</select>
     <span class="sp"></span>
     <button id="ps">요약만</button>
+    <button id="pth" title="발표 배경 밝게/어둡게 (T)">${P.theme === 'light' ? '🌙 어둡게' : '☀️ 밝게'}</button>
     <button id="fm">A−</button><button id="fp">A+</button>
     <button id="ff">전체화면</button>
     <button id="pf">PDF</button><button id="ph">HWPX</button>
@@ -1925,11 +1958,12 @@ function openPresent(ids, i) {
   <div class="pfoot">
     <span>발표 <b id="fnow">-</b></span><span>다음 <b id="fnext">-</b></span>
     <span class="sp"></span>
-    <span>← → 이동 · Space 타이머 · S 요약 · F 전체화면 · Esc 닫기</span>
+    <span>← → 이동 · Space 타이머 · S 요약 · T 배경 · F 전체화면 · Esc 닫기</span>
   </div>`;
   $('#pp').onclick = () => goP(-1); $('#pn').onclick = () => goP(1);
   $('#fm').onclick = () => sizeP(-3); $('#fp').onclick = () => sizeP(3);
   $('#ps').onclick = toggleSumOnly;
+  $('#pth').onclick = togglePTheme;
   $('#ff').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else el.requestFullscreen && el.requestFullscreen(); };
   $('#pf').onclick = () => exportPdf([P.ids[P.i]]);
   $('#ph').onclick = () => exportHwpx([P.ids[P.i]]);
@@ -1949,6 +1983,15 @@ function goP(d) {
   P.i = n; resetPresentTimer(); watchP(); const b = $('#pbody'); if (b) b.scrollTop = 0;
 }
 function sizeP(d) { P.size = Math.min(80, Math.max(14, P.size + d)); localStorage.setItem('wsPs', P.size); paintPresent(); }
+function togglePTheme() {
+  P.theme = P.theme === 'light' ? 'dark' : 'light';
+  localStorage.setItem('wsPtheme', P.theme);
+  const el = $('#present');
+  if (el) el.classList.toggle('light', P.theme === 'light');
+  const b = $('#pth');
+  if (b) b.textContent = P.theme === 'light' ? '🌙 어둡게' : '☀️ 밝게';
+  toast(P.theme === 'light' ? '밝은 배경으로 바꿨어요' : '어두운 배경으로 바꿨어요');
+}
 function toggleSumOnly() { P.sumOnly = !P.sumOnly; const b = $('#ps'); if (b) b.classList.toggle('on', P.sumOnly); paintPresent(); }
 function resetPresentTimer() { P.t.endsAt = null; P.t.paused = true; P.t.remain = P.t.mins * 60000; const g = $('#tgo'); if (g) g.textContent = '▶ 시작'; tickPresentTimer(); }
 function togglePresentTimer() {
@@ -1984,7 +2027,7 @@ function paintPresent() {
     <div class="pm">${esc(membersText(g) || '구성원 없음')} · ${esc(S.meta.title)}</div>
     ${g.topic ? `<div class="pt">주제 · ${esc(g.topic)}</div>` : ''}
     ${sum ? `<div class="psum">${nl2(sum)}</div>` : (P.sumOnly ? '<div class="psum">작성된 발표 요약이 없어요. (작업실의 “발표 요약”에 입력하면 여기 크게 표시됩니다)</div>' : '')}
-    <div class="doc">${clean(P.doc && P.doc.html) || '<span style="color:#8c9ab9">(작성된 내용이 없어요)</span>'}</div>`;
+    <div class="doc">${clean(P.doc && P.doc.html) || '<span class="nodoc">(작성된 내용이 없어요)</span>'}</div>`;
   b.scrollTop = top;
   tickPresentTimer();
 }
@@ -2003,6 +2046,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === ' ') { e.preventDefault(); togglePresentTimer(); }
   else if (e.key === 's' || e.key === 'S') toggleSumOnly();
   else if (e.key === 'f' || e.key === 'F') $('#ff').click();
+  else if (e.key === 't' || e.key === 'T') togglePTheme();
 });
 
 /* ===================== 저장: PDF(인쇄) / HWPX ===================== */
