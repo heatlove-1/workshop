@@ -214,6 +214,33 @@ button.person:hover{border-color:var(--pri);background:var(--pri-s)}
 .cols button{width:28px;height:28px;border-radius:50%;padding:0;min-height:0;border:2px solid #fff;box-shadow:0 0 0 1px var(--bd)}
 .cols button.on{box-shadow:0 0 0 3px var(--pri)}
 .bwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(166px,1fr));gap:14px;margin-top:12px}
+.vswitch{display:inline-flex;border:1px solid var(--bd);border-radius:999px;overflow:hidden;background:var(--panel-2);flex:none}
+.vswitch button{border:0;background:none;padding:7px 13px;font-size:.88em;font-weight:700;color:var(--mu);min-height:0;border-radius:0}
+.vswitch button.on{background:var(--pri);color:#fff}
+.catbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;padding:10px;border:1px solid var(--bd);border-radius:var(--r);background:var(--panel-2)}
+.catchip{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--bd);border-radius:999px;padding:5px 11px;font-size:.86em;font-weight:700;cursor:pointer}
+.catchip.on{border-color:var(--pri);box-shadow:0 0 0 2px rgba(47,111,237,.18)}
+.catchip .dot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
+.catchip b{color:var(--mu);font-size:.9em;font-weight:700}
+.catchip .x{border:0;background:none;padding:0 1px;min-height:0;font-size:.9em;color:var(--mu);cursor:pointer}
+.catchip .x:hover{color:var(--pri)}
+.bmove{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;padding:9px 11px;border:1px solid var(--pri);border-radius:var(--r);background:#eef2fc}
+.blanes{display:flex;gap:12px;align-items:flex-start;overflow-x:auto;margin-top:12px;padding:2px 2px 12px}
+.blane{flex:0 0 250px;background:var(--panel-2);border:1px solid var(--bd);border-radius:var(--r);padding:10px;display:flex;flex-direction:column;gap:10px;min-height:190px}
+.blane.over{border-color:var(--pri);background:#eef2fc;box-shadow:inset 0 0 0 2px rgba(47,111,237,.35)}
+.blane-h{display:flex;align-items:center;gap:7px}
+.blane-h .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.blane-h b{flex:1;word-break:break-all;font-size:.93em}
+.blane-h .n{font-size:.78em;color:var(--mu);flex:none}
+.blane .lnotes{display:flex;flex-direction:column;gap:10px}
+.blane .pnote{min-height:112px;transform:none !important;box-shadow:1px 3px 7px rgba(16,24,40,.16)}
+.blane .pnote .tx{max-height:5.2em;font-size:.94em;margin-top:12px}
+.blane .lempty{border:2px dashed var(--bd);border-radius:8px;padding:16px 10px;text-align:center;color:var(--mu);font-size:.84em;line-height:1.5}
+.blane.add{flex:0 0 150px;min-height:120px;align-items:center;justify-content:center;border-style:dashed;cursor:pointer;color:var(--pri);font-weight:800;background:var(--panel)}
+.pnote.drag{opacity:.4}
+.pnote .ctg{font-weight:800}
+.pnote .mvb{border:0;background:rgba(255,255,255,.8);border-radius:999px;padding:2px 8px;font-size:.95em;font-weight:700;color:#33415c;min-height:0;cursor:pointer;margin-left:auto}
+.pnote .mvb:hover{background:#fff;color:var(--pri)}
 .pnote{position:relative;border-radius:3px;padding:13px 12px 10px;min-height:152px;display:flex;flex-direction:column;gap:7px;cursor:pointer;box-shadow:2px 4px 10px rgba(16,24,40,.18);transition:transform .12s,box-shadow .12s;color:#1a1a1a}
 .pnote:hover{transform:translateY(-4px) rotate(0deg) !important;box-shadow:3px 8px 18px rgba(16,24,40,.24)}
 .pnote.sel{outline:3px solid var(--pri);outline-offset:1px}
@@ -415,8 +442,8 @@ const DB = (() => {
 })();
 
 /* ---------- 상태 ---------- */
-const S = { code: null, meta: null, groups: {}, docs: {}, notes: {}, role: null, gid: null, me: null, view: 'home', tab: 'status', roomTab: 'mine', sel: {}, tplKey: 'basic' };
-let B = { col: 0, sort: 'new', mine: false, sel: {} };
+const S = { code: null, meta: null, groups: {}, docs: {}, notes: {}, cats: {}, role: null, gid: null, me: null, view: 'home', tab: 'status', roomTab: 'mine', sel: {}, tplKey: 'basic' };
+let B = { col: 0, sort: 'new', mine: false, sel: {}, view: 'wall', cat: null, drag: null };
 const app = $('#app');
 const ws = p => `ws/${S.code}/${p}`;
 let unsubs = [];
@@ -425,6 +452,7 @@ function connect(code) {
   unsubs.push(DB.watch(`ws/${code}/meta`, v => { S.meta = v || S.meta; onData(); }));
   unsubs.push(DB.watch(`ws/${code}/groups`, v => { S.groups = v || {}; onData(); }));
   unsubs.push(DB.watch(`ws/${code}/notes`, v => { S.notes = v || {}; onData(); }));
+  unsubs.push(DB.watch(`ws/${code}/cats`, v => { S.cats = v || {}; onData(); }));
 }
 const glist = () => Object.entries(S.groups).map(([id, g]) => ({ id, ...g })).sort((a, b) => (a.order || 0) - (b.order || 0));
 const mlist = g => Object.entries((g && g.members) || {}).map(([id, m]) => ({ id, ...m })).sort((a, b) => (a.o || 0) - (b.o || 0));
@@ -446,6 +474,17 @@ const NCOLS = ['#fff59a', '#ffd59e', '#c6f2d5', '#cfe2ff', '#f3d1fa', '#ffd2d8',
 const boardOn = () => !(S.meta && S.meta.board === 'off');
 const noteList = gid => Object.entries((S.notes && S.notes[gid]) || {}).map(([id, n]) => ({ id, ...n })).filter(n => n && n.t);
 const noteVotes = n => Object.keys((n && n.votes) || {}).length;
+const CATC = ['#2f6fed', '#16915a', '#e08a00', '#c2185b', '#7b4fe0', '#0a8f9e', '#d84315', '#5c6b7a'];
+const CATPRE = [
+  { n: '문제 · 원인 · 해결 · 기타', v: ['문제점', '원인', '해결 방안', '기타'] },
+  { n: '좋은 점 · 아쉬운 점 · 제안', v: ['좋은 점', '아쉬운 점', '제안'] },
+  { n: '사람 · 제도 · 예산 · 환경', v: ['사람', '제도', '예산', '환경'] },
+  { n: '지금 · 나중 · 하지 않을 일', v: ['지금 할 일', '나중에 할 일', '하지 않을 일'] },
+  { n: '중요도 3단계', v: ['매우 중요', '보통', '참고'] },
+  { n: '우리 · 함께 · 요청', v: ['우리가 할 일', '함께 할 일', '요청할 일'] },
+  { n: '학생 · 교사 · 학교 · 가정', v: ['학생', '교사', '학교', '가정·지역'] }
+];
+const catList = gid => Object.entries((S.cats && S.cats[gid]) || {}).map(([id, c]) => ({ id, ...c })).filter(c => c && c.name).sort((a, b) => (a.ord || 0) - (b.ord || 0) || (a.ts || 0) - (b.ts || 0));
 const myId = () => (S.me && S.me.id) || 'anon';
 const joinUrl = (code) => `${location.origin}${location.pathname}?w=${encodeURIComponent(code || S.code)}`;
 const adminUrl = () => `${location.pathname}?admin=1`;
@@ -1014,14 +1053,26 @@ function renderRoom() {
       </div>
       <div class="card">
         <div class="bhead">
+          <div class="vswitch" id="bView">
+            <button data-v="wall" class="on">🧱 모아보기</button>
+            <button data-v="cat">🗂 주제별 묶기</button>
+          </div>
           <span class="mu">정렬</span>
-          <select id="bSort" style="flex:none;width:150px"><option value="new">최신순</option><option value="vote">공감 많은 순</option><option value="old">붙인 순서</option></select>
+          <select id="bSort" style="flex:none;width:140px"><option value="new">최신순</option><option value="vote">공감 많은 순</option><option value="old">붙인 순서</option></select>
           <label class="chk" style="margin:0"><input type="checkbox" id="bMine"> 내가 쓴 것만</label>
           <span class="grow"></span>
           <button class="sm" id="bPickAll">전체 선택</button>
           <button class="sm" id="bPickNone">선택 해제</button>
         </div>
+        <div class="catbar" id="bCatBar"></div>
+        <div class="bmove" id="bMove" hidden>
+          <b id="bMoveCnt">0장 선택</b><span class="mu">주제로 옮기기</span>
+          <select id="bMoveSel" style="flex:1;min-width:150px"></select>
+          <button class="pri sm" id="bMoveGo">옮기기</button>
+        </div>
         <div class="bwall" id="bWall"></div>
+        <div class="blanes" id="bLanes" hidden></div>
+        <p class="mu" style="margin:4px 0 0">주제별 묶기에서는 포스트잇을 <b>끌어다 놓아</b> 같은 주제끼리 모을 수 있어요. 휴대전화에서는 포스트잇의 <b>⇄ 주제</b> 를 누르면 됩니다.</p>
         <div class="btnrow" style="margin-top:14px">
           <button class="pri" id="bToDoc">선택 의견 본문으로 정리</button>
           <span class="grow"></span>
@@ -1256,7 +1307,21 @@ function bindBoard() {
   $('#bPickNone').onclick = () => { B.sel = {}; renderBoard(); };
   $('#bToDoc').onclick = notesToDoc;
   $('#bClear').onclick = clearBoard;
-  B.sel = {};
+  $$('#bView button').forEach(b => b.onclick = () => { B.view = b.dataset.v; setView(); });
+  $('#bMoveGo').onclick = async () => {
+    const ids = pickedIds(), cat = $('#bMoveSel').value;
+    if (!ids.length) return toast('먼저 포스트잇을 고르세요');
+    if (closedForMe()) return toast('접속 기간이 끝나 보기 전용이에요');
+    for (const id of ids) await DB.update(ws('notes/' + S.gid + '/' + id), { cat: cat || '' });
+    const c = catList(S.gid).find(x => x.id === cat);
+    toast(ids.length + '장을 ' + (c ? '「' + c.name + '」' : '미분류') + '(으)로 옮겼어요');
+    B.view = 'cat'; setView();
+  };
+  B.sel = {}; B.cat = null; B.view = 'wall';
+}
+function setView() {
+  $$('#bView button').forEach(b => b.classList.toggle('on', b.dataset.v === B.view));
+  renderBoard();
 }
 async function addNote() {
   const ta = $('#bText'); if (!ta) return;
@@ -1268,32 +1333,160 @@ async function addNote() {
   ta.value = ''; ta.focus(); B.sel[id] = true; renderBoard(); toast('포스트잇을 붙였어요');
 }
 function renderBoard() {
-  const wall = $('#bWall'); if (!wall) return;
-  const all = noteList(S.gid);
+  const wall = $('#bWall'), lanes = $('#bLanes'); if (!wall) return;
+  const all = noteList(S.gid), cs = catList(S.gid);
   let ns = B.mine ? all.filter(n => n.byId === myId()) : all.slice();
+  if (B.cat !== null && B.view !== 'cat') ns = ns.filter(n => (n.cat || '') === B.cat);
   ns.sort((a, b) => B.sort === 'vote' ? (noteVotes(b) - noteVotes(a) || b.ts - a.ts) : B.sort === 'old' ? a.ts - b.ts : b.ts - a.ts);
-  const cnt = $('#bCnt'); if (cnt) cnt.textContent = all.length + '장';
+  const cnt = $('#bCnt'); if (cnt) cnt.textContent = all.length + '장' + (cs.length ? ' · 주제 ' + cs.length + '개' : '');
+  renderCatBar();
+  const laneMode = B.view === 'cat';
+  wall.hidden = laneMode; if (lanes) lanes.hidden = !laneMode;
   const ord = ns.map(n => n.id);
-  wall.innerHTML = ns.length ? ns.map(n => {
-    const v = noteVotes(n), rot = (((n.ts || 0) % 5) - 2) * 0.7, mine = n.byId === myId();
-    return '<div class="pnote' + (B.sel[n.id] ? ' sel' : '') + '" data-n="' + n.id + '" style="background:' + (NCOLS[n.col || 0] || NCOLS[0]) + ';transform:rotate(' + rot + 'deg)">' +
-      '<label class="pick" title="정리에 포함"><input type="checkbox" class="npick" data-n="' + n.id + '" ' + (B.sel[n.id] ? 'checked' : '') + '></label>' +
-      (v ? '<span class="vt">♥ ' + v + '</span>' : '') +
-      '<div class="tx">' + esc(n.t) + '</div>' +
-      '<div class="mt2">' + esc(n.by || '') + (mine ? ' (나)' : '') + ' · ' + esc(fmtAgo(n.ts)) + '</div></div>';
-  }).join('') : '<div class="bempty">아직 붙은 포스트잇이 없어요.<br>위에 의견을 적고 <b>붙이기</b>를 눌러 보세요.</div>';
-  $$('.npick', wall).forEach(c => c.onclick = e => {
+  if (laneMode) {
+    const cols = [{ id: '', name: '미분류', dot: '#c3c9d4' }].concat(cs.map(c => ({ id: c.id, name: c.name, dot: CATC[c.col || 0] })));
+    lanes.innerHTML = cols.map(c => {
+      const items = ns.filter(n => (n.cat || '') === c.id);
+      return '<div class="blane" data-lane="' + c.id + '">' +
+        '<div class="blane-h"><i class="dot" style="background:' + c.dot + '"></i><b>' + esc(c.name) + '</b><span class="n">' + items.length + '장</span></div>' +
+        '<div class="lnotes">' + (items.map(n => noteCardHtml(n)).join('') || '<div class="lempty">여기로 포스트잇을<br>끌어다 놓으세요</div>') + '</div></div>';
+    }).join('') + '<div class="blane add" id="laneAdd">+ 주제 추가</div>';
+    bindNotes(lanes, ord);
+    $$('.blane[data-lane]', lanes).forEach(l => {
+      l.ondragover = e => { e.preventDefault(); l.classList.add('over'); };
+      l.ondragleave = () => l.classList.remove('over');
+      l.ondrop = e => {
+        e.preventDefault(); l.classList.remove('over');
+        const id = B.drag || (e.dataTransfer && e.dataTransfer.getData('text/plain'));
+        if (id) moveNote(id, l.dataset.lane);
+      };
+    });
+    const la = $('#laneAdd', lanes); if (la) la.onclick = addCat;
+  } else {
+    wall.innerHTML = ns.length ? ns.map(n => noteCardHtml(n)).join('') :
+      '<div class="bempty">' + ((B.cat !== null || B.mine) ? '이 조건에 맞는 포스트잇이 없어요.' : '아직 붙은 포스트잇이 없어요.<br>위에 의견을 적고 <b>붙이기</b>를 눌러 보세요.') + '</div>';
+    bindNotes(wall, ord);
+  }
+  updatePickCnt();
+}
+function noteCardHtml(n) {
+  const v = noteVotes(n), rot = B.view === 'cat' ? 0 : (((n.ts || 0) % 5) - 2) * 0.7, mine = n.byId === myId();
+  const c = catList(S.gid).find(x => x.id === (n.cat || ''));
+  return '<div class="pnote' + (B.sel[n.id] ? ' sel' : '') + '" draggable="true" data-n="' + n.id + '" style="background:' + (NCOLS[n.col || 0] || NCOLS[0]) + ';transform:rotate(' + rot + 'deg)">' +
+    '<label class="pick" title="정리에 포함"><input type="checkbox" class="npick" data-n="' + n.id + '" ' + (B.sel[n.id] ? 'checked' : '') + '></label>' +
+    (v ? '<span class="vt">♥ ' + v + '</span>' : '') +
+    '<div class="tx">' + esc(n.t) + '</div>' +
+    '<div class="mt2">' + (c && B.view !== 'cat' ? '<span class="ctg" style="color:' + CATC[c.col || 0] + '">● ' + esc(c.name) + '</span> · ' : '') +
+    esc(n.by || '') + (mine ? ' (나)' : '') + ' · ' + esc(fmtAgo(n.ts)) +
+    '<button class="mvb nmv" data-n="' + n.id + '" title="주제 묶음 옮기기">⇄ 주제</button></div></div>';
+}
+function bindNotes(root, ord) {
+  $$('.npick', root).forEach(c => c.onclick = e => {
     e.stopPropagation(); B.sel[c.dataset.n] = c.checked;
     const box = c.closest('.pnote'); if (box) box.classList.toggle('sel', c.checked); updatePickCnt();
   });
-  $$('.pnote', wall).forEach(el => el.onclick = () => openNote(el.dataset.n, ord));
-  updatePickCnt();
+  $$('.nmv', root).forEach(b => b.onclick = e => { e.stopPropagation(); pickCatFor(b.dataset.n); });
+  $$('.pnote', root).forEach(el => {
+    el.onclick = () => openNote(el.dataset.n, ord);
+    el.ondragstart = e => {
+      B.drag = el.dataset.n; el.classList.add('drag');
+      if (e.dataTransfer) { e.dataTransfer.setData('text/plain', el.dataset.n); e.dataTransfer.effectAllowed = 'move'; }
+    };
+    el.ondragend = () => { el.classList.remove('drag'); B.drag = null; };
+  });
+}
+function renderCatBar() {
+  const bar = $('#bCatBar'); if (!bar) return;
+  const cs = catList(S.gid), all = noteList(S.gid), can = isAdmin() || isLeader();
+  const cnt = id => all.filter(n => (n.cat || '') === id).length;
+  const chip = (id, name, dot) => '<span class="catchip' + (B.cat === id ? ' on' : '') + '" data-c="' + id + '"><i class="dot" style="background:' + dot + '"></i>' + esc(name) + ' <b>' + cnt(id) + '</b>' +
+    (id && can ? '<button class="x" data-ce="' + id + '" title="이름 바꾸기">✎</button><button class="x" data-cd="' + id + '" title="주제 지우기">✕</button>' : '') + '</span>';
+  bar.innerHTML = '<span class="mu" style="flex:none">주제 묶음</span>' + chip('', '미분류', '#c3c9d4') +
+    cs.map(c => chip(c.id, c.name, CATC[c.col || 0])).join('') + '<span class="grow"></span>' +
+    '<button class="sm" id="bCatAdd">+ 주제 추가</button>' +
+    '<select id="bCatPre" style="flex:none;width:186px"><option value="">주제 묶음 세트 넣기…</option>' +
+    CATPRE.map((p, i) => '<option value="' + i + '">' + esc(p.n) + '</option>').join('') + '</select>';
+  $$('.catchip', bar).forEach(el => el.onclick = e => {
+    if (e.target.closest('.x')) return;
+    B.cat = (B.cat === el.dataset.c) ? null : el.dataset.c;
+    if (B.view === 'cat') B.view = 'wall';
+    setView();
+  });
+  $$('[data-ce]', bar).forEach(bt => bt.onclick = async e => {
+    e.stopPropagation();
+    const c = cs.find(x => x.id === bt.dataset.ce); if (!c) return;
+    const nm = prompt('주제 이름을 바꾸세요', c.name); if (nm === null) return;
+    if (!nm.trim()) return toast('이름을 비울 수 없어요');
+    await DB.update(ws('cats/' + S.gid + '/' + c.id), { name: nm.trim() }); toast('이름을 바꿨어요');
+  });
+  $$('[data-cd]', bar).forEach(bt => bt.onclick = async e => {
+    e.stopPropagation();
+    const c = cs.find(x => x.id === bt.dataset.cd); if (!c) return;
+    if (!confirm('주제 「' + c.name + '」을 지울까요?\n이 주제의 포스트잇은 미분류로 돌아갑니다.')) return;
+    for (const n of noteList(S.gid)) if ((n.cat || '') === c.id) await DB.update(ws('notes/' + S.gid + '/' + n.id), { cat: '' });
+    await DB.remove(ws('cats/' + S.gid + '/' + c.id));
+    if (B.cat === c.id) B.cat = null;
+    toast('주제를 지웠어요');
+  });
+  $('#bCatAdd', bar).onclick = addCat;
+  $('#bCatPre', bar).onchange = async e => {
+    const i = e.target.value; e.target.value = '';
+    if (i === '') return;
+    if (closedForMe()) return toast('접속 기간이 끝나 보기 전용이에요');
+    const set = CATPRE[+i], base = catList(S.gid).length;
+    for (let k = 0; k < set.v.length; k++)
+      await DB.set(ws('cats/' + S.gid + '/' + uid('c')), { name: set.v[k], col: (base + k) % CATC.length, ord: base + k, ts: Date.now() + k });
+    B.cat = null; B.view = 'cat'; setView(); toast('주제 묶음 ' + set.v.length + '개를 만들었어요');
+  };
+}
+async function addCat() {
+  if (closedForMe()) return toast('접속 기간이 끝나 보기 전용이에요');
+  const nm = prompt('새 주제 이름을 입력하세요\n예) 문제점 / 해결 방안 / 예산 / 홍보'); if (nm === null) return;
+  if (!nm.trim()) return toast('이름을 입력하세요');
+  const base = catList(S.gid).length;
+  await DB.set(ws('cats/' + S.gid + '/' + uid('c')), { name: nm.trim(), col: base % CATC.length, ord: base, ts: Date.now() });
+  B.cat = null; B.view = 'cat'; setView(); toast('주제를 만들었어요');
+}
+async function moveNote(id, cat) {
+  if (closedForMe()) return toast('접속 기간이 끝나 보기 전용이에요');
+  await DB.update(ws('notes/' + S.gid + '/' + id), { cat: cat || '' });
+  const c = catList(S.gid).find(x => x.id === cat);
+  toast(c ? '「' + c.name + '」(으)로 옮겼어요' : '미분류로 옮겼어요');
+  renderBoard();
+}
+function pickCatFor(id) {
+  const cs = catList(S.gid), n = noteList(S.gid).find(x => x.id === id); if (!n) return;
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = '<div class="mbox" style="width:min(440px,100%)"><div class="mt"><span>주제 묶음 옮기기</span><button class="sm" id="cx">✕ 닫기</button></div>' +
+    '<p class="mu" style="margin:0 0 12px">“' + esc(n.t.slice(0, 50)) + (n.t.length > 50 ? '…' : '') + '”</p>' +
+    '<div class="btnrow" style="flex-direction:column;align-items:stretch;gap:8px">' +
+    '<button data-mv="" class="' + (!n.cat ? 'pri' : '') + '">미분류</button>' +
+    cs.map(c => '<button data-mv="' + c.id + '" class="' + (n.cat === c.id ? 'pri' : '') + '">● ' + esc(c.name) + '</button>').join('') +
+    '</div><p style="margin:12px 0 0"><button class="sm" id="cNew">+ 새 주제 만들어 옮기기</button></p></div>';
+  document.body.appendChild(m); document.body.classList.add('noscroll');
+  const close = () => { m.remove(); document.body.classList.remove('noscroll'); };
+  $$('[data-mv]', m).forEach(bt => bt.onclick = async () => { close(); await moveNote(id, bt.dataset.mv); });
+  $('#cNew', m).onclick = async () => {
+    const nm = prompt('새 주제 이름을 입력하세요'); if (nm === null || !nm.trim()) return;
+    const base = catList(S.gid).length, cid = uid('c');
+    await DB.set(ws('cats/' + S.gid + '/' + cid), { name: nm.trim(), col: base % CATC.length, ord: base, ts: Date.now() });
+    close(); await moveNote(id, cid);
+  };
+  $('#cx', m).onclick = close;
+  m.onclick = e => { if (e.target === m) close(); };
 }
 function pickedIds() { return Object.keys(B.sel).filter(k => B.sel[k] && noteList(S.gid).some(n => n.id === k)); }
 function updatePickCnt() {
   const b = $('#bToDoc'); if (!b) return;
   const n = pickedIds().length;
   b.textContent = n ? '선택한 ' + n + '장 본문으로 정리' : '전체 의견 본문으로 정리';
+  const mv = $('#bMove');
+  if (mv) {
+    mv.hidden = !n;
+    const c = $('#bMoveCnt'); if (c) c.textContent = n + '장 선택';
+    const sel = $('#bMoveSel');
+    if (sel) sel.innerHTML = '<option value="">미분류</option>' + catList(S.gid).map(x => '<option value="' + x.id + '">' + esc(x.name) + '</option>').join('');
+  }
 }
 function openNote(id, ord) {
   let n = noteList(S.gid).find(x => x.id === id); if (!n) return;
@@ -1320,11 +1513,21 @@ function openNote(id, ord) {
     const voted = !!(n.votes && n.votes[myId()]), v = noteVotes(n);
     $('#nBody', m).innerHTML = '<div class="bigNote" style="background:' + (NCOLS[n.col || 0] || NCOLS[0]) + '">' + esc(n.t) + '</div>' +
       '<p class="mu" style="margin:12px 0 0">' + esc(n.by || '') + ' · ' + esc(fmtT(n.ts)) + '</p>' +
+      '<div class="row wrap" style="margin-top:10px"><span class="mu" style="flex:none">주제 묶음</span><select id="nCat" style="flex:1;min-width:150px"><option value="">미분류</option>' +
+      catList(S.gid).map(c => '<option value="' + c.id + '"' + ((n.cat || '') === c.id ? ' selected' : '') + '>' + esc(c.name) + '</option>').join('') + '</select></div>' +
       '<div class="btnrow" style="margin-top:12px"><button id="nPrev">← 이전</button><button id="nNext">다음 →</button>' +
       '<span class="grow"></span><button id="nVote" class="' + (voted ? 'pri' : '') + '">♥ 공감 ' + v + '</button>' +
       (can ? '<button id="nEdit">수정</button><button class="warn" id="nDel">삭제</button>' : '') + '</div>';
     $('#nPrev', m).onclick = () => go(-1);
     $('#nNext', m).onclick = () => go(1);
+    const nc = $('#nCat', m);
+    if (nc) nc.onchange = async () => {
+      if (closedForMe()) return toast('접속 기간이 끝나 보기 전용이에요');
+      n.cat = nc.value;
+      await DB.update(ws('notes/' + S.gid + '/' + n.id), { cat: nc.value || '' });
+      const c = catList(S.gid).find(x => x.id === nc.value);
+      toast(c ? '「' + c.name + '」(으)로 옮겼어요' : '미분류로 옮겼어요');
+    };
     $('#nVote', m).onclick = async () => {
       const vs = Object.assign({}, n.votes || {});
       if (voted) delete vs[myId()]; else vs[myId()] = true;
@@ -1357,9 +1560,14 @@ function notesToDoc() {
   if (!pick.length) return toast('정리할 포스트잇이 없어요');
   if (!editable()) return toast('완료 처리된 방은 수정할 수 없어요. 먼저 다시 열어 주세요');
   pick.sort((a, b) => noteVotes(b) - noteVotes(a) || a.ts - b.ts);
-  const rows = pick.map((n, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(n.t).replace(/\n/g, '<br>') + '</td><td>' + esc(n.by || '') + '</td><td>' + noteVotes(n) + '</td></tr>').join('');
-  const html = '<h3>포스트잇 의견 모음 (' + pick.length + '장)</h3>' +
-    '<table><tbody><tr><th>번호</th><th>의견</th><th>작성자</th><th>공감</th></tr>' + rows + '</tbody></table>' +
+  const tbl = list => '<table><tbody><tr><th>번호</th><th>의견</th><th>작성자</th><th>공감</th></tr>' +
+    list.map((n, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(n.t).replace(/\n/g, '<br>') + '</td><td>' + esc(n.by || '') + '</td><td>' + noteVotes(n) + '</td></tr>').join('') + '</tbody></table>';
+  const cs = catList(S.gid);
+  const buckets = cs.map(c => ({ name: c.name, items: pick.filter(n => (n.cat || '') === c.id) }))
+    .concat([{ name: '미분류', items: pick.filter(n => !cs.some(c => c.id === (n.cat || ''))) }]).filter(x => x.items.length);
+  const grouped = cs.length > 0 && buckets.length > 0;
+  const html = '<h3>포스트잇 의견 모음 (' + pick.length + '장' + (grouped ? ' · 주제 ' + buckets.length + '묶음' : '') + ')</h3>' +
+    (grouped ? buckets.map(bk => '<h4>■ ' + esc(bk.name) + ' (' + bk.items.length + '장)</h4>' + tbl(bk.items)).join('') : tbl(pick)) +
     '<h3>우리 분임이 정리한 의견</h3><ol><li><br></li><li><br></li><li><br></li></ol><p><br></p>';
   const ed = $('#editor'); const t = $('.tabs [data-t="mine"]'); if (t) t.click();
   ed.focus();
@@ -1570,7 +1778,7 @@ async function setGroupCount(n) {
   } else {
     const kill = gs.slice(n);
     if (!confirm(`뒤쪽 ${kill.length}개 분임(${kill.map(g => g.name).join(', ')})을 삭제할까요?\n작성한 내용도 함께 지워집니다.`)) return;
-    for (const g of kill) { await DB.remove(ws('groups/' + g.id)); await DB.remove(ws('docs/' + g.id)); }
+    for (const g of kill) { await DB.remove(ws('groups/' + g.id)); await DB.remove(ws('docs/' + g.id)); await DB.remove(ws('notes/' + g.id)); await DB.remove(ws('cats/' + g.id)); }
   }
   S.groups = (await DB.get(ws('groups'))) || {};
   renderAdmin(); toast(`분임을 ${n}개로 맞췄어요`);
@@ -1663,7 +1871,7 @@ function adminGroups(b) {
       S.groups = (await DB.get(ws('groups'))) || {};
     }
     if (cur.length > n && confirm(`남는 분임 ${cur.length - n}개를 삭제할까요?`)) {
-      for (const g of cur.slice(n)) { await DB.remove(ws('groups/' + g.id)); await DB.remove(ws('docs/' + g.id)); }
+      for (const g of cur.slice(n)) { await DB.remove(ws('groups/' + g.id)); await DB.remove(ws('docs/' + g.id)); await DB.remove(ws('notes/' + g.id)); await DB.remove(ws('cats/' + g.id)); }
       S.groups = (await DB.get(ws('groups'))) || {};
     }
     renderAdmin(); toast('명단을 배부했어요');
@@ -1686,7 +1894,7 @@ function adminGroups(b) {
   });
   $$('[data-del]', b).forEach(btn => btn.onclick = async () => {
     const g = S.groups[btn.dataset.del]; if (!confirm(`"${g.name}" 분임을 삭제할까요? 작성한 내용도 함께 지워져요.`)) return;
-    await DB.remove(ws('groups/' + btn.dataset.del)); await DB.remove(ws('docs/' + btn.dataset.del));
+    await DB.remove(ws('groups/' + btn.dataset.del)); await DB.remove(ws('docs/' + btn.dataset.del)); await DB.remove(ws('notes/' + btn.dataset.del)); await DB.remove(ws('cats/' + btn.dataset.del));
     S.groups = (await DB.get(ws('groups'))) || {}; renderAdmin();
   });
   const move = async (gid, d) => {
@@ -1751,8 +1959,14 @@ function adminBrief(b) {
     <div class="card-h"><h3>포스트잇 의견 보드</h3><span class="chip ${boardOn() ? 'ok' : 'gray'}">${boardOn() ? '사용 중' : '사용 안 함'}</span></div>
     <p class="mu">분임원이 포스트잇으로 의견을 주고받고, 공감이 많은 의견을 본문으로 정리해 그대로 발표할 수 있습니다.</p>
     <label class="chk"><input type="checkbox" id="bdOn" ${boardOn() ? 'checked' : ''}> 분임 작업실에 포스트잇 보드 사용</label>
-    <div class="row wrap" style="margin-top:10px">${glist().length ? glist().map(g => `<span class="chip">${esc(g.name)} · ${noteList(g.id).length}장</span>`).join('') : '<span class="mu">아직 분임이 없습니다.</span>'}</div>
-    <div class="btnrow" style="margin-top:12px"><button class="warn" id="bdClear">모든 분임 보드 비우기</button></div>
+    <div class="row wrap" style="margin-top:10px">${glist().length ? glist().map(g => `<span class="chip">${esc(g.name)} · ${noteList(g.id).length}장${catList(g.id).length ? ' · 주제 ' + catList(g.id).length : ''}</span>`).join('') : '<span class="mu">아직 분임이 없습니다.</span>'}</div>
+    <label style="margin-top:14px">주제 묶음 배부 <span class="mu">(포스트잇을 주제별로 모을 칸을 모든 분임에 미리 만들어 줍니다)</span></label>
+    <div class="row wrap">
+      <select id="bdCatPre" style="flex:1;min-width:210px"><option value="">묶음 세트 고르기…</option>${CATPRE.map((p, i) => `<option value="${i}">${esc(p.n)}</option>`).join('')}</select>
+      <select id="bdCatMode" style="flex:none;width:190px"><option value="add">기존 주제에 더하기</option><option value="replace">기존 주제 지우고 새로</option></select>
+      <button class="pri" id="bdCatGo">모든 분임에 배부</button>
+    </div>
+    <div class="btnrow" style="margin-top:12px"><button class="warn" id="bdClear">모든 분임 보드 비우기</button><button class="warn sm" id="bdCatClear">모든 분임 주제 묶음 지우기</button></div>
   </div>`;
 
   $('#brSave').onclick = async () => {
@@ -1796,6 +2010,31 @@ function adminBrief(b) {
     if (!confirm('모든 분임의 포스트잇을 지울까요?\n되돌릴 수 없습니다.')) return;
     for (const g of glist()) await DB.remove(ws('notes/' + g.id));
     toast('모든 보드를 비웠어요'); renderAdminBody();
+  };
+  $('#bdCatGo').onclick = async () => {
+    const i = $('#bdCatPre').value;
+    if (i === '') return toast('묶음 세트를 고르세요');
+    const gs = glist(); if (!gs.length) return toast('먼저 분임을 만들어 주세요');
+    const set = CATPRE[+i], mode = $('#bdCatMode').value;
+    if (mode === 'replace' && !confirm('모든 분임의 기존 주제 묶음을 지우고 새로 만듭니다.\n붙어 있는 포스트잇은 미분류로 돌아갑니다. 계속할까요?')) return;
+    for (const g of gs) {
+      if (mode === 'replace') {
+        for (const n of noteList(g.id)) if (n.cat) await DB.update(ws('notes/' + g.id + '/' + n.id), { cat: '' });
+        await DB.remove(ws('cats/' + g.id));
+      }
+      const base = mode === 'replace' ? 0 : catList(g.id).length;
+      for (let k = 0; k < set.v.length; k++)
+        await DB.set(ws('cats/' + g.id + '/' + uid('c')), { name: set.v[k], col: (base + k) % CATC.length, ord: base + k, ts: Date.now() + k });
+    }
+    toast('모든 분임에 주제 묶음을 배부했어요'); renderAdminBody();
+  };
+  $('#bdCatClear').onclick = async () => {
+    if (!confirm('모든 분임의 주제 묶음을 지울까요?\n포스트잇은 지워지지 않고 미분류로 돌아갑니다.')) return;
+    for (const g of glist()) {
+      for (const n of noteList(g.id)) if (n.cat) await DB.update(ws('notes/' + g.id + '/' + n.id), { cat: '' });
+      await DB.remove(ws('cats/' + g.id));
+    }
+    toast('주제 묶음을 모두 지웠어요'); renderAdminBody();
   };
   $('#tplGo').onclick = async () => {
     const k = S.tplKey || 'basic', mode = $('#tplMode').value, gs = glist();
