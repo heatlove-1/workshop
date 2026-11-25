@@ -317,21 +317,70 @@ canvas#cv{width:100%;border:1px solid var(--bd);border-radius:10px;touch-action:
 /* ---------- 발표 화면 ---------- */
 .present{position:fixed;inset:0;background:#0d1220;color:#f2f5fc;z-index:60;display:flex;flex-direction:column}
 .present[hidden]{display:none}
-.pbar{display:flex;gap:7px;align-items:center;padding:9px 14px;background:#141b2e;border-bottom:1px solid #222c47;flex-wrap:wrap}
-.pbar button{background:#1d2740;border-color:#2b3757;color:#e8edf9;min-height:36px;padding:6px 11px;border-radius:9px}
+.pbar{position:relative;display:flex;gap:5px;align-items:center;padding:5px 10px;background:#141b2e;border-bottom:1px solid #222c47;flex-wrap:wrap}
+.pbar button{background:#1d2740;border-color:#2b3757;color:#e8edf9;min-height:31px;padding:4px 10px;border-radius:8px;font-size:.9em;flex:none;line-height:1.2}
 .pbar button:hover{background:#27334f;border-color:#3a4870}
 .pbar button.on{background:var(--pri);border-color:var(--pri);color:#fff}
-.pbar .sep{width:1px;height:20px;background:#2b3757;margin:0 3px}
-.pbar .sp{flex:1}
-.pbar .cnt{font-weight:800;font-variant-numeric:tabular-nums;color:#b9c6e6;padding:0 4px}
-.ptimer{font-variant-numeric:tabular-nums;font-weight:800;background:#1d2740;border:1px solid #2b3757;border-radius:999px;padding:5px 13px;color:#cfe0ff}
-.ptimer.run{background:#13365c;border-color:#1d5491;color:#9fd0ff}
-.ptimer.end{background:#4a1d1d;border-color:#7d2b2b;color:#ffbcb4}
-.pdots{display:flex;gap:4px;padding:7px 14px;background:#101728;border-bottom:1px solid #1d2740;overflow-x:auto}
-.pdots i{flex:1;height:4px;border-radius:9px;background:#273253}
-.pdots i.on{background:var(--pri)}
+.pbar button.ic{padding:4px 8px;min-width:32px;font-weight:700}
+.pbar .sep{width:1px;height:18px;background:#2b3757;margin:0 3px}
+.pbar .sp{flex:1;min-width:6px}
+.pbar .cnt{font-weight:800;font-variant-numeric:tabular-nums;color:#b9c6e6;padding:0 3px;font-size:.9em}
+.pbar .pnm{font-weight:700;color:#dbe4fa;font-size:.9em;max-width:16em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pbar .pnm em{font-style:normal;color:#8694ba;font-weight:600;margin-left:7px}
+/* 타이머 칩 */
+.pbar .ptimer{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;font-weight:800;background:#1d2740;border:1px solid #2b3757;border-radius:999px;padding:4px 12px;color:#cfe0ff;min-height:31px;font-size:.95em;cursor:pointer}
+.pbar .ptimer i{font-style:normal;font-size:.82em;opacity:.85}
+.pbar .ptimer.t-ok{background:#12352a;border-color:#1d6a4c;color:#8fe7bd}
+.pbar .ptimer.t-warn{background:#3c2f12;border-color:#8a6a1d;color:#f6d79a}
+.pbar .ptimer.t-dan{background:#45201c;border-color:#98372c;color:#ffc0b5}
+.pbar .ptimer.t-end{background:#4a1d1d;border-color:#7d2b2b;color:#ffbcb4}
+.pbar .ptimer.run.t-dan{animation:ptpulse 1s ease-in-out infinite}
+.pbar .ptimer:not(.run){background:#1d2740;border-color:#2b3757;color:#cfe0ff}
+.pbar .ptimer:not(.run).t-end{background:#4a1d1d;border-color:#7d2b2b;color:#ffbcb4}
+.pbar .ptimer:hover{border-color:#4a5c8c}
+@keyframes ptpulse{0%,100%{box-shadow:0 0 0 0 rgba(216,74,58,0)}50%{box-shadow:0 0 0 5px rgba(216,74,58,.34)}}
+/* 타이머 설정 / 더보기 팝업 */
+.ppop{position:fixed;z-index:9;background:#17203a;border:1px solid #2b3757;border-radius:12px;padding:9px;min-width:212px;box-shadow:0 16px 38px rgba(0,0,0,.5);color:#dce5fa}
+.ppop .h{font-size:.76em;font-weight:800;letter-spacing:.03em;color:#8b9ac0;padding:2px 4px 7px}
+.ppop .mins{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.ppop .mins button{background:#1d2740;border:1px solid #2b3757;color:#dce5fa;border-radius:8px;min-height:32px;padding:3px 4px;font-size:.9em;font-weight:700}
+.ppop .mins button:hover{background:#27334f}
+.ppop .mins button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.ppop .d{height:1px;background:#2b3757;margin:8px 2px}
+.ppop .mi{display:flex;width:100%;align-items:center;gap:9px;background:none;border:0;color:#dce5fa;padding:8px 9px;border-radius:8px;min-height:34px;text-align:left;font-size:.93em}
+.ppop .mi:hover{background:#243357}
+.ppop .mi span{flex:1}
+.ppop .mi kbd{font-family:inherit;font-size:.78em;color:#8b9ac0;background:#1d2740;border:1px solid #2b3757;border-radius:5px;padding:1px 5px}
+/* 진행 점 */
+.pdots{display:flex;gap:3px;align-items:center;padding:0 10px 5px;background:#141b2e;border-bottom:1px solid #222c47;overflow-x:auto;min-height:9px}
+.pdots i{flex:1;min-width:9px;height:4px;border-radius:9px;background:#273253;cursor:pointer;transition:background .15s,height .15s}
+.pdots i:hover{background:#44568a}
+.pdots i.on{background:var(--pri);height:6px}
 .pdots i.done{background:#1f7a58}
-.pbody{flex:1;overflow:auto;padding:34px 6vw 40px}
+.pdots i.on.done{background:var(--pri)}
+.pbody{flex:1;overflow:auto;padding:24px 5vw 32px}
+/* 블록 집중 보기 */
+.pbody .doc>*{transition:opacity .18s ease,transform .18s ease}
+.pbody.spotting .doc>*{opacity:.26}
+.pbody.spotting .doc>*.spot{opacity:1;transform:scale(1.012);outline:2px solid #4b7fe0;outline-offset:7px;border-radius:12px}
+/* 핵심 문장만 크게 보기 */
+.pspot{position:absolute;inset:0;z-index:8;background:rgba(7,11,22,.955);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:5vh 6vw;text-align:center;overflow:auto;cursor:pointer}
+.pspot .sp-k{font-size:clamp(12px,1.5vw,17px);font-weight:800;letter-spacing:.1em;color:#6fd3a5}
+.pspot .sp-g{font-size:clamp(20px,3vw,40px);font-weight:800;color:#fff;letter-spacing:-.02em}
+.pspot .sp-t{font-size:clamp(14px,1.8vw,24px);color:#a9bbe4;background:#17213d;border:1px solid #2a3a63;border-radius:12px;padding:7px 18px}
+.pspot .sp-s{font-size:clamp(22px,4vw,58px);line-height:1.4;font-weight:700;color:#fff;max-width:19em;white-space:pre-wrap;margin:4px 0}
+.pspot .sp-l{display:flex;flex-direction:column;gap:12px;max-width:26em;width:100%}
+.pspot .sp-l div{font-size:clamp(16px,2.3vw,32px);line-height:1.45;font-weight:600;color:#dff4e9;background:#10291f;border:1px solid #1d5a41;border-left:5px solid #12a06a;border-radius:0 12px 12px 0;padding:11px 16px;text-align:left}
+.pspot .sp-n{font-size:clamp(14px,1.8vw,22px);color:#8c9ab9;line-height:1.7}
+.pspot .sp-x{font-size:clamp(11px,1.3vw,15px);color:#6b7795;letter-spacing:.03em;margin-top:6px}
+.present.light .pspot{background:rgba(255,255,255,.97)}
+.present.light .pspot .sp-k{color:#0f8457}
+.present.light .pspot .sp-g{color:var(--tx)}
+.present.light .pspot .sp-t{color:var(--pri-d);background:#eef3ff;border-color:#c6d5f7}
+.present.light .pspot .sp-s{color:#17284a}
+.present.light .pspot .sp-l div{color:#17433a;background:#f3fbf6;border-color:#cfe6d8;border-left-color:#12a06a}
+.present.light .pspot .sp-n{color:var(--mu)}
+.present.light .pspot .sp-x{color:#98a2b8}
 .pbody .pname{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
 .pbody h1{font-size:calc(var(--ps) * 1.7);margin:0;letter-spacing:-.02em}
 .pbody .pm{color:#9aa8c9;font-size:calc(var(--ps) * .58);margin:6px 0 0}
@@ -344,7 +393,7 @@ canvas#cv{width:100%;border:1px solid var(--bd);border-radius:10px;touch-action:
 .pbody .doc img{background:#fff}
 .pbody.sumonly .doc{display:none}
 .pbody .nodoc{color:#8c9ab9}
-.pfoot{display:flex;gap:12px;align-items:center;padding:9px 16px;background:#141b2e;border-top:1px solid #222c47;color:#8c9ab9;font-size:.85em;flex-wrap:wrap}
+.pfoot{display:flex;gap:11px;align-items:center;padding:5px 14px;background:#141b2e;border-top:1px solid #222c47;color:#8c9ab9;font-size:.8em;flex-wrap:wrap}
 .pfoot .sp{flex:1}
 .pfoot b{color:#cfdcff}
 
@@ -358,13 +407,31 @@ canvas#cv{width:100%;border:1px solid var(--bd);border-radius:10px;touch-action:
 .present.light .pbar .sep{background:var(--bd)}
 .present.light .pbar .cnt{color:#46506b}
 .present.light .pbar select{background:#fff;border:1px solid var(--bd);color:var(--tx)}
-.present.light .ptimer{background:#fff;border-color:var(--bd);color:var(--pri-d)}
-.present.light .ptimer.run{background:#e7f0ff;border-color:#9dbcf5;color:#1b4ea8}
-.present.light .ptimer.end{background:#ffe9e6;border-color:#f0a99f;color:#b42318}
-.present.light .pdots{background:#eef1f8;border-bottom:1px solid var(--bd)}
+.present.light .pbar .pnm{color:var(--tx)}
+.present.light .pbar .pnm em{color:var(--mu)}
+.present.light .pbar .ptimer{background:#fff;border-color:var(--bd);color:var(--pri-d)}
+.present.light .pbar .ptimer.t-ok{background:#eafaf2;border-color:#9dd9bb;color:#0f7049}
+.present.light .pbar .ptimer.t-warn{background:#fff6e4;border-color:#eacb8d;color:#8a5c05}
+.present.light .pbar .ptimer.t-dan{background:#ffeeea;border-color:#f3b3a7;color:#b0301e}
+.present.light .pbar .ptimer:not(.run){background:#fff;border-color:var(--bd);color:var(--pri-d)}
+.present.light .pbar .ptimer.t-end,.present.light .pbar .ptimer:not(.run).t-end{background:#ffe9e6;border-color:#f0a99f;color:#b42318}
+.present.light .ppop{background:#fff;border-color:var(--bd);color:var(--tx);box-shadow:0 14px 34px rgba(24,34,64,.16)}
+.present.light .ppop .h{color:var(--mu)}
+.present.light .ppop .mins button{background:#fff;border-color:var(--bd);color:var(--tx)}
+.present.light .ppop .mins button:hover{background:#eef2fc}
+.present.light .ppop .mins button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.present.light .ppop .d{background:var(--bd)}
+.present.light .ppop .mi{color:var(--tx)}
+.present.light .ppop .mi:hover{background:#eef2fc}
+.present.light .ppop .mi kbd{color:var(--mu);background:#f4f6fb;border-color:var(--bd)}
+.present.light .pdots{background:#f6f8fd;border-bottom:1px solid var(--bd)}
 .present.light .pdots i{background:#ced7ea}
+.present.light .pdots i:hover{background:#9fb0d4}
 .present.light .pdots i.on{background:var(--pri)}
 .present.light .pdots i.done{background:var(--ok)}
+.present.light .pdots i.on.done{background:var(--pri)}
+.present.light .pbody.spotting .doc>*{opacity:.3}
+.present.light .pbody.spotting .doc>*.spot{opacity:1}
 .present.light .pbody .pm{color:var(--mu)}
 .present.light .pbody .pt{background:#eef3ff;border-color:#c6d5f7;color:var(--pri-d)}
 .present.light .pbody .psum{background:#f4f8ff;border-color:#c9dcf8;border-left-color:var(--pri);color:#17284a}
@@ -3099,7 +3166,7 @@ function adminStatus(b) {
       <button id="pdfAll">전체 PDF 저장·인쇄</button>
       <button id="hwpxAll">전체 HWPX 저장</button>
     </div>
-    <p class="mu" style="margin:10px 0 0">발표 화면에서는 ← → 로 이동, <b>Space</b> 타이머, <b>S</b> 요약만 보기, <b>F</b> 전체화면, <b>Esc</b> 닫기입니다.</p>
+    <p class="mu" style="margin:10px 0 0">발표 화면에서는 ← → 로 이동, <b>숫자키</b>로 해당 분임 바로 가기, <b>Space</b> 타이머, <b>K</b> 핵심 문장만 크게, <b>S</b> 요약만, <b>T</b> 배경, <b>F</b> 전체화면, <b>Esc</b> 닫기입니다. 발표 중 내용을 <b>클릭하면 그 칸만 또렷하게</b> 보여 줍니다.</p>
     ${roundNums().length > 1 ? `<div class="hr"></div>
     <label>차수별로 한 번에 저장 <span class="mu">(지난 차수도 그대로 보관되어 있습니다)</span></label>
     <div class="row wrap">
@@ -3177,7 +3244,7 @@ function adminStatus(b) {
 /* ===================== 발표 스테이지 ===================== */
 const P = {
   open: false, ids: [], i: 0, r: 0, gmap: null, size: parseInt(localStorage.getItem('wsPs')) || 30, unsub: null, doc: null,
-  sumOnly: false, theme: localStorage.getItem('wsPtheme') || 'dark',
+  sumOnly: false, spot: false, block: null, blockIdx: null, theme: localStorage.getItem('wsPtheme') || 'dark',
   t: { mins: parseInt(localStorage.getItem('wsPmin')) || 3, endsAt: null, paused: true, remain: 0 }
 };
 async function openPresentRound(r, ids) {
@@ -3190,24 +3257,28 @@ function openPresent(ids, i, o) {
   if (!ids || !ids.length) return toast('발표할 분임이 없어요');
   o = o || {};
   P.r = o.r || RN(); P.gmap = o.gmap || null;
-  P.ids = ids; P.i = Math.max(0, i || 0); P.open = true; P.sumOnly = false;
+  P.ids = ids; P.i = Math.max(0, i || 0); P.open = true; P.sumOnly = false; P.spot = false; P.block = null; P.blockIdx = null;
   document.body.classList.add('noscroll');
   const el = $('#present'); el.hidden = false;
   el.classList.toggle('light', P.theme === 'light');
   el.innerHTML = `
   <div class="pbar">
-    <button id="pp">◀ 이전</button><span class="cnt" id="pc"></span><button id="pn">다음 ▶</button>
+    <button class="ic" id="pp" title="이전 분임 (←)">◀</button>
+    <span class="cnt" id="pc"></span>
+    <button class="ic" id="pn" title="다음 분임 (→)">▶</button>
+    <span class="pnm" id="pnm"></span>
     <span class="sep"></span>
-    <span class="ptimer" id="ptimer">${fmtClock(P.t.mins * 60000)}</span>
-    <button id="tgo">▶ 시작</button><button id="trs">↺</button>
-    <select id="tmin" title="발표 제한 시간">${[1, 2, 3, 5, 7, 10, 15].map(n => `<option value="${n}" ${n === P.t.mins ? 'selected' : ''}>${n}분</option>`).join('')}</select>
+    <button class="ptimer" id="ptimer" title="누르면 시작 (Space)"><i id="pticon">▶</i><span id="ptnum">${fmtClock(P.t.mins * 60000)}</span></button>
+    <button class="ic" id="tset" title="발표 시간 설정">⚙</button>
     <span class="sp"></span>
-    <button id="ps">요약만</button>
-    <button id="pth" title="발표 배경 밝게/어둡게 (T)">${P.theme === 'light' ? '🌙 어둡게' : '☀️ 밝게'}</button>
-    <button id="fm">A−</button><button id="fp">A+</button>
-    <button id="ff">전체화면</button>
-    <button id="pf">PDF</button><button id="ph">HWPX</button>
-    <button id="px">닫기 ✕</button>
+    <button id="pk" title="핵심 문장만 크게 보기 (K)">🎤 핵심</button>
+    <button id="ps" title="발표 요약만 보기 (S)">요약만</button>
+    <button class="ic" id="fm" title="글자 작게">A−</button>
+    <button class="ic" id="fp" title="글자 크게">A+</button>
+    <button class="ic" id="pth" title="배경 밝게/어둡게 (T)">${P.theme === 'light' ? '🌙' : '☀️'}</button>
+    <button class="ic" id="ff" title="전체화면 (F)">⛶</button>
+    <button class="ic" id="pmore" title="더 보기">⋯</button>
+    <button class="ic" id="px" title="닫기 (Esc)">✕</button>
   </div>
   <div class="pdots" id="pdots"></div>
   <div class="pbody" id="pbody"></div>
@@ -3215,20 +3286,118 @@ function openPresent(ids, i, o) {
     <span class="pbrand">생각 모아 <em>봄</em></span>
     <span>발표 <b id="fnow">-</b></span><span>다음 <b id="fnext">-</b></span>
     <span class="sp"></span>
-    <span>← → 이동 · Space 타이머 · S 요약 · T 배경 · F 전체화면 · Esc 닫기</span>
+    <span>← → 이동 · Space 타이머 · S 요약 · K 핵심 문장 · T 배경 · F 전체화면 · 내용을 누르면 그 칸만 또렷하게</span>
   </div>`;
   $('#pp').onclick = () => goP(-1); $('#pn').onclick = () => goP(1);
   $('#fm').onclick = () => sizeP(-3); $('#fp').onclick = () => sizeP(3);
   $('#ps').onclick = toggleSumOnly;
+  $('#pk').onclick = toggleSpot;
   $('#pth').onclick = togglePTheme;
   $('#ff').onclick = () => { if (document.fullscreenElement) document.exitFullscreen(); else el.requestFullscreen && el.requestFullscreen(); };
-  $('#pf').onclick = () => exportPdf([P.ids[P.i]], P.r);
-  $('#ph').onclick = () => exportHwpx([P.ids[P.i]], P.r);
   $('#px').onclick = closePresent;
-  $('#tgo').onclick = togglePresentTimer;
-  $('#trs').onclick = resetPresentTimer;
-  $('#tmin').onchange = e => { P.t.mins = +e.target.value; localStorage.setItem('wsPmin', P.t.mins); resetPresentTimer(); };
+  $('#ptimer').onclick = togglePresentTimer;
+  $('#tset').onclick = e => { e.stopPropagation(); openTimerPop(); };
+  $('#pmore').onclick = e => { e.stopPropagation(); openMorePop(); };
+  $('#pdots').onclick = e => { const d = e.target.closest('i[data-i]'); if (d) goP(+d.dataset.i - P.i); };
+  $('#pbody').onclick = e => {
+    if (e.target.closest('a')) return;
+    const doc = $('#pbody .doc'); if (!doc) return;
+    let n = e.target;
+    while (n && n.parentElement !== doc) n = n.parentElement;
+    const b = $('#pbody');
+    if (!n || P.block === n) return clearBlockSpot();
+    P.block = n; P.blockIdx = [...doc.children].indexOf(n);
+    b.classList.add('spotting');
+    $$('#pbody .doc>.spot').forEach(x => x.classList.remove('spot'));
+    n.classList.add('spot');
+  };
   resetPresentTimer(); watchP();
+}
+/* --- 발표 시간 설정 팝업 --- */
+function closePops() { $$('#present .ppop').forEach(p => p.remove()); }
+function placePop(p, anchor, align) {
+  const host = $('#present'); host.appendChild(p);
+  const r = anchor.getBoundingClientRect(), w = p.offsetWidth || 212;
+  let left = align === 'right' ? r.right - w : r.left;
+  left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
+  p.style.left = left + 'px'; p.style.top = (r.bottom + 6) + 'px';
+}
+function openTimerPop() {
+  if ($('#ptpop')) return closePops();
+  closePops();
+  const p = document.createElement('div');
+  p.className = 'ppop'; p.id = 'ptpop';
+  p.innerHTML = `<div class="h">발표 제한 시간</div>
+    <div class="mins">${[1, 2, 3, 5, 7, 10, 15, 20].map(n => `<button data-m="${n}" class="${n === P.t.mins ? 'on' : ''}">${n}분</button>`).join('')}</div>
+    <div class="d"></div>
+    <button class="mi" data-a="reset"><span>↺ 처음으로 되돌리기</span></button>
+    <button class="mi" data-a="go"><span>${P.t.paused ? '▶ 시작하기' : '⏸ 잠시 멈추기'}</span><kbd>Space</kbd></button>`;
+  p.onclick = e => {
+    e.stopPropagation();
+    const m = e.target.closest('[data-m]'), a = e.target.closest('[data-a]');
+    if (m) { P.t.mins = +m.dataset.m; localStorage.setItem('wsPmin', P.t.mins); resetPresentTimer(); closePops(); toast(`발표 시간을 ${P.t.mins}분으로 맞췄어요`); }
+    else if (a && a.dataset.a === 'reset') { resetPresentTimer(); closePops(); }
+    else if (a) { togglePresentTimer(); closePops(); }
+  };
+  placePop(p, $('#tset'), 'left');
+}
+function openMorePop() {
+  if ($('#pmpop')) return closePops();
+  closePops();
+  const p = document.createElement('div');
+  p.className = 'ppop'; p.id = 'pmpop'; p.style.minWidth = '234px';
+  p.innerHTML = `<div class="h">이 분임 저장</div>
+    <button class="mi" data-a="pdf"><span>📄 PDF 저장 · 인쇄</span></button>
+    <button class="mi" data-a="hwpx"><span>📝 HWPX 저장</span></button>
+    <div class="d"></div>
+    <div class="h">보기</div>
+    <button class="mi" data-a="spot"><span>🎤 핵심 문장만 크게</span><kbd>K</kbd></button>
+    <button class="mi" data-a="sum"><span>📋 발표 요약만 보기</span><kbd>S</kbd></button>
+    <button class="mi" data-a="clear"><span>✦ 집중 보기 해제</span></button>`;
+  p.onclick = e => {
+    e.stopPropagation();
+    const a = e.target.closest('[data-a]'); if (!a) return;
+    const k = a.dataset.a; closePops();
+    if (k === 'pdf') exportPdf([P.ids[P.i]], P.r);
+    if (k === 'hwpx') exportHwpx([P.ids[P.i]], P.r);
+    if (k === 'spot') toggleSpot();
+    if (k === 'sum') toggleSumOnly();
+    if (k === 'clear') clearBlockSpot();
+  };
+  placePop(p, $('#pmore'), 'right');
+}
+function clearBlockSpot() {
+  P.block = null; P.blockIdx = null;
+  const b = $('#pbody'); if (b) b.classList.remove('spotting');
+  $$('#pbody .doc>.spot').forEach(x => x.classList.remove('spot'));
+}
+/* --- 핵심 문장만 크게 보기 --- */
+function toggleSpot() {
+  P.spot = !P.spot;
+  const b = $('#pk'); if (b) b.classList.toggle('on', P.spot);
+  if (!P.spot) { const o = $('#pspot'); if (o) o.remove(); return; }
+  renderSpot();
+}
+function sayLines() {
+  const d = document.createElement('div');
+  d.innerHTML = clean(P.doc && P.doc.html) || '';
+  let out = $$('.tpl-say p', d).map(n => (n.textContent || '').trim()).filter(t => t && !/^[-·.\s]*$/.test(t));
+  if (!out.length) out = $$('.tpl-concl li', d).map(n => (n.textContent || '').trim()).filter(Boolean);
+  return out.slice(0, 4);
+}
+function renderSpot() {
+  if (!P.open || !P.spot) return;
+  const host = $('#present'); if (!host) return;
+  let o = $('#pspot');
+  if (!o) { o = document.createElement('div'); o.id = 'pspot'; o.className = 'pspot'; o.onclick = () => toggleSpot(); host.appendChild(o); }
+  const g = pG(P.ids[P.i]) || {}, sum = (P.doc && P.doc.summary || '').trim(), lines = sayLines();
+  o.innerHTML = `<div class="sp-k">핵심 문장</div>
+    <div class="sp-g">${esc(g.name || '')}</div>
+    ${g.topic ? `<div class="sp-t">${esc(g.topic)}</div>` : ''}
+    ${sum ? `<div class="sp-s">${nl2(sum)}</div>` : ''}
+    ${lines.length ? `<div class="sp-l">${lines.map(t => `<div>${esc(t)}</div>`).join('')}</div>` : ''}
+    ${!sum && !lines.length ? '<div class="sp-n">아직 정리된 핵심 문장이 없어요.<br>작업실의 <b>발표 요약</b>이나 양식의 <b>발표 문장</b> 칸을 채우면 여기 크게 보입니다.</div>' : ''}
+    <div class="sp-x">아무 곳이나 누르면 (또는 K · Esc) 전체 화면으로 돌아갑니다</div>`;
 }
 const pG = id => (P.gmap ? P.gmap[id] : S.groups[id]);
 function watchP() {
@@ -3238,6 +3407,7 @@ function watchP() {
 }
 function goP(d) {
   const n = P.i + d; if (n < 0 || n >= P.ids.length) return;
+  closePops(); clearBlockSpot();
   P.i = n; resetPresentTimer(); watchP(); const b = $('#pbody'); if (b) b.scrollTop = 0;
 }
 function sizeP(d) { P.size = Math.min(80, Math.max(14, P.size + d)); localStorage.setItem('wsPs', P.size); paintPresent(); }
@@ -3251,17 +3421,24 @@ function togglePTheme() {
   toast(P.theme === 'light' ? '밝은 배경으로 바꿨어요' : '어두운 배경으로 바꿨어요');
 }
 function toggleSumOnly() { P.sumOnly = !P.sumOnly; const b = $('#ps'); if (b) b.classList.toggle('on', P.sumOnly); paintPresent(); }
-function resetPresentTimer() { P.t.endsAt = null; P.t.paused = true; P.t.remain = P.t.mins * 60000; const g = $('#tgo'); if (g) g.textContent = '▶ 시작'; tickPresentTimer(); }
+function resetPresentTimer() { P.t.endsAt = null; P.t.paused = true; P.t.remain = P.t.mins * 60000; tickPresentTimer(); }
 function togglePresentTimer() {
-  if (P.t.paused) { P.t.endsAt = Date.now() + (P.t.remain || P.t.mins * 60000); P.t.paused = false; $('#tgo').textContent = '⏸ 정지'; }
-  else { P.t.remain = Math.max(0, P.t.endsAt - Date.now()); P.t.paused = true; $('#tgo').textContent = '▶ 계속'; }
+  if (P.t.paused) { P.t.endsAt = Date.now() + (P.t.remain || P.t.mins * 60000); P.t.paused = false; }
+  else { P.t.remain = Math.max(0, P.t.endsAt - Date.now()); P.t.paused = true; }
   tickPresentTimer();
 }
 function tickPresentTimer() {
   const el = $('#ptimer'); if (!el) return;
+  const tot = Math.max(1, P.t.mins * 60000);
   const left = P.t.paused ? (P.t.remain || 0) : Math.max(0, P.t.endsAt - Date.now());
-  el.textContent = left <= 0 ? '시간 종료' : fmtClock(left);
-  el.className = 'ptimer ' + (left <= 0 ? 'end' : (P.t.paused ? '' : 'run'));
+  const r = left / tot;
+  const num = $('#ptnum'), ic = $('#pticon');
+  if (num) num.textContent = left <= 0 ? '시간 종료' : fmtClock(left);
+  if (ic) ic.textContent = left <= 0 ? '⏱' : (P.t.paused ? '▶' : '⏸');
+  const st = left <= 0 ? 'end' : (r <= .2 ? 'dan' : (r <= .5 ? 'warn' : 'ok'));
+  el.className = 'ptimer' + (P.t.paused ? '' : ' run') + ' t-' + st;
+  el.title = left <= 0 ? '시간이 끝났어요 — ⚙ 에서 되돌릴 수 있어요' : (P.t.paused ? '누르면 시작 (Space)' : '누르면 잠시 멈춤 (Space)');
+  if (P.t.endedToast !== (left <= 0)) { P.t.endedToast = left <= 0; if (left <= 0 && !P.t.paused) toast('발표 시간이 끝났어요'); }
 }
 function paintPresent() {
   if (!P.open) return;
@@ -3270,8 +3447,14 @@ function paintPresent() {
   b.style.setProperty('--ps', P.size + 'px');
   b.classList.toggle('sumonly', P.sumOnly);
   $('#pc').textContent = `${P.i + 1} / ${P.ids.length}`;
+  $('#pnm').textContent = g.name;
+  const nxn = pG(P.ids[P.i + 1]);
+  $('#pnm').innerHTML = `${esc(g.name)}<em>${nxn ? '다음 ' + esc(nxn.name) : '마지막 발표'}</em>`;
   $('#pp').disabled = P.i === 0; $('#pn').disabled = P.i === P.ids.length - 1;
-  $('#pdots').innerHTML = P.ids.map((id, k) => `<i class="${k === P.i ? 'on' : ((pG(id) || {}).status === 'done' ? 'done' : '')}"></i>`).join('');
+  $('#pdots').innerHTML = P.ids.map((id, k) => {
+    const gg = pG(id) || {};
+    return `<i data-i="${k}" title="${esc((k + 1) + '. ' + (gg.name || ''))}" class="${k === P.i ? 'on' : ''} ${gg.status === 'done' ? 'done' : ''}"></i>`;
+  }).join('');
   const nx = pG(P.ids[P.i + 1]);
   $('#fnow').textContent = g.name; $('#fnext').textContent = nx ? nx.name : '마지막 발표';
   const roles = g.roles || {}, ms = mlist(g), pres = ms.find(m => m.id === roles.pres);
@@ -3288,25 +3471,42 @@ function paintPresent() {
     ${sum ? `<div class="psum">${nl2(sum)}</div>` : (P.sumOnly ? '<div class="psum">작성된 발표 요약이 없어요. (작업실의 “발표 요약”에 입력하면 여기 크게 표시됩니다)</div>' : '')}
     <div class="doc">${clean(P.doc && P.doc.html) || '<span class="nodoc">(작성된 내용이 없어요)</span>'}</div>`;
   b.scrollTop = top;
+  const doc = $('#pbody .doc'), bi = P.blockIdx;
+  P.block = null;
+  if (doc && bi != null && doc.children[bi]) { P.block = doc.children[bi]; P.block.classList.add('spot'); b.classList.add('spotting'); }
+  else b.classList.remove('spotting');
   tickPresentTimer();
+  if (P.spot) renderSpot();
 }
 function closePresent() {
-  P.open = false; if (P.unsub) P.unsub(); P.unsub = null;
+  P.open = false; P.spot = false; P.block = null; P.blockIdx = null;
+  if (P.unsub) P.unsub(); P.unsub = null;
   if (document.fullscreenElement) document.exitFullscreen();
   $('#present').hidden = true; $('#present').innerHTML = '';
   document.body.classList.remove('noscroll');
 }
+document.addEventListener('click', e => {
+  if (!P.open) return;
+  if ($('#present .ppop') && !e.target.closest('.ppop') && !e.target.closest('#tset') && !e.target.closest('#pmore')) closePops();
+}, true);
 document.addEventListener('keydown', e => {
   if (!$('#stage').hidden && e.key === 'Escape') return closeStage();
   if (e.key === 'Escape' && boardFullOn() && !document.querySelector('.modal')) return closeBoardFull();
   if (!P.open) return;
+  if (e.key === 'Escape') {
+    if ($('#present .ppop')) return closePops();
+    if (P.spot) return toggleSpot();
+    if (P.block) return clearBlockSpot();
+    return closePresent();
+  }
   if (e.key === 'ArrowRight' || e.key === 'PageDown') goP(1);
   else if (e.key === 'ArrowLeft' || e.key === 'PageUp') goP(-1);
-  else if (e.key === 'Escape') closePresent();
   else if (e.key === ' ') { e.preventDefault(); togglePresentTimer(); }
   else if (e.key === 's' || e.key === 'S') toggleSumOnly();
+  else if (e.key === 'k' || e.key === 'K') toggleSpot();
   else if (e.key === 'f' || e.key === 'F') $('#ff').click();
   else if (e.key === 't' || e.key === 'T') togglePTheme();
+  else if (/^[1-9]$/.test(e.key)) { const n = +e.key - 1; if (n < P.ids.length) goP(n - P.i); }
 });
 
 /* ===================== 저장: PDF(인쇄) / HWPX ===================== */
