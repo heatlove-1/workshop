@@ -15,7 +15,7 @@
   --bg:#eceff6;--panel:#fff;--panel-2:#f8f9fc;--ink:#101828;--mu:#667085;--bd:#dde1ea;--bd-s:#eceff4;
   --pri:#3a5bd9;--pri-d:#2c47b4;--pri-s:#eef1fe;--ok:#0e8a5f;--ok-s:#e6f6ee;--warn:#b45309;--warn-s:#fff6e8;--dg:#c0392b;--dg-s:#fdeceb;
   --acc:#12a06a;--acc-d:#0c7d52;--acc-s:#e7f7ef;--acc-l:#86e9bb;
-  --r:16px;--rs:11px;--sh:0 1px 2px rgba(16,24,40,.04),0 4px 14px rgba(16,24,40,.055);
+  --abh:64px;--r:16px;--rs:11px;--sh:0 1px 2px rgba(16,24,40,.04),0 4px 14px rgba(16,24,40,.055);
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -67,7 +67,7 @@ label.chk input{width:auto;margin-top:3px}
 /* ---------- 레이아웃 ---------- */
 .wrap{max-width:1080px;margin:0 auto;padding:18px 16px 56px}
 .wrap.narrow{max-width:520px}
-.card{background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin:14px 0;box-shadow:var(--sh)}
+.card{background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin:14px 0;box-shadow:var(--sh);scroll-margin-top:calc(var(--abh) + 12px)}
 .card.tight{padding:14px}
 .card.flat{box-shadow:none;background:var(--panel-2)}
 .card-h{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-bottom:4px}
@@ -78,7 +78,7 @@ label.chk input{width:auto;margin-top:3px}
 @media(max-width:720px){.two{grid-template-columns:1fr}}
 
 /* ---------- 상단 바 ---------- */
-.appbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--bd)}
+.appbar{position:sticky;top:0;z-index:50;background:var(--panel);border-bottom:1px solid var(--bd)}
 .appbar-in{max-width:1080px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:-.02em}
 .brand .dot{width:11px;height:11px;border-radius:3px;background:var(--pri)}
@@ -139,8 +139,8 @@ button.person:hover{border-color:var(--pri);background:var(--pri-s)}
 /* ---------- 작업실 ---------- */
 .room{display:grid;grid-template-columns:1fr 316px;gap:16px;align-items:start}
 @media(max-width:980px){.room{grid-template-columns:1fr}.room .side{order:-1}}
-.side{display:grid;gap:12px;position:sticky;top:64px}
-@media(max-width:980px){.side{position:static}}
+.side{display:grid;gap:12px;position:sticky;top:calc(var(--abh) + 10px);max-height:calc(100vh - var(--abh) - 20px);overflow-y:auto;padding-right:2px}
+@media(max-width:980px){.side{position:static;max-height:none;overflow:visible}.tb{max-height:none}}
 .side .card{margin:0}
 .brief{background:linear-gradient(180deg,#f4f7ff,#fff);border:1px solid #d3dbfb}
 .brief ol,.brief ul{margin:6px 0 0;padding-left:20px}
@@ -150,7 +150,12 @@ button.person:hover{border-color:var(--pri);background:var(--pri-s)}
 .role{display:flex;align-items:center;gap:8px;margin:7px 0}
 .role .lab{width:58px;flex:none;color:var(--mu);font-size:.86em;font-weight:700}
 .role select{flex:1}
-.tb{display:flex;flex-wrap:wrap;gap:4px;align-items:center;background:var(--panel-2);border:1px solid var(--bd);border-radius:var(--r) var(--r) 0 0;padding:7px;position:sticky;top:56px;z-index:9}
+.tb{display:flex;flex-wrap:wrap;gap:4px;align-items:center;background:var(--panel-2);border:1px solid var(--bd);border-radius:var(--r) var(--r) 0 0;padding:7px;position:sticky;top:var(--abh);z-index:30;max-height:46vh;overflow-y:auto}
+    .tb.stuck{box-shadow:0 6px 16px rgba(16,24,40,.13);border-radius:0}
+    .tb.stuck .tbg>.lab{display:none}
+    .tb.stuck .tbg{padding:2px 5px}
+    .tb.stuck button{padding:4px 8px;font-size:.88em;min-height:30px}
+    .tbfold{position:absolute;right:8px;top:6px;z-index:2}
 .tb button,.tb select{min-height:34px;padding:4px 9px;width:auto;border-radius:8px;font-weight:600}
 .tb .sep{width:1px;height:20px;background:var(--bd);margin:0 3px}
 .tb .lab{font-size:.82em;color:var(--mu);font-weight:700;padding:0 2px}
@@ -219,7 +224,16 @@ button.person:hover{border-color:var(--pri);background:var(--pri-s)}
 .cols{display:flex;gap:6px;flex-wrap:wrap}
 .cols button{width:28px;height:28px;border-radius:50%;padding:0;min-height:0;border:2px solid #fff;box-shadow:0 0 0 1px var(--bd)}
 .cols button.on{box-shadow:0 0 0 3px var(--pri)}
-.bwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(166px,1fr));gap:14px;margin-top:12px}
+.bwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;margin-top:14px}
+    .bmain{padding-bottom:16px}
+    .bsum{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:16px;padding:14px;border:1px solid var(--pri);border-radius:var(--r);background:#eef2fc}
+    .bsum .t{flex:1;min-width:240px}
+    .bsum .t p{margin:4px 0 0;font-size:.88em}
+    .bsum .a{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .bwrite{border:2px solid var(--pri);background:var(--panel)}
+    .bwrite .card-h h3{color:var(--pri-d)}
+    .bwrite.flash{animation:bwf 1.1s ease}
+    @keyframes bwf{0%,100%{box-shadow:none}30%{box-shadow:0 0 0 5px rgba(47,111,237,.22)}}
 .vswitch{display:inline-flex;border:1px solid var(--bd);border-radius:999px;overflow:hidden;background:var(--panel-2);flex:none}
 .vswitch button{border:0;background:none;padding:7px 13px;font-size:.88em;font-weight:700;color:var(--mu);min-height:0;border-radius:0}
 .vswitch button.on{background:var(--pri);color:#fff}
@@ -232,7 +246,7 @@ button.person:hover{border-color:var(--pri);background:var(--pri-s)}
 .catchip .x:hover{color:var(--pri)}
 .bmove{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;padding:9px 11px;border:1px solid var(--pri);border-radius:var(--r);background:#eef2fc}
 .blanes{display:flex;gap:12px;align-items:flex-start;overflow-x:auto;margin-top:12px;padding:2px 2px 12px}
-.blane{flex:0 0 250px;background:var(--panel-2);border:1px solid var(--bd);border-radius:var(--r);padding:10px;display:flex;flex-direction:column;gap:10px;min-height:190px}
+.blane{flex:0 0 268px;background:var(--panel-2);border:1px solid var(--bd);border-radius:var(--r);padding:10px;display:flex;flex-direction:column;gap:10px;min-height:190px}
 .blane.over{border-color:var(--pri);background:#eef2fc;box-shadow:inset 0 0 0 2px rgba(47,111,237,.35)}
 .blane-h{display:flex;align-items:center;gap:7px}
 .blane-h .dot{width:10px;height:10px;border-radius:50%;flex:none}
@@ -554,7 +568,8 @@ body{background-image:radial-gradient(900px 420px at 50% -160px,rgba(58,91,217,.
 .mark{flex:none;display:block}
 .wordmark{font-weight:800;letter-spacing:-.035em;white-space:nowrap}
 .wordmark em{font-style:normal;color:var(--acc)}
-.appbar{background:rgba(255,255,255,.82);backdrop-filter:saturate(150%) blur(10px);border-bottom:1px solid rgba(16,24,40,.07)}
+.appbar{background:var(--panel);border-bottom:1px solid rgba(16,24,40,.09)}
+    .appbar.sticky{box-shadow:0 4px 14px rgba(16,24,40,.10)}
 .appbar-in{padding:9px 16px;gap:13px}
 .brand{display:flex;align-items:center;gap:9px;font-size:1.03em}
 .appbar .ttl{letter-spacing:-.02em}
@@ -1670,19 +1685,12 @@ function renderRoom() {
     </section>
 
     <section id="sBoard" hidden>
-      <div class="card">
-        <div class="card-h"><h3>의견 포스트잇</h3><span class="chip" id="bCnt">0장</span></div>
-        <p class="mu" style="margin-top:0">생각나는 의견을 짧게 적어 붙이세요. 포스트잇을 누르면 크게 볼 수 있고, 공감(♥)이 많은 의견부터 모아 본문으로 정리할 수 있어요.</p>
-        <div class="bcompose">
-          <textarea id="bText" rows="3" placeholder="예) 신청 절차를 온라인 한 번으로 통합하면 좋겠다"></textarea>
-          <div class="row wrap">
-            <span class="mu">색</span><div class="cols" id="bCols"></div>
-            <span class="grow"></span>
-            <button class="pri" id="bAdd">붙이기 (Ctrl+Enter)</button>
-          </div>
+      <div class="card bmain">
+        <div class="card-h">
+          <h3>모인 의견</h3><span class="chip" id="bCnt">0장</span>
+          <span class="grow"></span>
+          <button class="pri sm" id="bJump">✏️ 내 의견 쓰기</button>
         </div>
-      </div>
-      <div class="card">
         <div class="bhead">
           <div class="vswitch" id="bView">
             <button data-v="wall" class="on">🧱 모아보기</button>
@@ -1703,13 +1711,29 @@ function renderRoom() {
         </div>
         <div class="bwall" id="bWall"></div>
         <div class="blanes" id="bLanes" hidden></div>
-        <p class="mu" style="margin:4px 0 0">주제별 묶기에서는 포스트잇을 <b>끌어다 놓아</b> 같은 주제끼리 모을 수 있어요. 휴대전화에서는 포스트잇의 <b>⇄ 주제</b> 를 누르면 됩니다.</p>
-        <div class="btnrow" style="margin-top:14px">
-          <button class="pri" id="bToDoc">선택 의견 본문으로 정리</button>
-          <span class="grow"></span>
-          <button class="warn sm" id="bClear">보드 비우기</button>
+        <p class="mu" style="margin:10px 0 0">포스트잇을 누르면 크게 볼 수 있어요. <b>주제별 묶기</b>에서는 <b>끌어다 놓아</b> 같은 주제끼리 모을 수 있고, 휴대전화에서는 포스트잇의 <b>⇄ 주제</b> 를 누르면 됩니다.</p>
+        <div class="bsum">
+          <div class="t">
+            <b>모둠 의견 정리하기</b>
+            <p class="mu">고른 의견이 <b>주제별 의견 표 · 핵심 키워드 · 우리 분임의 결론 · 발표 문장</b> 칸으로 작업실 본문에 들어갑니다. 빈칸만 채우면 발표 준비가 끝납니다.</p>
+          </div>
+          <div class="a">
+            <button class="pri" id="bToDoc">선택 의견 본문으로 정리</button>
+            <button class="warn sm" id="bClear">보드 비우기</button>
+          </div>
         </div>
-        <p class="mu" style="margin:8px 0 0">정리하면 <b>주제별 의견 표 · 핵심 키워드 · 우리 분임의 결론 · 발표 문장</b> 칸이 한 번에 만들어집니다. 빈칸만 채우면 발표 준비가 끝납니다.</p>
+      </div>
+
+      <div class="card bwrite" id="bWrite">
+        <div class="card-h"><h3>✏️ 내 의견 쓰기</h3><span class="mu">짧게 한 가지씩 · Ctrl+Enter 로 바로 붙이기</span></div>
+        <div class="bcompose">
+          <textarea id="bText" rows="2" placeholder="예) 신청 절차를 온라인 한 번으로 통합하면 좋겠다"></textarea>
+          <div class="row wrap">
+            <span class="mu">색</span><div class="cols" id="bCols"></div>
+            <span class="grow"></span>
+            <button class="pri" id="bAdd">붙이기 (Ctrl+Enter)</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1733,7 +1757,7 @@ function renderRoom() {
     $('#sMine').hidden = S.roomTab !== 'mine'; $('#sBoard').hidden = S.roomTab !== 'board';
     $('#sOthers').hidden = S.roomTab !== 'others'; $('#sPast').hidden = S.roomTab !== 'past';
     if (S.roomTab === 'others') updateRoom();
-    if (S.roomTab === 'board') { renderBoard(); const t = $('#bText'); if (t) t.focus(); }
+    if (S.roomTab === 'board') { renderBoard(); window.scrollTo({ top: 0, behavior: 'auto' }); }
     if (S.roomTab === 'past') renderPastRounds();
   });
   bindRoundBar(); bindEditor(); bindBoard();
@@ -2071,6 +2095,12 @@ function bindBoard() {
   $('#bMine').onchange = e => { B.mine = e.target.checked; renderBoard(); };
   $('#bPickAll').onclick = () => { noteList(S.gid).forEach(n => { B.sel[n.id] = true; }); renderBoard(); };
   $('#bPickNone').onclick = () => { B.sel = {}; renderBoard(); };
+  const jmp = $('#bJump');
+  if (jmp) jmp.onclick = () => {
+    const w = $('#bWrite'), t = $('#bText');
+    if (w) { w.scrollIntoView({ behavior: 'smooth', block: 'center' }); w.classList.remove('flash'); void w.offsetWidth; w.classList.add('flash'); }
+    if (t) setTimeout(() => t.focus(), 260);
+  };
   $('#bToDoc').onclick = notesToDoc;
   $('#bClear').onclick = clearBoard;
   $$('#bView button').forEach(b => b.onclick = () => { B.view = b.dataset.v; setView(); });
@@ -2130,7 +2160,7 @@ function renderBoard() {
     const la = $('#laneAdd', lanes); if (la) la.onclick = addCat;
   } else {
     wall.innerHTML = ns.length ? ns.map(n => noteCardHtml(n)).join('') :
-      '<div class="bempty">' + ((B.cat !== null || B.mine) ? '이 조건에 맞는 포스트잇이 없어요.' : '아직 붙은 포스트잇이 없어요.<br>위에 의견을 적고 <b>붙이기</b>를 눌러 보세요.') + '</div>';
+      '<div class="bempty">' + ((B.cat !== null || B.mine) ? '이 조건에 맞는 포스트잇이 없어요.' : '아직 붙은 포스트잇이 없어요.<br>아래 <b>내 의견 쓰기</b> 칸에 적고 <b>붙이기</b>를 눌러 보세요.') + '</div>';
     bindNotes(wall, ord);
   }
   updatePickCnt();
@@ -3240,6 +3270,31 @@ async function exportHwpx(ids, r) {
     toast('HWPX 파일을 저장했어요 (그림은 PDF로 확인)');
   } catch (e) { console.error(e); toast('HWPX 저장 중 오류가 났어요'); }
 }
+
+
+/* ===== 고정 바(상단 바·툴바) 겹침 방지 ===== */
+function syncSticky() {
+  const ab = document.querySelector('.appbar');
+  const h = ab ? Math.round(ab.getBoundingClientRect().height) : 0;
+  const cur = document.documentElement.style.getPropertyValue('--abh');
+  if (h && cur !== h + 'px') document.documentElement.style.setProperty('--abh', h + 'px');
+  const sy = window.scrollY || document.documentElement.scrollTop || 0;
+  if (ab) ab.classList.toggle('sticky', sy > 4);
+  const tb = document.querySelector('.tb');
+  if (tb) tb.classList.toggle('stuck', sy > 10 && tb.getBoundingClientRect().top <= h + 2);
+}
+let _ssq = false;
+function queueSticky() { if (_ssq) return; _ssq = true; requestAnimationFrame(() => { _ssq = false; syncSticky(); }); }
+window.addEventListener('scroll', queueSticky, { passive: true });
+window.addEventListener('resize', queueSticky);
+window.addEventListener('orientationchange', queueSticky);
+if (window.ResizeObserver) {
+  const ro = new ResizeObserver(queueSticky);
+  const watchAppbar = () => { const ab = document.querySelector('.appbar'); if (ab && ab !== ro._t) { if (ro._t) ro.unobserve(ro._t); ro.observe(ab); ro._t = ab; } };
+  new MutationObserver(() => { watchAppbar(); queueSticky(); }).observe(document.getElementById('app'), { childList: true });
+  watchAppbar();
+}
+setTimeout(syncSticky, 60);
 
 window.addEventListener('popstate', () => { closePresent(); start(); });
 start();
