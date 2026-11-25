@@ -363,24 +363,30 @@ canvas#cv{width:100%;border:1px solid var(--bd);border-radius:10px;touch-action:
 .pbody .doc>*{transition:opacity .18s ease,transform .18s ease}
 .pbody.spotting .doc>*{opacity:.26}
 .pbody.spotting .doc>*.spot{opacity:1;transform:scale(1.012);outline:2px solid #4b7fe0;outline-offset:7px;border-radius:12px}
-/* 핵심 문장만 크게 보기 */
-.pspot{position:absolute;inset:0;z-index:8;background:rgba(7,11,22,.955);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:5vh 6vw;text-align:center;overflow:auto;cursor:pointer}
-.pspot .sp-k{font-size:clamp(12px,1.5vw,17px);font-weight:800;letter-spacing:.1em;color:#6fd3a5}
-.pspot .sp-g{font-size:clamp(20px,3vw,40px);font-weight:800;color:#fff;letter-spacing:-.02em}
-.pspot .sp-t{font-size:clamp(14px,1.8vw,24px);color:#a9bbe4;background:#17213d;border:1px solid #2a3a63;border-radius:12px;padding:7px 18px}
-.pspot .sp-s{font-size:clamp(22px,4vw,58px);line-height:1.4;font-weight:700;color:#fff;max-width:19em;white-space:pre-wrap;margin:4px 0}
-.pspot .sp-l{display:flex;flex-direction:column;gap:12px;max-width:26em;width:100%}
-.pspot .sp-l div{font-size:clamp(16px,2.3vw,32px);line-height:1.45;font-weight:600;color:#dff4e9;background:#10291f;border:1px solid #1d5a41;border-left:5px solid #12a06a;border-radius:0 12px 12px 0;padding:11px 16px;text-align:left}
-.pspot .sp-n{font-size:clamp(14px,1.8vw,22px);color:#8c9ab9;line-height:1.7}
-.pspot .sp-x{font-size:clamp(11px,1.3vw,15px);color:#6b7795;letter-spacing:.03em;margin-top:6px}
-.present.light .pspot{background:rgba(255,255,255,.97)}
+/* 핵심 문장만 크게 보기 — 화면을 꽉 채우고 글자 크기를 자동으로 맞춤 */
+.pspot{position:absolute;inset:0;z-index:8;background:rgba(7,11,22,.962);display:flex;flex-direction:column;gap:1.4vh;padding:2.4vh 2.6vw 1.8vh;cursor:pointer;--sp-s:48px}
+.pspot .sp-head{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;text-align:center}
+.pspot .sp-k{font-size:clamp(11px,1.15vw,16px);font-weight:800;letter-spacing:.14em;color:#6fd3a5}
+.pspot .sp-g{font-size:clamp(18px,2.1vw,34px);font-weight:800;color:#fff;letter-spacing:-.02em}
+.pspot .sp-t{font-size:clamp(13px,1.35vw,21px);color:#a9bbe4;background:#17213d;border:1px solid #2a3a63;border-radius:11px;padding:5px 15px;font-weight:700}
+.pspot .sp-fit{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pspot .sp-in{width:100%;display:flex;flex-direction:column;gap:calc(var(--sp-s) * .34)}
+.pspot .sp-s{font-size:var(--sp-s);line-height:1.26;font-weight:800;color:#fff;letter-spacing:-.025em;white-space:pre-wrap;text-align:center;text-wrap:balance;margin:0}
+.pspot .sp-l{display:grid;gap:calc(var(--sp-s) * .2);width:100%}
+.pspot .sp-l.c2{grid-template-columns:1fr 1fr}
+.pspot .sp-l div{font-size:calc(var(--sp-s) * .56);line-height:1.34;font-weight:700;color:#dff4e9;background:#10291f;border:1px solid #1d5a41;border-left:.14em solid #12a06a;border-radius:0 .22em .22em 0;padding:.42em .62em;text-align:left;display:flex;align-items:center}
+.pspot .sp-l.solo div{font-size:calc(var(--sp-s) * .76)}
+.pspot .sp-n{font-size:clamp(16px,2vw,30px);color:#8c9ab9;line-height:1.7;text-align:center}
+.pspot .sp-x{flex:0 0 auto;font-size:clamp(11px,1.15vw,15px);color:#6b7795;letter-spacing:.03em;text-align:center}
+.present.light .pspot{background:rgba(255,255,255,.975)}
 .present.light .pspot .sp-k{color:#0f8457}
 .present.light .pspot .sp-g{color:var(--tx)}
 .present.light .pspot .sp-t{color:var(--pri-d);background:#eef3ff;border-color:#c6d5f7}
-.present.light .pspot .sp-s{color:#17284a}
+.present.light .pspot .sp-s{color:#15233f}
 .present.light .pspot .sp-l div{color:#17433a;background:#f3fbf6;border-color:#cfe6d8;border-left-color:#12a06a}
 .present.light .pspot .sp-n{color:var(--mu)}
 .present.light .pspot .sp-x{color:#98a2b8}
+@media (max-width:760px){.pspot .sp-l.c2{grid-template-columns:1fr}}
 .pbody .pname{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
 .pbody h1{font-size:calc(var(--ps) * 1.7);margin:0;letter-spacing:-.02em}
 .pbody .pm{color:#9aa8c9;font-size:calc(var(--ps) * .58);margin:6px 0 0}
@@ -3391,14 +3397,39 @@ function renderSpot() {
   let o = $('#pspot');
   if (!o) { o = document.createElement('div'); o.id = 'pspot'; o.className = 'pspot'; o.onclick = () => toggleSpot(); host.appendChild(o); }
   const g = pG(P.ids[P.i]) || {}, sum = (P.doc && P.doc.summary || '').trim(), lines = sayLines();
-  o.innerHTML = `<div class="sp-k">핵심 문장</div>
-    <div class="sp-g">${esc(g.name || '')}</div>
-    ${g.topic ? `<div class="sp-t">${esc(g.topic)}</div>` : ''}
-    ${sum ? `<div class="sp-s">${nl2(sum)}</div>` : ''}
-    ${lines.length ? `<div class="sp-l">${lines.map(t => `<div>${esc(t)}</div>`).join('')}</div>` : ''}
-    ${!sum && !lines.length ? '<div class="sp-n">아직 정리된 핵심 문장이 없어요.<br>작업실의 <b>발표 요약</b>이나 양식의 <b>발표 문장</b> 칸을 채우면 여기 크게 보입니다.</div>' : ''}
+  const two = lines.length >= 3 && lines.every(t => t.length <= 46);
+  const solo = !sum && lines.length <= 2;
+  o.innerHTML = `<div class="sp-head">
+      <span class="sp-k">핵심 문장</span>
+      <span class="sp-g">${esc(g.name || '')}</span>
+      ${g.topic ? `<span class="sp-t">${esc(g.topic)}</span>` : ''}
+    </div>
+    <div class="sp-fit"><div class="sp-in">
+      ${sum ? `<div class="sp-s">${nl2(sum)}</div>` : ''}
+      ${lines.length ? `<div class="sp-l${two ? ' c2' : ''}${solo ? ' solo' : ''}">${lines.map(t => `<div><span>${esc(t)}</span></div>`).join('')}</div>` : ''}
+      ${!sum && !lines.length ? '<div class="sp-n">아직 정리된 핵심 문장이 없어요.<br>작업실의 <b>발표 요약</b>이나 양식의 <b>발표 문장</b> 칸을 채우면 여기 크게 보입니다.</div>' : ''}
+    </div></div>
     <div class="sp-x">아무 곳이나 누르면 (또는 K · Esc) 전체 화면으로 돌아갑니다</div>`;
+  fitSpot();
 }
+function fitSpot() {
+  const o = $('#pspot'); if (!o) return;
+  const box = o.querySelector('.sp-fit'), inner = o.querySelector('.sp-in');
+  if (!box || !inner) return;
+  const run = () => {
+    const h = box.clientHeight, w = box.clientWidth;
+    if (h < 40 || w < 40) return;
+    let lo = 14, hi = 190, best = 14;
+    for (let k = 0; k < 11; k++) {
+      const mid = (lo + hi) / 2;
+      o.style.setProperty('--sp-s', mid.toFixed(2) + 'px');
+      if (inner.scrollHeight <= h && inner.scrollWidth <= w + 1) { best = mid; lo = mid; } else { hi = mid; }
+    }
+    o.style.setProperty('--sp-s', best.toFixed(2) + 'px');
+  };
+  requestAnimationFrame(run);
+}
+addEventListener('resize', () => { if (P.open && P.spot) fitSpot(); });
 const pG = id => (P.gmap ? P.gmap[id] : S.groups[id]);
 function watchP() {
   if (P.unsub) P.unsub(); P.doc = null;
