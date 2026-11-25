@@ -394,7 +394,8 @@ canvas#cv{width:100%;border:1px solid var(--bd);border-radius:10px;touch-action:
 .pspot .sp-k{font-size:clamp(11px,1.15vw,16px);font-weight:800;letter-spacing:.14em;color:#6fd3a5}
 .pspot .sp-g{font-size:clamp(18px,2.1vw,34px);font-weight:800;color:#fff;letter-spacing:-.02em}
 .pspot .sp-t{font-size:clamp(13px,1.35vw,21px);color:#a9bbe4;background:#17213d;border:1px solid #2a3a63;border-radius:11px;padding:5px 15px;font-weight:700}
-.pspot .sp-fit{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pspot .sp-fit{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden auto;scrollbar-width:none}
+.pspot .sp-fit::-webkit-scrollbar{width:0;height:0}
 .pspot .sp-in{width:100%;max-width:100%;display:flex;flex-direction:column;align-items:stretch;gap:calc(var(--sp-s) * .26)}
 .pspot .sp-s{font-size:var(--sp-s);line-height:1.3;font-weight:800;color:#fff;letter-spacing:-.02em;white-space:pre-wrap;text-align:center;text-wrap:balance;word-break:keep-all;overflow-wrap:break-word;margin:0;max-width:100%}
 .pspot .sp-l{display:grid;gap:calc(var(--sp-s) * .2);width:100%}
@@ -3625,23 +3626,27 @@ function fitSpot(again) {
   P._fitRaf = requestAnimationFrame(() => {
     P._fitRaf = null;
     const h = box.clientHeight, w = box.clientWidth;
-    if (h < 60 || w < 60) { setTimeout(() => fitSpot(), 70); return; }
+    /* 틀이 아직 그려지지 않았으면 기다린다 */
+    if (h < 60 || w < 60) { setTimeout(() => fitSpot(again), 80); return; }
     const set = v => o.style.setProperty('--sp-s', v.toFixed(2) + 'px');
-    const over = () => inner.scrollHeight > h - 2 || inner.scrollWidth > w - 1;
-    /* 한 줄에 글자가 두세 개만 들어가는 일이 없도록 공간 기준 상한을 둔다 */
-    let lo = 13, hi = Math.max(18, Math.min(150, h * 0.5, w / 6.2)), best = lo;
-    set(hi);
-    if (!over()) best = hi;
-    else {
-      for (let k = 0; k < 15; k++) {
+    /* 넘침 판정 — 소수점 반올림 오차를 감안해 2px 여유를 둔다 */
+    const over = () => (inner.scrollHeight - h > 2) || (inner.scrollWidth - w > 2);
+    /* 한 줄에 글자가 두세 개만 들어가지 않도록 공간 기준 상한을 둔다 */
+    const MIN = 16, MAX = Math.max(MIN + 6, Math.min(128, h * 0.46, w / 7.2));
+    set(MAX);
+    if (over()) {
+      let lo = MIN, hi = MAX, best = MIN;
+      for (let k = 0; k < 16; k++) {
         const mid = (lo + hi) / 2;
         set(mid);
         if (over()) hi = mid; else { best = mid; lo = mid; }
       }
+      set(best);
+      /* 아주 긴 문장이면 최소 크기까지만 조금씩 줄인다 */
+      for (let k = 0; k < 8 && over() && best > MIN; k++) { best = Math.max(MIN, best * 0.94); set(best); }
     }
-    set(best);
-    for (let k = 0; k < 18 && over(); k++) { best *= 0.955; set(best); }
-    if (!again) setTimeout(() => fitSpot(true), 130);
+    /* 글꼴이 늦게 적용되는 경우가 있어 한 번 더 확인한다 */
+    if (!again) setTimeout(() => fitSpot(true), 150);
   });
 }
 const refitSpot = () => { if (!P.open) return; if (P.spot) fitSpot(); layoutInk(); };
