@@ -160,7 +160,7 @@ button.person:hover{border-color:var(--pri);background:var(--pri-s)}
 .tb button,.tb select{min-height:34px;padding:4px 9px;width:auto;border-radius:8px;font-weight:600}
 .tb .sep{width:1px;height:20px;background:var(--bd);margin:0 3px}
 .tb .lab{font-size:.82em;color:var(--mu);font-weight:700;padding:0 2px}
-.tb.off{opacity:.45;pointer-events:none}
+.tb.off{pointer-events:none}
 .doc{background:#fff;border:1px solid var(--bd);border-top:0;border-radius:0 0 var(--r) var(--r);min-height:420px;padding:22px;outline:none;line-height:1.75;overflow-wrap:anywhere}
 .doc[contenteditable=false]{background:var(--panel-2)}
 .doc:focus{box-shadow:inset 0 0 0 2px rgba(58,91,217,.12)}
@@ -653,6 +653,26 @@ body{background-image:radial-gradient(900px 420px at 50% -160px,rgba(58,91,217,.
 .rvbox .doc{max-height:320px;overflow:auto;border:1px solid var(--bd);border-radius:10px;padding:11px 13px;margin-top:9px;background:#fff;font-size:.95em;min-height:0}
 @media (max-width:640px){.rbar{padding:9px 10px}.rbar .rnote{display:none}}
 
+
+/* ===================== 고정 바 불투명 · 겹침 방지 ===================== */
+.appbar{background:#fff;box-shadow:0 1px 0 rgba(16,24,40,.04)}
+.appbar.stuck{box-shadow:0 2px 10px rgba(16,24,40,.10)}
+.tb,.tb.stuck{background:var(--panel-2);opacity:1}
+.tb{isolation:isolate}
+
+/* 편집 잠김 상태: 반투명 대신 한 줄 안내 바로 */
+.tb2>.lockmsg{display:none}
+.tb.off{pointer-events:none;background:var(--warn-s);border-color:#f0d9b5;max-height:none;overflow:visible}
+.tb.off>.tbg{display:none}
+.tb2.off>.lockmsg{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:5px 6px;font-weight:700;color:#8a4b0c;font-size:.93em;line-height:1.5}
+.tb2.off>.lockmsg .mu{font-weight:500;color:#9a6a2c}
+
+/* 도구 접기 */
+.tb2>.tbfoldg{margin-left:auto}
+.tb2>.tbfoldg button{background:var(--panel);color:var(--mu);font-size:.85em}
+.tb2.fold>.tbg:not(.tbfoldg){display:none}
+.tb2.fold{padding:5px 10px}
+@media (max-width:720px){.tb2>.tbfoldg{margin-left:0}}
 </style>
 </head>
 <body>
@@ -1629,6 +1649,7 @@ function renderRoom() {
       <div class="room">
         <main>
           <div class="tb tb2" id="tb">
+            <div class="lockmsg">🔒 완료 처리되어 편집이 잠겨 있어요 <span class="mu">— 아래 ‘다시 열어 수정하기’를 누르면 다시 쓸 수 있어요</span></div>
             <div class="tbg"><span class="lab">문단</span>
               <select id="fb" title="문단 종류"><option value="p">본문</option><option value="h2">큰 제목</option><option value="h3">소제목</option><option value="blockquote">인용</option></select>
               <select id="ff" title="글꼴"><option value="">글꼴</option><option value="Pretendard, sans-serif">기본(고딕)</option><option value="'Noto Serif KR', serif">명조</option><option value="'Gowun Dodum', sans-serif">둥근</option><option value="'Nanum Pen Script', cursive">손글씨</option></select>
@@ -1665,6 +1686,9 @@ function renderRoom() {
             </div>
             <div class="tbg">
               <button data-c="undo" title="되돌리기">↶</button><button data-c="redo" title="다시">↷</button>
+            </div>
+            <div class="tbg tbfoldg">
+              <button id="tbFold" title="도구 모음을 접어 화면을 넓게 씁니다">도구 접기 ▴</button>
             </div>
           </div>
           <input type="file" id="imgFile" accept="image/*" hidden>
@@ -2015,6 +2039,20 @@ function bindEditor() {
     toast(fs.length + '장을 넣었어요 · 설명 글을 고쳐 보세요');
   };
   $('#draw').onclick = openDraw;
+  const foldBtn = $('#tbFold');
+  if (foldBtn) {
+    const applyFold = () => {
+      const on = localStorage.getItem('tbFold') === '1';
+      tb.classList.toggle('fold', on);
+      foldBtn.textContent = on ? '도구 펼치기 ▾' : '도구 접기 ▴';
+      foldBtn.title = on ? '편집 도구를 다시 펼칩니다' : '도구 모음을 접어 화면을 넓게 씁니다';
+    };
+    foldBtn.onclick = () => {
+      localStorage.setItem('tbFold', localStorage.getItem('tbFold') === '1' ? '0' : '1');
+      applyFold();
+    };
+    applyFold();
+  }
   ed.addEventListener('input', () => { scheduleSave(); updateStats(); });
   ed.addEventListener('keydown', e => {
     if (e.key !== 'Tab') return;
@@ -3407,6 +3445,16 @@ setTimeout(syncSticky, 60);
 
 window.addEventListener('popstate', () => { closePresent(); start(); });
 start();
+
+// 상단 바: 스크롤되면 그림자로 본문과 분리
+(function(){
+  const upd = () => {
+    const ab = document.querySelector('.appbar');
+    if (ab) ab.classList.toggle('stuck', window.scrollY > 2);
+  };
+  window.addEventListener('scroll', upd, { passive: true });
+  upd();
+})();
 </script>
 </body>
 </html>
