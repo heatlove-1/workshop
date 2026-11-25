@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#2c47b4">
 <title>생각 모아 봄 · 분임토의 의견 모음</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='13' fill='%233a5bd9'/%3E%3Crect x='7' y='24' width='15' height='15' rx='3.5' fill='%23fff' opacity='.92'/%3E%3Crect x='26' y='24' width='15' height='15' rx='3.5' fill='%23fff' opacity='.6'/%3E%3Crect x='16.5' y='26' width='15' height='15' rx='3.5' fill='%2386e9bb'/%3E%3Cpath d='M24 24V14' stroke='%2386e9bb' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Gowun+Dodum&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
 <style>
 
 :root{
@@ -155,6 +158,7 @@ button.person:hover{border-color:var(--pri);background:var(--pri-s)}
 .doc{background:#fff;border:1px solid var(--bd);border-top:0;border-radius:0 0 var(--r) var(--r);min-height:420px;padding:22px;outline:none;line-height:1.75;overflow-wrap:anywhere}
 .doc[contenteditable=false]{background:var(--panel-2)}
 .doc:focus{box-shadow:inset 0 0 0 2px rgba(58,91,217,.12)}
+.doc.dragging{box-shadow:inset 0 0 0 3px rgba(18,160,106,.35)}
 .doc table{border-collapse:collapse;margin:10px 0;max-width:100%}
 .doc td,.doc th{border:1px solid #9aa3b5;padding:7px 11px;min-width:70px;vertical-align:top}
 .doc th{background:var(--pri-s)}
@@ -333,6 +337,171 @@ canvas#cv{width:100%;border:1px solid var(--bd);border-radius:10px;touch-action:
 .present.light .pfoot{background:#f6f8fd;border-top:1px solid var(--bd);color:var(--mu)}
 .present.light .pfoot b{color:var(--pri-d)}
 
+
+
+/* 양식 갤러리: 큰 미리보기 */
+.modal .mbox.wide{max-width:1180px}
+.gwrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:14px;align-items:start}
+.gwrap .tgal{max-height:58vh;overflow:auto;padding-right:4px}
+.gpv{border:1px solid var(--bd);border-radius:14px;background:var(--panel-2);max-height:58vh;overflow:auto}
+.gpv-h{position:sticky;top:0;display:flex;gap:10px;align-items:center;padding:11px 13px;background:var(--panel);border-bottom:1px solid var(--bd);border-radius:14px 14px 0 0}
+.gpv-h b{display:block;font-size:1.02em;letter-spacing:-.01em}
+.gpv-h .mu{display:block;font-size:.84em;margin-top:2px}
+.gpv-h button{flex:none}
+.gpv-body{padding:12px 13px 16px}
+.gpv-body .doc{border:0;border-radius:10px;min-height:0;padding:0;background:none;font-size:.92em;pointer-events:none}
+.gpv-empty{display:flex;align-items:center;justify-content:center;text-align:center;height:220px;color:var(--mu);font-size:.92em;line-height:1.7}
+.tcard .tbody .now{margin-top:7px;padding:3px 9px;font-size:.78em}
+@media (max-width:880px){.gwrap{grid-template-columns:1fr}.gwrap .tgal{max-height:38vh}.gpv{max-height:40vh}}
+
+/* ===================== 양식 시트(활동지) ===================== */
+.doc .tpl-sheet{border:1px solid #d9e0ee;border-radius:14px;margin:18px 0;background:#fff;overflow:hidden}
+.doc .tpl-sheet .tpl-h{padding:12px 16px 13px;background:#f5f8fd;border-bottom:1px solid #e3e9f5}
+.doc .tpl-sheet .tpl-k{display:inline-block;font-size:.7em;font-weight:800;letter-spacing:.03em;padding:3px 9px;border-radius:999px;background:#64748b;color:#fff;vertical-align:middle}
+.doc .tpl-sheet h2{margin:8px 0 2px;font-size:1.2em;letter-spacing:-.02em;color:#17213a;line-height:1.3}
+.doc .tpl-sheet .tpl-d{margin:0;font-size:.86em;color:#64718c}
+.doc .tpl-sheet .tpl-b{padding:14px 16px 16px}
+.doc .tpl-st{font-weight:800;color:#2a3b6b;margin:14px 0 7px;font-size:.98em;display:flex;align-items:center;gap:7px}
+.doc .tpl-st::before{content:"";width:4px;height:15px;border-radius:2px;background:#3a5bd9;display:inline-block}
+.doc .tpl-b>.tpl-st:first-child{margin-top:0}
+.doc .tpl-grid{display:grid;gap:10px;margin:8px 0 12px}
+.doc .tpl-grid.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.doc .tpl-grid.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.doc .tpl-grid.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.doc .tpl-grid.g1{grid-template-columns:1fr}
+@media (max-width:760px){
+  .doc .tpl-grid.g3,.doc .tpl-grid.g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .doc .tpl-kw{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .doc .tpl-dia .r{flex-wrap:wrap}
+  .doc .tpl-dia .r .tpl-cell{flex:1 1 96px}
+}
+.doc .tpl-cell{border:1px solid #dde3f0;border-radius:11px;padding:10px 12px 11px;background:#fbfcff;min-height:78px}
+.doc .tpl-cell>b{display:block;font-size:.84em;font-weight:800;color:#44527a;margin-bottom:5px;letter-spacing:-.01em}
+.doc .tpl-cell>p{margin:0;min-height:1.6em}
+.doc .tpl-cell.t-good{background:#f1fbf5;border-color:#bfe6cf}
+.doc .tpl-cell.t-good>b{color:#15794e}
+.doc .tpl-cell.t-warn{background:#fff9ec;border-color:#f0dcb0}
+.doc .tpl-cell.t-warn>b{color:#9a6a06}
+.doc .tpl-cell.t-info{background:#f1f6ff;border-color:#c6d7f7}
+.doc .tpl-cell.t-info>b{color:#1f46a8}
+.doc .tpl-cell.t-bad{background:#fff4f2;border-color:#f3cdc5}
+.doc .tpl-cell.t-bad>b{color:#b03226}
+.doc .tpl-cell.t-key{background:#eef2ff;border-color:#9fb4ee;border-width:2px}
+.doc .tpl-cell.t-key>b{color:#2039a0}
+.doc .tpl-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:7px;background:#3a5bd9;color:#fff;font-size:.78em;font-weight:800;margin-right:6px}
+.doc .tpl-fill{border:1px solid #e1e7f3;border-left:4px solid #93a7e0;border-radius:0 11px 11px 0;background:#fbfcff;padding:10px 13px;margin:8px 0 11px}
+.doc .tpl-fill>b{display:block;font-size:.86em;color:#3c4a70;margin-bottom:4px}
+.doc .tpl-fill>p{margin:2px 0;min-height:1.6em;border-bottom:1px dotted #c8d2e6;padding-bottom:2px}
+.doc .tpl-kw{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:8px 0 12px}
+.doc .tpl-kw .kw{border:1.5px dashed #bcc8e4;border-radius:999px;background:#fff;text-align:center;padding:9px 6px;font-weight:700;color:#2a3b6b;min-height:1.6em}
+.doc .tpl-concl{border:1px solid #c9dbf8;background:#f3f8ff;border-radius:12px;padding:12px 14px;margin:12px 0}
+.doc .tpl-concl>b{display:block;color:#1b3f8f;font-size:.92em;margin-bottom:5px}
+.doc .tpl-concl ol,.doc .tpl-concl ul{margin:4px 0 0;padding-left:22px}
+.doc .tpl-say{border:1px solid #cfe6d8;background:#f3fbf6;border-left:5px solid #12a06a;border-radius:0 12px 12px 0;padding:11px 14px;margin:12px 0 2px}
+.doc .tpl-say>b{display:block;font-size:.82em;color:#12754f;margin-bottom:4px;letter-spacing:.02em}
+.doc .tpl-say>p{margin:0;font-size:1.04em;font-weight:600;color:#17433a}
+.doc .tpl-rule{background:#f4f6fb;border:1px dashed #c9d3e8;border-radius:10px;padding:8px 12px;margin:0 0 12px;font-size:.88em;color:#4d5a7d}
+.doc .tpl-dia .r{display:flex;gap:8px;justify-content:center;margin:8px 0}
+.doc .tpl-dia .r .tpl-cell{flex:0 0 132px;min-height:58px;text-align:center}
+.doc .tpl-dia .r .tpl-cell>b{margin-bottom:3px}
+.doc .tpl-pyr .r{display:flex;justify-content:center;margin:8px 0}
+.doc .tpl-pyr .r .tpl-cell{min-height:52px}
+.doc .tpl-steps{display:grid;gap:9px;margin:8px 0 12px}
+.doc .tpl-bk{margin:10px 0 14px}
+.doc .tpl-bkh{display:inline-flex;align-items:center;gap:7px;font-weight:800;color:#2a3b6b;margin:0 0 6px;font-size:.96em}
+.doc .tpl-sheet table{width:100%;margin:6px 0 12px;border-radius:10px;overflow:hidden}
+.doc .tpl-sheet td,.doc .tpl-sheet th{border:1px solid #d3dbec;padding:8px 11px}
+.doc .tpl-sheet th{background:#eef2fb;color:#2a3b6b;font-size:.9em}
+.doc figure.fig{margin:14px 0;text-align:center}
+.doc figure.fig img{max-width:100%;border-radius:10px;border:1px solid #e1e6f0}
+.doc figure.fig figcaption{font-size:.85em;color:#64718c;margin-top:5px}
+.doc hr{border:0;border-top:2px solid #e3e8f2;margin:18px 0}
+.doc h2{font-size:1.3em;margin:16px 0 6px;color:#17213a;letter-spacing:-.02em}
+
+/* ===================== 편집 도구 모음(그룹형) ===================== */
+.tb2{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:8px 10px}
+.tb2 .tbg{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:3px 8px 3px 6px;border:1px solid var(--bd);border-radius:11px;background:#fff}
+.tb2 .tbg>.lab{font-size:.74em;color:var(--mu);font-weight:800;letter-spacing:.02em;margin-right:3px}
+.tb2 button{min-height:32px;padding:4px 9px;font-size:.9em}
+.tb2 select{min-height:32px;padding:3px 6px;font-size:.88em;width:auto}
+.tb2 .pal{display:inline-flex;gap:3px;align-items:center;padding:0 2px}
+.tb2 .sw{width:22px;height:22px;min-height:22px;padding:0;border-radius:6px;border:1px solid rgba(0,0,0,.18)}
+.tb2 .sw:hover{transform:translateY(-1px)}
+.tb2 .sw.ring{box-shadow:0 0 0 2px #fff inset}
+.tb2 .pri2{background:var(--pri-s);border-color:#c3d2f5;color:var(--pri-d);font-weight:700}
+@media (max-width:720px){.tb2{gap:5px}.tb2 .tbg{padding:2px 6px}.tb2 button{padding:4px 7px;font-size:.86em}}
+
+/* ===================== 발표 화면: 양식 시트 ===================== */
+.pbody .doc .tpl-sheet{background:#111a2f;border-color:#2c3859;border-radius:16px;margin:calc(var(--ps) * .7) 0}
+.pbody .doc .tpl-sheet .tpl-h{background:#17213d}
+.pbody .doc .tpl-sheet h2{color:#eaf0ff;font-size:calc(var(--ps) * 1.05)}
+.pbody .doc .tpl-sheet .tpl-d{color:#93a2c4;font-size:calc(var(--ps) * .5)}
+.pbody .doc .tpl-sheet .tpl-k{font-size:calc(var(--ps) * .42)}
+.pbody .doc .tpl-st{color:#b6c9ff;font-size:calc(var(--ps) * .72)}
+.pbody .doc .tpl-st::before{background:#5b84e6}
+.pbody .doc .tpl-cell{background:#15203a;border-color:#2e3a5e;color:#edf2ff}
+.pbody .doc .tpl-cell>b{color:#9db4ee;font-size:calc(var(--ps) * .52)}
+.pbody .doc .tpl-cell.t-good{background:#10291f;border-color:#235c43}
+.pbody .doc .tpl-cell.t-good>b{color:#6fd3a2}
+.pbody .doc .tpl-cell.t-warn{background:#2b2312;border-color:#5f4b1c}
+.pbody .doc .tpl-cell.t-warn>b{color:#e3bf6c}
+.pbody .doc .tpl-cell.t-info{background:#13203f;border-color:#2b4480}
+.pbody .doc .tpl-cell.t-info>b{color:#8fb3ff}
+.pbody .doc .tpl-cell.t-bad{background:#2d1715;border-color:#6a2f28}
+.pbody .doc .tpl-cell.t-bad>b{color:#f0a097}
+.pbody .doc .tpl-cell.t-key{background:#1b2a56;border-color:#4a68c4}
+.pbody .doc .tpl-cell.t-key>b{color:#b8c9ff}
+.pbody .doc .tpl-num{background:#3a5bd9;font-size:calc(var(--ps) * .5)}
+.pbody .doc .tpl-fill{background:#15203a;border-color:#2e3a5e;border-left-color:#4a68c4}
+.pbody .doc .tpl-fill>b{color:#9db4ee;font-size:calc(var(--ps) * .54)}
+.pbody .doc .tpl-fill>p{border-bottom-color:#2e3a5e}
+.pbody .doc .tpl-kw .kw{background:#15203a;border-color:#3b4a74;color:#cfdcff}
+.pbody .doc .tpl-concl{background:#13233f;border-color:#2b4480}
+.pbody .doc .tpl-concl>b{color:#9db4ee;font-size:calc(var(--ps) * .6)}
+.pbody .doc .tpl-say{background:#0f2a21;border-color:#1f5c44;border-left-color:#19c383}
+.pbody .doc .tpl-say>b{color:#5fd3a4;font-size:calc(var(--ps) * .5)}
+.pbody .doc .tpl-say>p{color:#dcfaee}
+.pbody .doc .tpl-rule{background:#141d33;border-color:#2e3a5e;color:#9aa8c9;font-size:calc(var(--ps) * .56)}
+.pbody .doc .tpl-bkh{color:#b6c9ff}
+.pbody .doc .tpl-sheet th{background:#1b2440;color:#c3d3ff}
+.pbody .doc .tpl-sheet td,.pbody .doc .tpl-sheet th{border-color:#39456a}
+.pbody .doc figure.fig figcaption{color:#93a2c4;font-size:calc(var(--ps) * .52)}
+.pbody .doc figure.fig img{border-color:#2e3a5e;max-height:52vh;object-fit:contain}
+.pbody .doc hr{border-top-color:#2c3859}
+
+.present.light .pbody .doc .tpl-sheet{background:#fff;border-color:#dbe2ef}
+.present.light .pbody .doc .tpl-sheet .tpl-h{background:#f5f8fd;border-bottom-color:#e3e9f5}
+.present.light .pbody .doc .tpl-sheet h2{color:#17213a}
+.present.light .pbody .doc .tpl-sheet .tpl-d{color:#64718c}
+.present.light .pbody .doc .tpl-st{color:#2a3b6b}
+.present.light .pbody .doc .tpl-cell{background:#fbfcff;border-color:#dde3f0;color:var(--tx)}
+.present.light .pbody .doc .tpl-cell>b{color:#44527a}
+.present.light .pbody .doc .tpl-cell.t-good{background:#f1fbf5;border-color:#bfe6cf}
+.present.light .pbody .doc .tpl-cell.t-good>b{color:#15794e}
+.present.light .pbody .doc .tpl-cell.t-warn{background:#fff9ec;border-color:#f0dcb0}
+.present.light .pbody .doc .tpl-cell.t-warn>b{color:#9a6a06}
+.present.light .pbody .doc .tpl-cell.t-info{background:#f1f6ff;border-color:#c6d7f7}
+.present.light .pbody .doc .tpl-cell.t-info>b{color:#1f46a8}
+.present.light .pbody .doc .tpl-cell.t-bad{background:#fff4f2;border-color:#f3cdc5}
+.present.light .pbody .doc .tpl-cell.t-bad>b{color:#b03226}
+.present.light .pbody .doc .tpl-cell.t-key{background:#eef2ff;border-color:#9fb4ee}
+.present.light .pbody .doc .tpl-cell.t-key>b{color:#2039a0}
+.present.light .pbody .doc .tpl-fill{background:#fbfcff;border-color:#e1e7f3;border-left-color:#93a7e0}
+.present.light .pbody .doc .tpl-fill>b{color:#3c4a70}
+.present.light .pbody .doc .tpl-fill>p{border-bottom-color:#c8d2e6}
+.present.light .pbody .doc .tpl-kw .kw{background:#fff;border-color:#bcc8e4;color:#2a3b6b}
+.present.light .pbody .doc .tpl-concl{background:#f3f8ff;border-color:#c9dbf8}
+.present.light .pbody .doc .tpl-concl>b{color:#1b3f8f}
+.present.light .pbody .doc .tpl-say{background:#f3fbf6;border-color:#cfe6d8;border-left-color:#12a06a}
+.present.light .pbody .doc .tpl-say>b{color:#12754f}
+.present.light .pbody .doc .tpl-say>p{color:#17433a}
+.present.light .pbody .doc .tpl-rule{background:#f4f6fb;border-color:#c9d3e8;color:#4d5a7d}
+.present.light .pbody .doc .tpl-bkh{color:#2a3b6b}
+.present.light .pbody .doc .tpl-sheet th{background:#eef2fb;color:#2a3b6b}
+.present.light .pbody .doc .tpl-sheet td,.present.light .pbody .doc .tpl-sheet th{border-color:#d3dbec}
+.present.light .pbody .doc figure.fig img{border-color:#e1e6f0}
+.present.light .pbody .doc figure.fig figcaption{color:#64718c}
+
 /* ---------- 인쇄 ---------- */
 #printArea{display:none}
 @media print{
@@ -356,6 +525,27 @@ canvas#cv{width:100%;border:1px solid var(--bd);border-radius:10px;touch-action:
   .qrp .code{font-size:24pt;font-weight:800;letter-spacing:2pt}
   .qrp .qpb{display:flex;align-items:center;justify-content:center;gap:8pt;font-size:16pt;font-weight:800;letter-spacing:-.5pt;margin-bottom:10pt}
   .qrp .foot{margin-top:16pt;font-size:11pt;color:#444;border-top:1px solid #bbb;display:inline-block;padding-top:6pt}
+  .pr .doc .tpl-sheet{border:1px solid #000;border-radius:0;margin:9pt 0;break-inside:avoid}
+  .pr .doc .tpl-sheet .tpl-h{background:#eee;border-bottom:1px solid #000;padding:6pt 8pt}
+  .pr .doc .tpl-sheet .tpl-k{background:#000!important;color:#fff;font-size:7.5pt;padding:1pt 5pt;border-radius:7pt}
+  .pr .doc .tpl-sheet h2{font-size:13.5pt;margin:4pt 0 1pt;color:#000}
+  .pr .doc .tpl-sheet .tpl-d{font-size:9pt;color:#333}
+  .pr .doc .tpl-sheet .tpl-b{padding:7pt 8pt}
+  .pr .doc .tpl-st{color:#000;font-size:10.5pt;margin:7pt 0 3pt}
+  .pr .doc .tpl-st::before{background:#000}
+  .pr .doc .tpl-grid{gap:5pt}
+  .pr .doc .tpl-cell,.pr .doc .tpl-fill,.pr .doc .tpl-concl,.pr .doc .tpl-say,.pr .doc .tpl-rule{border:1px solid #666!important;background:#fff!important;border-radius:0;break-inside:avoid}
+  .pr .doc .tpl-cell>b,.pr .doc .tpl-fill>b,.pr .doc .tpl-concl>b,.pr .doc .tpl-say>b{color:#000}
+  .pr .doc .tpl-say{border-left:3pt solid #000!important}
+  .pr .doc .tpl-fill{border-left:2pt solid #000!important}
+  .pr .doc .tpl-fill>p{border-bottom:1px dotted #999}
+  .pr .doc .tpl-kw .kw{border:1px dashed #666;border-radius:9pt;color:#000}
+  .pr .doc .tpl-sheet th{background:#eee!important;color:#000}
+  .pr .doc .tpl-sheet td,.pr .doc .tpl-sheet th{border:1px solid #000}
+  .pr .doc figure.fig{break-inside:avoid;margin:8pt 0}
+  .pr .doc figure.fig img{max-width:100%;max-height:95mm;border:1px solid #999}
+  .pr .doc figure.fig figcaption{font-size:9pt;color:#333}
+  .pr .doc h2{font-size:15pt;color:#000}
   @page{size:A4;margin:15mm}
 }
 
@@ -686,7 +876,8 @@ function renderTimerChip() {
 setInterval(() => { renderTimerChip(); if (P.open) tickPresentTimer(); }, 500);
 
 /* ---------- 문서 정리(보안) ---------- */
-const OK_TAGS = new Set('p div br b strong i em u s strike span font h1 h2 h3 h4 ul ol li table thead tbody tr td th img mark hr blockquote'.split(' '));
+const OK_TAGS = new Set('p div section figure figcaption br b strong i em u s strike span font h1 h2 h3 h4 h5 ul ol li table thead tbody tr td th img mark hr blockquote'.split(' '));
+const OK_CLS = /^(tpl-[a-z]+|t-[a-z]+|g[1-4]|kw|fig|r)$/;
 const DROP_TAGS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'link', 'meta', 'svg', 'form', 'input', 'button', 'textarea', 'select', 'video', 'audio']);
 function clean(html) {
   const doc = new DOMParser().parseFromString('<div>' + (html || '') + '</div>', 'text/html');
@@ -701,7 +892,8 @@ function clean(html) {
       if (!OK_TAGS.has(t)) { while (c.firstChild) c.parentNode.insertBefore(c.firstChild, c); c.remove(); return; }
       [...c.attributes].forEach(a => {
         const k = a.name.toLowerCase(), v = a.value;
-        const ok = (k === 'style' && !/expression|url\(|javascript|@import/i.test(v)) || ['size', 'color', 'colspan', 'rowspan', 'alt'].includes(k) ||
+        const ok = (k === 'style' && !/expression|url\(|javascript|@import/i.test(v)) || ['size', 'color', 'face', 'colspan', 'rowspan', 'alt', 'align'].includes(k) ||
+          (k === 'class' && v.split(/\s+/).every(x => !x || OK_CLS.test(x))) || (k === 'data-tpl') ||
           (k === 'src' && t === 'img' && /^(data:image\/(png|jpeg|gif|webp);base64,|https:\/\/)/i.test(v));
         if (!ok) c.removeAttribute(a.name);
       });
@@ -868,6 +1060,119 @@ const TPL = {
   }
 };
 
+/* ===================== 양식 디자인 업그레이드 (활동지 시트) ===================== */
+const _cell = (lab, tone, body) => '<div class="tpl-cell' + (tone ? ' ' + tone : '') + '">' + (lab ? '<b>' + lab + '</b>' : '') + '<p>' + (body || '<br>') + '</p></div>';
+const _gridc = (n, cells) => '<div class="tpl-grid g' + n + '">' + cells.join('') + '</div>';
+const _st = t => '<div class="tpl-st">' + t + '</div>';
+const _fill = (lab, lines) => '<div class="tpl-fill"><b>' + lab + '</b>' + '<p><br></p>'.repeat(lines || 2) + '</div>';
+const _concl = (lab, n) => '<div class="tpl-concl"><b>' + (lab || '우리 분임의 결론') + '</b><ol>' + '<li><br></li>'.repeat(n || 3) + '</ol></div>';
+const _say = t => '<div class="tpl-say"><b>발표 문장 — 이 문장만 읽어도 발표가 됩니다</b><p>' + (t || '우리 분임은 ______ 이 가장 중요하다고 보았습니다. 그 이유는 ______ 입니다.') + '</p></div>';
+const _kws = n => _st('핵심 키워드') + '<div class="tpl-kw">' + '<div class="kw"><br></div>'.repeat(n || 4) + '</div>';
+const _rule = t => '<div class="tpl-rule">' + t + '</div>';
+const _numc = (i, lab, tone) => _cell('<span class="tpl-num">' + i + '</span>' + lab, tone);
+const _tblS = (head, rows) => '<table><tbody>' + _trh(head) + rows.map(r => _tr(r)).join('') + '</tbody></table>';
+const _diaRow = cells => '<div class="r">' + cells.map(c => _cell(c, c === '1순위' ? 't-key' : '')).join('') + '</div>';
+const _pyrRow = (w, lab, tone) => '<div class="r"><div class="tpl-cell' + (tone ? ' ' + tone : '') + '" style="flex:0 0 ' + w + '%"><b>' + lab + '</b><p><br></p></div></div>';
+
+const TBODY = {
+  basic: _fill('1. 현황 — 지금 어떤 상태인가요?', 2) + _fill('2. 문제점 — 무엇이 어렵나요?', 2) +
+    _fill('3. 개선 방안 — 어떻게 바꾸면 좋을까요?', 3) + _fill('4. 건의 사항', 1) + _concl() + _say(),
+  table: _tblS(['구분', '우리 분임의 의견', '이유 · 근거'], [['현황', '', ''], ['문제', '', ''], ['개선안', '', ''], ['기대 효과', '', '']]) + _concl() + _say(),
+  top3: _gridc(3, [_numc(1, '첫 번째 제안'), _numc(2, '두 번째 제안'), _numc(3, '세 번째 제안')]) +
+    _fill('실행에 필요한 지원 · 예산 · 협조', 2) + _say(),
+  qa: _fill('질문 1.', 2) + _fill('질문 2.', 2) + _fill('질문 3.', 2) + _fill('그 밖에 나누고 싶은 의견', 2) + _say(),
+  postit: _st('보드에 모인 의견') + _tblS(['번호', '의견', '작성자', '공감'], [['1', '', '', ''], ['2', '', '', ''], ['3', '', '', ''], ['4', '', '', ''], ['5', '', '', '']]) +
+    _st('비슷한 의견 묶기') + _gridc(3, [_cell('묶음 1 — 이름', 't-info'), _cell('묶음 2 — 이름', 't-info'), _cell('묶음 3 — 이름', 't-info')]) +
+    _kws(4) + _concl() + _say(),
+  brain: _rule('규칙 ① 비판하지 않기 ② 많이 내기 ③ 자유롭게 ④ 남의 의견에 얹기') +
+    _st('떠오른 아이디어 — 양을 먼저') + _gridc(3, Array.from({ length: 9 }, (x, i) => _cell('아이디어 ' + (i + 1)))) +
+    _st('비슷한 것끼리 묶기') + _tblS(['묶음 이름', '포함된 아이디어', '핵심 메시지'], [['', '', ''], ['', '', ''], ['', '', '']]) +
+    _concl('해볼 만한 3가지', 3) + _say(),
+  round: _rule('한 번에 하나씩, 순서대로 의견을 말하고 그대로 기록합니다. 한 사람도 빠지지 않게.') +
+    _tblS(['이름', '1차 의견', '2차 의견 (보완)'], Array.from({ length: 6 }, () => ['', '', ''])) +
+    _fill('공통으로 나온 이야기', 2) + _concl() + _say(),
+  lotus: _st('중심 주제에서 8방향으로 펼치기') +
+    _gridc(3, [_cell('① 펼침'), _cell('② 펼침'), _cell('③ 펼침'), _cell('⑧ 펼침'), _cell('중심 주제', 't-key'), _cell('④ 펼침'), _cell('⑦ 펼침'), _cell('⑥ 펼침'), _cell('⑤ 펼침')]) +
+    _fill('가장 발전시킬 가지 1개와 이유', 2) + _say(),
+  mandal: _st('핵심 목표와 8가지 실행 요소') +
+    _gridc(3, [_cell('실행 1'), _cell('실행 2'), _cell('실행 3'), _cell('실행 8'), _cell('핵심 목표', 't-key'), _cell('실행 4'), _cell('실행 7'), _cell('실행 6'), _cell('실행 5')]) +
+    _concl('이번에 먼저 할 3가지', 3) + _say(),
+  scamper: _rule('기존 방식을 7가지 질문으로 비틀어 새 아이디어를 만듭니다.') +
+    _tblS(['질문', '바꿔 본 아이디어'], [['S 대체 — 무엇을 바꿔볼까?', ''], ['C 결합 — 무엇과 합쳐볼까?', ''], ['A 응용 — 어디서 빌려올까?', ''], ['M 수정 — 크게/작게 바꿔볼까?', ''], ['P 다른 용도 — 달리 쓸 수 있을까?', ''], ['E 제거 — 무엇을 없앨까?', ''], ['R 역순 — 순서를 뒤집으면?', '']]) +
+    _concl('채택할 아이디어', 2) + _say(),
+  worldcafe: _st('라운드를 옮겨가며 이야기 모으기') +
+    _gridc(3, [_numc(1, '1라운드 — 처음 생각', 't-info'), _numc(2, '2라운드 — 다른 모둠 의견 더하기', 't-info'), _numc(3, '3라운드 — 돌아와 정리', 't-info')]) +
+    _fill('테이블을 옮겨도 계속 나온 이야기', 2) + _concl() + _say(),
+  swot: _st('내부 · 외부 환경 진단') +
+    _gridc(2, [_cell('S 강점 (Strength)', 't-good'), _cell('W 약점 (Weakness)', 't-warn'), _cell('O 기회 (Opportunity)', 't-info'), _cell('T 위협 (Threat)', 't-bad')]) +
+    _st('교차 전략') +
+    _gridc(2, [_cell('SO — 강점으로 기회 살리기', 't-good'), _cell('WO — 약점 보완해 기회 잡기', 't-warn'), _cell('ST — 강점으로 위협 막기', 't-info'), _cell('WT — 약점·위협 줄이기', 't-bad')]) +
+    _concl('우리가 고른 전략', 2) + _say(),
+  pmi: _gridc(3, [_cell('P 좋은 점 (Plus)', 't-good'), _cell('M 아쉬운 점 (Minus)', 't-bad'), _cell('I 흥미로운 점 (Interesting)', 't-info')]) +
+    _fill('그래서 어떻게 할까요?', 2) + _concl() + _say(),
+  fish: _st('문제 — 무엇이 문제인가요?') + _fill('문제 정의', 1) +
+    _st('원인을 영역별로 나누어 보기') +
+    _gridc(4, [_cell('사람 · 역량', 't-info'), _cell('제도 · 절차', 't-info'), _cell('환경 · 시설', 't-info'), _cell('자원 · 예산', 't-info')]) +
+    _fill('가장 큰 뿌리 원인', 1) + _concl('원인을 없앨 방법', 3) + _say(),
+  why5: _st('왜를 다섯 번 — 뿌리까지 내려가기') +
+    '<div class="tpl-steps">' + [1, 2, 3, 4, 5].map(i => _cell('<span class="tpl-num">' + i + '</span>왜 그런가요?', i === 5 ? 't-key' : '')).join('') + '</div>' +
+    _fill('근본 원인', 1) + _concl('근본 원인을 없앨 방법', 2) + _say(),
+  gap: _gridc(2, [_cell('지금 (현재 모습)', 't-warn'), _cell('바라는 모습 (목표)', 't-good')]) +
+    _fill('둘 사이의 차이 — 무엇이 비어 있나요?', 2) + _concl('차이를 좁힐 방법', 3) + _say(),
+  ngt: _rule('각자 조용히 의견을 적고, 설명한 뒤 점수를 매겨 우선순위를 정합니다. (가장 좋은 의견 5점)') +
+    _tblS(['의견', '① ', '② ', '③ ', '④ ', '합계'], Array.from({ length: 6 }, () => ['', '', '', '', '', ''])) +
+    _st('점수가 높은 순서') + _concl('우리 분임이 고른 1순위', 2) + _say(),
+  matrix: _rule('기준별로 점수를 매겨(1~5점) 가장 높은 안을 고릅니다.') +
+    _tblS(['검토한 방안', '실현 가능성', '효과 크기', '시급성', '비용', '합계'], Array.from({ length: 5 }, () => ['', '', '', '', '', ''])) +
+    _fill('점수가 가장 높은 방안과 고른 이유', 2) + _say(),
+  diamond: _rule('가장 중요한 의견을 맨 위에 두고, 아래로 내려갈수록 덜 중요한 의견을 배치합니다.') +
+    '<div class="tpl-dia">' + _diaRow(['1순위']) + _diaRow(['2순위', '3순위']) + _diaRow(['4순위', '5순위', '6순위']) + _diaRow(['7순위', '8순위']) + _diaRow(['9순위']) + '</div>' +
+    _fill('1순위로 올린 이유', 2) + _concl('최종 합의', 2) + _say('우리 분임은 ______ 을 1순위로 꼽았습니다. 그 이유는 ______ 입니다.'),
+  eisen: _st('중요도와 긴급도로 나누기') +
+    _gridc(2, [_cell('① 중요 + 긴급 — 지금 바로', 't-bad'), _cell('② 중요 + 덜 긴급 — 계획해서', 't-good'), _cell('③ 덜 중요 + 긴급 — 나눠서', 't-warn'), _cell('④ 덜 중요 + 덜 긴급 — 줄이기', 't-info')]) +
+    _concl('먼저 할 일 3가지', 3) + _say(),
+  debate: _st('쟁점') + _fill('무엇을 두고 토론했나요?', 1) +
+    _gridc(2, [_cell('찬성 — 주장과 근거', 't-good'), _cell('반대 — 주장과 근거', 't-bad')]) +
+    _st('서로 부딪친 지점') + _tblS(['쟁점', '찬성 측', '반대 측'], [['', '', ''], ['', '', '']]) +
+    _concl('우리 분임이 모은 결론', 2) + _say(),
+  ceda: _tblS(['단계', '찬성 측', '반대 측'], [['입론 (주장)', '', ''], ['반박 (문제 제기)', '', ''], ['재반박', '', ''], ['최종 정리', '', '']]) +
+    _fill('판정 · 합의된 내용', 2) + _say(),
+  hat: _st('여섯 색깔 사고모자 — 같은 주제를 여섯 눈으로 보기') +
+    _gridc(3, [_cell('⚪ 흰 모자 — 사실 · 자료'), _cell('🔴 빨간 모자 — 느낌 · 직감', 't-bad'), _cell('⚫ 검은 모자 — 걱정 · 위험', 't-warn'), _cell('🟡 노란 모자 — 좋은 점', 't-good'), _cell('🟢 초록 모자 — 새 아이디어', 't-info'), _cell('🔵 파란 모자 — 정리 · 결론', 't-key')]) +
+    _concl() + _say(),
+  pyramid: _rule('혼자 → 짝 → 모둠 → 전체로 올라가며 의견을 좁혀 갑니다.') +
+    '<div class="tpl-pyr">' + _pyrRow(40, '전체 합의 — 하나로', 't-key') + _pyrRow(60, '모둠 의견 — 3가지로') + _pyrRow(80, '짝 의견 — 6가지로') + _pyrRow(100, '내 의견 — 자유롭게') + '</div>' +
+    _fill('좁혀 가며 버린 의견과 그 이유', 2) + _say(),
+  kpt: _gridc(3, [_cell('Keep — 계속할 것', 't-good'), _cell('Problem — 문제였던 것', 't-bad'), _cell('Try — 다음에 해볼 것', 't-info')]) +
+    _concl('다음에 꼭 할 3가지', 3) + _say(),
+  f4: _gridc(2, [_cell('Fact — 무슨 일이 있었나', 't-info'), _cell('Feeling — 어떤 느낌이었나', 't-warn'), _cell('Finding — 무엇을 알게 됐나', 't-good'), _cell('Future — 앞으로 어떻게 할까', 't-key')]) +
+    _concl() + _say(),
+  action: _st('누가 · 언제까지 · 무엇을') +
+    _tblS(['할 일', '담당', '기한', '확인 방법'], Array.from({ length: 5 }, () => ['', '', '', ''])) +
+    _fill('이번 주에 바로 시작할 한 가지', 1) + _say('우리 분임은 ______ 부터 바로 실행하겠습니다.'),
+  role: _tblS(['역할', '이름', '하는 일'], [['사회자', '', '이야기 순서를 잡습니다'], ['기록자', '', '의견을 정리합니다'], ['발표자', '', '모둠 의견을 발표합니다'], ['시간 관리', '', '남은 시간을 알립니다'], ['자료 담당', '', '필요한 자료를 찾습니다']]) +
+    _fill('우리 분임이 정한 약속', 2),
+  propose: _fill('제안 이름', 1) +
+    _gridc(2, [_cell('배경 — 왜 필요한가', 't-info'), _cell('문제 — 지금 무엇이 어려운가', 't-bad'), _cell('제안 내용 — 무엇을 하자는 것인가', 't-key'), _cell('기대 효과 — 무엇이 좋아지나', 't-good')]) +
+    _st('필요한 예산 · 지원 · 일정') + _tblS(['시기', '내용', '담당 · 예산'], [['', '', ''], ['', '', ''], ['', '', '']]) +
+    _concl('핵심 제안 3줄 요약', 3) + _say()
+};
+
+function _sheet(key, body) {
+  const t = TPL[key] || {}, col = CATCOL[t.cat] || '#64748b';
+  return '<section class="tpl-sheet" data-tpl="' + key + '">' +
+    '<div class="tpl-h"><span class="tpl-k" style="background:' + col + '">' + esc(t.cat || '양식') + '</span>' +
+    '<h2>' + esc(t.name || '') + '</h2><p class="tpl-d">' + esc(t.desc || '') + '</p></div>' +
+    '<div class="tpl-b">' + body + '</div></section><p><br></p>';
+}
+Object.keys(TPL).forEach(k => { TPL[k].html = _sheet(k, TBODY[k] || TPL[k].html); });
+
+/* 자주 쓰는 삽입 블록 */
+const BLK_SUM = '<section class="tpl-sheet" data-tpl="sum"><div class="tpl-h"><span class="tpl-k" style="background:#12a06a">정리</span><h2>우리 분임 의견 정리</h2><p class="tpl-d">핵심 의견 · 근거 · 실행 제안을 한 번에 정리합니다</p></div><div class="tpl-b">' +
+  _gridc(3, [_numc(1, '핵심 의견', 't-key'), _numc(2, '그렇게 본 근거'), _numc(3, '실행 제안')]) + _kws(4) + _concl() + _say() + '</div></section><p><br></p>';
+const BLK_SAY = _say() + '<p><br></p>';
+const BLK_KW = '<section class="tpl-sheet" data-tpl="kw"><div class="tpl-h"><span class="tpl-k" style="background:#3a5bd9">정리</span><h2>핵심 키워드 뽑기</h2><p class="tpl-d">우리 의견을 네 단어로 줄여 봅니다</p></div><div class="tpl-b">' + _kws(4) + _fill('네 단어를 이어 한 문장으로', 1) + '</div></section><p><br></p>';
+
 /* 양식 미리보기 썸네일 */
 function thumbHtml(key) {
   const t = TPL[key] || {}, col = CATCOL[t.cat] || '#64748b';
@@ -897,28 +1202,48 @@ function thumbHtml(key) {
 function openTplGallery(onPick, opt) {
   opt = opt || {};
   const cats = ['전체'].concat(Object.keys(CATCOL));
-  let cur = '전체';
+  let cur = '전체', sel = opt.sel || null;
   const m = document.createElement('div'); m.className = 'modal';
-  m.innerHTML = '<div class="mbox"><div class="mt"><span>' + esc(opt.title || '토의 · 토론 양식 갤러리') + '</span><button class="sm" id="gx">✕ 닫기</button></div>' +
-    '<p class="mu" style="margin-top:0">' + esc(opt.hint || '양식을 누르면 작업실 문서에 바로 들어갑니다. 모두 ' + Object.keys(TPL).length + '종.') + '</p>' +
-    '<div class="tabs" id="gcat"></div><div class="tgal" id="ggal"></div></div>';
+  m.innerHTML = '<div class="mbox wide"><div class="mt"><span>' + esc(opt.title || '토의 · 토론 양식 갤러리') + '</span><button class="sm" id="gx">✕ 닫기</button></div>' +
+    '<p class="mu" style="margin-top:0">' + esc(opt.hint || '양식을 고르면 오른쪽에 큰 미리보기가 나옵니다. 모두 ' + Object.keys(TPL).length + '종.') + '</p>' +
+    '<div class="tabs" id="gcat"></div>' +
+    '<div class="gwrap"><div class="tgal" id="ggal"></div>' +
+    '<div class="gpv" id="gpv"><div class="gpv-empty">왼쪽에서 양식을 하나 누르면<br>여기에 실제 모양이 크게 보여요</div></div></div></div>';
   document.body.appendChild(m); document.body.classList.add('noscroll');
   const close = () => { m.remove(); document.body.classList.remove('noscroll'); document.removeEventListener('keydown', key); };
-  const key = e => { if (e.key === 'Escape') close(); };
+  const take = k => { close(); onPick(k); };
+  const key = e => {
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key === 'Enter' && sel) { e.preventDefault(); take(sel); }
+  };
+  const paintPv = () => {
+    const box = $('#gpv', m);
+    if (!sel) { box.innerHTML = '<div class="gpv-empty">왼쪽에서 양식을 하나 누르면<br>여기에 실제 모양이 크게 보여요</div>'; return; }
+    const t = TPL[sel];
+    box.innerHTML = '<div class="gpv-h"><div style="min-width:0"><b>' + esc(t.name) + '</b><span class="mu">' + esc(t.desc || '') + '</span></div>' +
+      '<button class="pri" id="gTake">이 양식 넣기</button></div>' +
+      '<div class="gpv-body"><div class="doc">' + clean(t.html) + '</div></div>';
+    $('#gTake', m).onclick = () => take(sel);
+    box.scrollTop = 0;
+  };
   const paint = () => {
     $('#gcat', m).innerHTML = cats.map(c => '<button data-c="' + esc(c) + '" class="' + (c === cur ? 'on' : '') + '">' + esc(c) + '</button>').join('');
     $$('#gcat [data-c]', m).forEach(b => b.onclick = () => { cur = b.dataset.c; paint(); });
     const ks = Object.keys(TPL).filter(k => cur === '전체' || TPL[k].cat === cur);
-    $('#ggal', m).innerHTML = ks.map(k => '<div class="tcard' + (opt.sel === k ? ' on' : '') + '" data-k="' + k + '">' + thumbHtml(k) +
-      '<div class="tbody"><b>' + esc(TPL[k].name) + '</b><span class="ds">' + esc(TPL[k].desc || '') + '</span><span class="ct">' + esc(TPL[k].cat) + '</span></div></div>').join('');
-    $$('#ggal [data-k]', m).forEach(c => c.onclick = () => { close(); onPick(c.dataset.k); });
+    $('#ggal', m).innerHTML = ks.map(k => '<div class="tcard' + (sel === k ? ' on' : '') + '" data-k="' + k + '">' + thumbHtml(k) +
+      '<div class="tbody"><b>' + esc(TPL[k].name) + '</b><span class="ds">' + esc(TPL[k].desc || '') + '</span>' +
+      '<span class="ct">' + esc(TPL[k].cat) + '</span><button class="sm now" data-now="' + k + '">바로 넣기</button></div></div>').join('');
+    $$('#ggal [data-k]', m).forEach(c => {
+      c.onclick = e => { if (e.target.closest('[data-now]')) return; sel = c.dataset.k; paint(); paintPv(); };
+      c.ondblclick = e => { if (e.target.closest('[data-now]')) return; take(c.dataset.k); };
+    });
+    $$('#ggal [data-now]', m).forEach(b => b.onclick = e => { e.stopPropagation(); take(b.dataset.now); });
   };
-  paint();
+  paint(); paintPv();
   $('#gx', m).onclick = close;
   m.onclick = e => { if (e.target === m) close(); };
   document.addEventListener('keydown', key);
 }
-
 /* ---------- 화면 틀 ---------- */
 function noticeBar() { return DB.mode === 'local' ? '<div class="notice">연습(로컬) 모드입니다 — firebase-config.js 를 채우기 전에는 같은 브라우저의 다른 탭끼리만 연결됩니다.</div>' : ''; }
 function appbar(o) {
@@ -1261,33 +1586,46 @@ function renderRoom() {
     <section id="sMine">
       <div class="room">
         <main>
-          <div class="tb" id="tb">
-            <span class="lab">글자</span>
-            <button data-c="bold" title="굵게 (Ctrl+B)"><b>B</b></button>
-            <button data-c="italic" title="기울임"><i>I</i></button>
-            <button data-c="underline" title="밑줄"><u>U</u></button>
-            <button data-c="hiliteColor" data-v="#fff176" title="형광펜" style="background:#fff176">형광</button>
-            <button data-c="foreColor" data-v="#d32f2f" style="color:#d32f2f">빨강</button>
-            <button data-c="foreColor" data-v="#1a4fd6" style="color:#1a4fd6">파랑</button>
-            <button data-c="foreColor" data-v="#111111">검정</button>
-            <select id="fs" title="글자 크기"><option value="">크기</option><option value="2">작게</option><option value="3">보통</option><option value="5">크게</option><option value="6">아주 크게</option></select>
-            <span class="sep"></span>
-            <span class="lab">단락</span>
-            <button data-c="formatBlock" data-v="h3">소제목</button>
-            <button data-c="formatBlock" data-v="p">본문</button>
-            <button data-c="insertUnorderedList">• 목록</button>
-            <button data-c="insertOrderedList">1. 목록</button>
-            <span class="sep"></span>
-            <span class="lab">표</span>
-            <select id="tr" title="행">${[2, 3, 4, 5, 6, 7, 8].map(n => `<option ${n === 3 ? 'selected' : ''}>${n}</option>`).join('')}</select>×<select id="tc" title="열">${[2, 3, 4, 5, 6].map(n => `<option ${n === 3 ? 'selected' : ''}>${n}</option>`).join('')}</select>
-            <button id="addTbl">넣기</button>
-            <button data-t="ar">행+</button><button data-t="dr">행−</button><button data-t="ac">열+</button><button data-t="dc">열−</button><button data-t="dt">표삭제</button>
-            <span class="sep"></span>
-            <button id="tplBtn" title="토의·토론 양식 갤러리">🗂 양식 갤러리</button>
-            <button id="draw">✏️ 그리기</button>
-            <span class="sep"></span>
-            <button data-c="undo" title="되돌리기">↶</button><button data-c="redo" title="다시">↷</button>
+          <div class="tb tb2" id="tb">
+            <div class="tbg"><span class="lab">문단</span>
+              <select id="fb" title="문단 종류"><option value="p">본문</option><option value="h2">큰 제목</option><option value="h3">소제목</option><option value="blockquote">인용</option></select>
+              <select id="ff" title="글꼴"><option value="">글꼴</option><option value="Pretendard, sans-serif">기본(고딕)</option><option value="'Noto Serif KR', serif">명조</option><option value="'Gowun Dodum', sans-serif">둥근</option><option value="'Nanum Pen Script', cursive">손글씨</option></select>
+              <select id="fs" title="글자 크기"><option value="">크기</option><option value="2">작게</option><option value="3">보통</option><option value="5">크게</option><option value="6">아주 크게</option></select>
+            </div>
+            <div class="tbg"><span class="lab">스타일</span>
+              <button data-c="bold" title="굵게 (Ctrl+B)"><b>B</b></button>
+              <button data-c="italic" title="기울임"><i>I</i></button>
+              <button data-c="underline" title="밑줄"><u>U</u></button>
+              <span class="pal" title="글자 색">${['#111111','#d32f2f','#1a4fd6','#12a06a','#7a3fd0','#e08a00'].map(c => `<button class="sw" data-c="foreColor" data-v="${c}" style="background:${c}"></button>`).join('')}</span>
+              <span class="pal" title="형광펜">${['#fff176','#b8f2d8','#bfe0ff','#ffc9de','transparent'].map(c => `<button class="sw ring" data-c="hiliteColor" data-v="${c}" style="background:${c === 'transparent' ? '#fff' : c}" title="${c === 'transparent' ? '형광 지우기' : '형광펜'}">${c === 'transparent' ? '✕' : ''}</button>`).join('')}</span>
+              <button data-c="removeFormat" title="서식 지우기">서식↺</button>
+            </div>
+            <div class="tbg"><span class="lab">정렬</span>
+              <button data-c="justifyLeft" title="왼쪽">◧</button>
+              <button data-c="justifyCenter" title="가운데">▣</button>
+              <button data-c="justifyRight" title="오른쪽">◨</button>
+              <button data-c="insertUnorderedList" title="글머리 목록">• 목록</button>
+              <button data-c="insertOrderedList" title="번호 목록">1. 목록</button>
+            </div>
+            <div class="tbg"><span class="lab">넣기</span>
+              <button id="tplBtn" class="pri2" title="토의·토론 양식 갤러리">🗂 양식</button>
+              <button id="imgBtn" title="사진 · 그림 넣기">🖼 이미지</button>
+              <button id="blkSum" title="의견 정리 카드">🧩 정리 카드</button>
+              <button id="blkSay" title="발표 문장 칸">🎤 발표 문장</button>
+              <button id="blkKw" title="핵심 키워드 칸">🔖 키워드</button>
+              <button id="draw" title="손으로 그리기">✏️ 그리기</button>
+              <button data-c="insertHorizontalRule" title="구분선">— 구분선</button>
+            </div>
+            <div class="tbg"><span class="lab">표</span>
+              <select id="tr" title="행">${[2, 3, 4, 5, 6, 7, 8].map(n => `<option ${n === 3 ? 'selected' : ''}>${n}</option>`).join('')}</select>×<select id="tc" title="열">${[2, 3, 4, 5, 6].map(n => `<option ${n === 3 ? 'selected' : ''}>${n}</option>`).join('')}</select>
+              <button id="addTbl">넣기</button>
+              <button data-t="ar">행+</button><button data-t="dr">행−</button><button data-t="ac">열+</button><button data-t="dc">열−</button><button data-t="dt">표삭제</button>
+            </div>
+            <div class="tbg">
+              <button data-c="undo" title="되돌리기">↶</button><button data-c="redo" title="다시">↷</button>
+            </div>
           </div>
+          <input type="file" id="imgFile" accept="image/*" hidden>
           <div class="doc" id="editor" contenteditable="true" spellcheck="false"></div>
           <div class="statusbar">
             <span id="saveState">불러오는 중…</span>
@@ -1371,7 +1709,7 @@ function renderRoom() {
           <span class="grow"></span>
           <button class="warn sm" id="bClear">보드 비우기</button>
         </div>
-        <p class="mu" style="margin:8px 0 0">정리하면 공감 순으로 표가 만들어지고, 아래에 <b>우리 분임이 정리한 의견</b> 칸이 생깁니다. 그대로 발표하면 됩니다.</p>
+        <p class="mu" style="margin:8px 0 0">정리하면 <b>주제별 의견 표 · 핵심 키워드 · 우리 분임의 결론 · 발표 문장</b> 칸이 한 번에 만들어집니다. 빈칸만 채우면 발표 준비가 끝납니다.</p>
       </div>
     </section>
 
@@ -1551,27 +1889,121 @@ function tblOp(op) {
   if (op === 'dt') table.remove();
   savedRange = null; scheduleSave(); updateStats();
 }
+function insertBlock(html, msg) {
+  if (!editable()) return toast('완료 처리된 방은 수정할 수 없어요. 먼저 다시 열어 주세요');
+  const ed = $('#editor'); if (!ed) return;
+  const t = $('.tabs [data-t="mine"]'); if (t && S.roomTab !== 'mine') t.click();
+  ed.focus(); restoreSel();
+  const sel = getSelection();
+  if (!sel.rangeCount || !ed.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+    const r = document.createRange(); r.selectNodeContents(ed); r.collapse(false);
+    sel.removeAllRanges(); sel.addRange(r);
+  }
+  document.execCommand('insertHTML', false, html);
+  afterEdit();
+  if (msg) toast(msg);
+}
+function shrinkImage(file, maxW, q) {
+  return new Promise((res, rej) => {
+    if (!/^image\//.test(file.type)) return rej(new Error('image only'));
+    if (file.size > 20 * 1024 * 1024) return rej(new Error('too big'));
+    const fr = new FileReader();
+    fr.onerror = () => rej(new Error('read'));
+    fr.onload = () => {
+      const im = new Image();
+      im.onerror = () => rej(new Error('decode'));
+      im.onload = () => {
+        const mw = maxW || 1200;
+        const sc = Math.min(1, mw / im.naturalWidth);
+        const w = Math.max(1, Math.round(im.naturalWidth * sc)), h = Math.max(1, Math.round(im.naturalHeight * sc));
+        const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        const cx = cv.getContext('2d');
+        cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, h);
+        cx.drawImage(im, 0, 0, w, h);
+        let out = cv.toDataURL('image/jpeg', q || 0.82);
+        if (out.length > 900000) out = cv.toDataURL('image/jpeg', 0.66);
+        res(out);
+      };
+      im.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
 function bindEditor() {
   const tb = $('#tb'), ed = $('#editor');
   ['mousedown', 'pointerdown'].forEach(ev => tb.addEventListener(ev, e => { if (!e.target.closest('select')) e.preventDefault(); }));
   $$('[data-c]', tb).forEach(b => b.onclick = () => cmd(b.dataset.c, b.dataset.v));
   $$('[data-t]', tb).forEach(b => b.onclick = () => tblOp(b.dataset.t));
   $('#fs').onchange = e => { if (e.target.value) cmd('fontSize', e.target.value); e.target.value = ''; };
+  $('#fb').onchange = e => { cmd('formatBlock', e.target.value); e.target.value = 'p'; };
+  $('#ff').onchange = e => { if (e.target.value) cmd('fontName', e.target.value); e.target.value = ''; };
   $('#addTbl').onclick = () => insertTable(+$('#tr').value, +$('#tc').value);
   $('#tplBtn').onclick = () => {
     if (!editable()) return toast('완료 처리된 방은 수정할 수 없어요. 먼저 다시 열어 주세요');
     openTplGallery(k => {
-      restoreSel(); document.execCommand('insertHTML', false, TPL[k].html); afterEdit();
-      toast(TPL[k].name + ' 양식을 넣었어요');
-    }, { hint: '커서 위치에 양식이 들어갑니다. 모두 ' + Object.keys(TPL).length + '종.' });
+      insertBlock(TPL[k].html, TPL[k].name + ' 양식을 넣었어요');
+    }, { hint: '양식을 고르면 큰 미리보기로 확인한 뒤 넣을 수 있어요. 모두 ' + Object.keys(TPL).length + '종.' });
+  };
+  $('#blkSum').onclick = () => insertBlock(BLK_SUM, '정리 카드를 넣었어요');
+  $('#blkSay').onclick = () => insertBlock(BLK_SAY, '발표 문장 칸을 넣었어요');
+  $('#blkKw').onclick = () => insertBlock(BLK_KW, '핵심 키워드 칸을 넣었어요');
+  $('#imgBtn').onclick = () => { if (!editable()) return toast('완료 처리된 방은 수정할 수 없어요'); $('#imgFile').click(); };
+  $('#imgFile').onchange = async e => {
+    const fs = [...(e.target.files || [])]; e.target.value = '';
+    if (!fs.length) return;
+    if (fs.length > 6) return toast('한 번에 6장까지 넣을 수 있어요');
+    toast('이미지를 넣는 중…');
+    for (const f of fs) {
+      try {
+        const data = await shrinkImage(f);
+        insertBlock('<figure class="fig"><img src="' + data + '" alt="첨부 이미지"><figcaption>이미지 설명을 입력하세요</figcaption></figure><p><br></p>', '');
+      } catch (err) { toast('이미지를 넣지 못했어요'); }
+    }
+    toast(fs.length + '장을 넣었어요 · 설명 글을 고쳐 보세요');
   };
   $('#draw').onclick = openDraw;
   ed.addEventListener('input', () => { scheduleSave(); updateStats(); });
+  ed.addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    const sel = getSelection(); if (!sel.rangeCount) return;
+    let n = sel.getRangeAt(0).startContainer;
+    if (n.nodeType === 3) n = n.parentNode;
+    const cells = [...ed.querySelectorAll('td,th,.tpl-cell>p,.tpl-fill>p,.tpl-kw .kw,.tpl-concl li')];
+    if (!cells.length) return;
+    const host = n.closest && n.closest('td,th,.tpl-cell>p,.tpl-fill>p,.tpl-kw .kw,.tpl-concl li');
+    if (!host) return;
+    e.preventDefault();
+    const i = cells.indexOf(host), nx = cells[i + (e.shiftKey ? -1 : 1)];
+    if (!nx) return;
+    const r = document.createRange(); r.selectNodeContents(nx); r.collapse(false);
+    sel.removeAllRanges(); sel.addRange(r); savedRange = r.cloneRange();
+    nx.scrollIntoView({ block: 'nearest' });
+  });
   ed.addEventListener('blur', () => flushSave());
   ed.addEventListener('paste', e => {
+    const items = [...((e.clipboardData && e.clipboardData.items) || [])];
+    const imgItem = items.find(x => x.kind === 'file' && /^image\//.test(x.type));
+    if (imgItem) {
+      e.preventDefault();
+      const f = imgItem.getAsFile();
+      if (f) shrinkImage(f).then(d => insertBlock('<figure class="fig"><img src="' + d + '" alt="붙인 이미지"><figcaption>이미지 설명을 입력하세요</figcaption></figure><p><br></p>', '이미지를 붙였어요')).catch(() => toast('이미지를 붙이지 못했어요'));
+      return;
+    }
     e.preventDefault(); const h = e.clipboardData.getData('text/html'), t = e.clipboardData.getData('text/plain');
     if (h) document.execCommand('insertHTML', false, clean(h)); else document.execCommand('insertText', false, t);
     afterEdit();
+  });
+  ed.addEventListener('dragover', e => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) { e.preventDefault(); ed.classList.add('dragging'); } });
+  ed.addEventListener('dragleave', () => ed.classList.remove('dragging'));
+  ed.addEventListener('drop', async e => {
+    const fs = [...((e.dataTransfer && e.dataTransfer.files) || [])].filter(f => /^image\//.test(f.type));
+    if (!fs.length) return;
+    e.preventDefault(); ed.classList.remove('dragging');
+    if (!editable()) return toast('완료 처리된 방은 수정할 수 없어요');
+    for (const f of fs.slice(0, 6)) {
+      try { const d = await shrinkImage(f); insertBlock('<figure class="fig"><img src="' + d + '" alt="첨부 이미지"><figcaption>이미지 설명을 입력하세요</figcaption></figure><p><br></p>', ''); } catch (x) { }
+    }
+    toast('이미지를 넣었어요');
   });
   $('#topicBtn').onclick = async () => {
     const g = S.groups[S.gid]; const t = prompt('이 분임의 토론 주제를 입력하세요', g.topic || ''); if (t === null) return;
@@ -1894,22 +2326,28 @@ function notesToDoc() {
   if (!pick.length) return toast('정리할 포스트잇이 없어요');
   if (!editable()) return toast('완료 처리된 방은 수정할 수 없어요. 먼저 다시 열어 주세요');
   pick.sort((a, b) => noteVotes(b) - noteVotes(a) || a.ts - b.ts);
-  const tbl = list => '<table><tbody><tr><th>번호</th><th>의견</th><th>작성자</th><th>공감</th></tr>' +
-    list.map((n, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(n.t).replace(/\n/g, '<br>') + '</td><td>' + esc(n.by || '') + '</td><td>' + noteVotes(n) + '</td></tr>').join('') + '</tbody></table>';
   const cs = catList(S.gid);
-  const buckets = cs.map(c => ({ name: c.name, items: pick.filter(n => (n.cat || '') === c.id) }))
-    .concat([{ name: '미분류', items: pick.filter(n => !cs.some(c => c.id === (n.cat || ''))) }]).filter(x => x.items.length);
-  const grouped = cs.length > 0 && buckets.length > 0;
-  const html = '<h3>' + (roundNums().length > 1 ? roundName(RN()) + ' — ' : '') + '포스트잇 의견 모음 (' + pick.length + '장' + (grouped ? ' · 주제 ' + buckets.length + '묶음' : '') + ')</h3>' +
-    (grouped ? buckets.map(bk => '<h4>■ ' + esc(bk.name) + ' (' + bk.items.length + '장)</h4>' + tbl(bk.items)).join('') : tbl(pick)) +
-    '<h3>우리 분임이 정리한 의견</h3><ol><li><br></li><li><br></li><li><br></li></ol><p><br></p>';
-  const ed = $('#editor'); const t = $('.tabs [data-t="mine"]'); if (t) t.click();
-  ed.focus();
-  const r = document.createRange(); r.selectNodeContents(ed); r.collapse(false);
-  const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); savedRange = r.cloneRange();
-  document.execCommand('insertHTML', false, html);
-  afterEdit(); ed.scrollIntoView({ block: 'end' });
-  toast(pick.length + '장을 본문에 정리해 넣었어요');
+  const buckets = cs.map(c => ({ name: c.name, col: CATC[c.col || 0], items: pick.filter(n => (n.cat || '') === c.id) }))
+    .concat([{ name: '미분류', col: '#c3c9d4', items: pick.filter(n => !cs.some(c => c.id === (n.cat || ''))) }]).filter(x => x.items.length);
+  const grouped = cs.length > 0 && buckets.length > 1;
+  const tbl = list => '<table><tbody><tr><th style="width:52px">번호</th><th>의견</th><th style="width:92px">작성자</th><th style="width:62px">공감</th></tr>' +
+    list.map((n, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(n.t).replace(/\n/g, '<br>') + '</td><td>' + esc(n.by || '') + '</td><td>' + noteVotes(n) + '</td></tr>').join('') + '</tbody></table>';
+  const bucketBlock = bk => '<div class="tpl-bk"><div class="tpl-bkh"><span class="tpl-num" style="background:' + bk.col + '">' + bk.items.length + '</span>' + esc(bk.name) + '</div>' + tbl(bk.items) + '</div>';
+  const top = pick.slice(0, 3);
+  const head = '<div class="tpl-h"><span class="tpl-k" style="background:#12a06a">정리</span>' +
+    '<h2>' + (roundNums().length > 1 ? esc(roundName(RN())) + ' — ' : '') + '포스트잇 의견 정리</h2>' +
+    '<p class="tpl-d">모은 의견 ' + pick.length + '장' + (grouped ? ' · 주제 ' + buckets.length + '묶음' : '') + ' — 공감이 많은 의견이 위에 옵니다</p></div>';
+  const body =
+    (top.length ? _st('공감이 가장 많았던 의견') + _gridc(Math.min(3, top.length), top.map((n, i) =>
+      '<div class="tpl-cell' + (i ? '' : ' t-key') + '"><b><span class="tpl-num">' + (i + 1) + '</span>공감 ' + noteVotes(n) + '</b><p>' + esc(n.t).replace(/\n/g, '<br>') + '</p></div>')) : '') +
+    _st(grouped ? '주제별 의견 모음' : '모은 의견') + (grouped ? buckets.map(bucketBlock).join('') : tbl(pick)) +
+    _kws(4) +
+    _concl('우리 분임의 결론', 3) +
+    _gridc(2, [_cell('그렇게 본 근거', 't-info'), _cell('바로 해볼 수 있는 제안', 't-good')]) +
+    _say();
+  const html = '<section class="tpl-sheet" data-tpl="synth">' + head + '<div class="tpl-b">' + body + '</div></section><p><br></p>';
+  insertBlock(html, pick.length + '장을 정리 보드로 넣었어요 — 빈칸만 채우면 발표 준비가 끝납니다');
+  const ed = $('#editor'); if (ed) ed.scrollIntoView({ block: 'end' });
 }
 async function clearBoard() {
   if (!(isAdmin() || isLeader())) return toast('보드 비우기는 분임장 또는 진행자만 할 수 있어요');
@@ -2769,7 +3207,7 @@ function blocksFromHtml(html) {
       if (tag === 'table') { flush(); blocks.push({ type: 'tbl', rows: [...n.rows].map(tr => [...tr.cells].map(td => ({ t: cellText(td), b: td.tagName === 'TH' }))) }); return; }
       if (tag === 'img') { flush(); blocks.push({ type: 'p', runs: [{ t: '[그림 — PDF 저장본에서 확인하세요]', b: false }] }); return; }
       if (tag === 'ul' || tag === 'ol') { flush(); let k = 1; [...n.children].forEach(li => { if (li.tagName.toLowerCase() !== 'li') return; cur = { type: 'p', runs: [{ t: tag === 'ul' ? '• ' : (k++) + '. ', b: false }] }; walk(li, bold); flush(); }); return; }
-      if (/^(p|div|h[1-6]|blockquote|li)$/.test(tag)) { flush(); walk(n, bold || /^h[1-6]$/.test(tag) || boldEl(n)); flush(); return; }
+      if (/^(p|div|section|figure|figcaption|h[1-6]|blockquote|li)$/.test(tag)) { flush(); walk(n, bold || /^h[1-6]$/.test(tag) || boldEl(n)); flush(); return; }
       walk(n, bold || boldEl(n));
     });
   })(root, false); flush();
