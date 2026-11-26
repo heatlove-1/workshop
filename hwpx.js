@@ -56,11 +56,14 @@
   let tblSeq = 0;
   function tblXml(rows, ids) {
     const R = rows.length, C = Math.max.apply(null, rows.map(r => r.length).concat([1]));
-    const W = 42520, cw = Math.floor(W / C), rh = 2000;
+    const W = 42520, cw = Math.floor(W / C);
+    const cps = c => (c && c.ps) ? c.ps : [(c && c.t) ? [{ t: c.t, b: c.b }] : []];
+    const rhs = rows.map(r => { let m = 1; for (let ci = 0; ci < C; ci++) m = Math.max(m, cps(r[ci]).length); return Math.max(2000, 700 + m * 1250); });
+    const TH = rhs.reduce((a, b) => a + b, 0);
     const bf = ids.border;
     let x = '<hp:p id="0" paraPrIDRef="0" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="0">' +
       '<hp:tbl id="' + (900000 + (++tblSeq)) + '" zOrder="0" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="CELL" repeatHeader="0" rowCnt="' + R + '" colCnt="' + C + '" cellSpacing="0" borderFillIDRef="' + bf + '" noAdjust="0">' +
-      '<hp:sz width="' + (cw * C) + '" widthRelTo="ABSOLUTE" height="' + (rh * R) + '" heightRelTo="ABSOLUTE" protect="0"/>' +
+      '<hp:sz width="' + (cw * C) + '" widthRelTo="ABSOLUTE" height="' + TH + '" heightRelTo="ABSOLUTE" protect="0"/>' +
       '<hp:pos treatAsChar="1" affectLSpacing="0" flowWithText="1" allowOverlap="0" holdAnchorAndSO="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="LEFT" vertOffset="0" horzOffset="0"/>' +
       '<hp:outMargin left="0" right="0" top="0" bottom="0"/><hp:inMargin left="510" right="510" top="141" bottom="141"/>';
     rows.forEach((r, ri) => {
@@ -69,9 +72,9 @@
         const c = r[ci] || { t: '' };
         x += '<hp:tc name="" header="0" hasMargin="0" protect="0" editable="0" dirty="0" borderFillIDRef="' + bf + '">' +
           '<hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="CENTER" linkListIDRef="0" linkListNextIDRef="0" textWidth="0" textHeight="0" hasTextRef="0" hasNumRef="0">' +
-          para(c.t ? [{ t: c.t, b: c.b }] : [], { ids }) + '</hp:subList>' +
+          cps(c).map(rs => para(rs.filter(x => x && x.t), { ids })).join('') + '</hp:subList>' +
           '<hp:cellAddr colAddr="' + ci + '" rowAddr="' + ri + '"/><hp:cellSpan colSpan="1" rowSpan="1"/>' +
-          '<hp:cellSz width="' + cw + '" height="' + rh + '"/><hp:cellMargin left="510" right="510" top="141" bottom="141"/></hp:tc>';
+          '<hp:cellSz width="' + cw + '" height="' + rhs[ri] + '"/><hp:cellMargin left="510" right="510" top="141" bottom="141"/></hp:tc>';
       }
       x += '</hp:tr>';
     });
